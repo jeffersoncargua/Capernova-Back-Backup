@@ -15,8 +15,8 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "El apellido de usuario es requerido ")]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "El correo del usuario es requerido ")]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "No cumple con el formato de correo electrónico")]
+        [Required(ErrorMessage = "El correo del usuario es requerido ")]        
         public string Email { get; set; }
 
         [Required(ErrorMessage = "La contraseña de usuario es requerido ")]

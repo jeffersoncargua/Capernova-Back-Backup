@@ -1,5 +1,6 @@
 
 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,26 @@ using User.Managment.Repository.Models;
 using User.Managment.Repository.Repository;
 using User.Managment.Repository.Repository.IRepository;
 
+//variable para que funcione CORS en la aplicacion y react
+//var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+//permite almacenar el proveedor y la configuracion par aplicarla al CORS
+var proveedor = builder.Services.BuildServiceProvider();
+var configuration = proveedor.GetRequiredService<IConfiguration>();
+
+//Se agrega la configuracion del servcio de CORS
+builder.Services.AddCors(options =>
+{
+    var frontEndURL = configuration.GetValue<string>("frontend_url");
+
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins(frontEndURL).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    });
+   
+});
 
 // Add services to the container.
 
@@ -24,8 +44,14 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 
+
 //Se agrega la configuracion para el requerimiento de Email
-builder.Services.Configure<IdentityOptions>(options => options.SignIn.RequireConfirmedEmail = true);
+builder.Services.Configure<IdentityOptions>(options => 
+{
+    options.SignIn.RequireConfirmedEmail = true;
+    
+});
+
 
 //
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(10));
@@ -37,6 +63,14 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 });
+
+//Se agrega el cookie para el identity cuando se realice el 2FA para logearse
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+//    {
+//        options.SlidingExpiration = true;
+//        options.ExpireTimeSpan = new TimeSpan(0, 1, 0);
+//    });
 
 //Se agrega la configuracion del Email que se agrego en la appSettings.json
 var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
@@ -54,6 +88,10 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -62,8 +100,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//Se agrega a la aplicacion el permiso de utilizar CORS
+app.UseCors();
+
+// Permite agregar el permiso de CORS
+//app.UseCors(x => x
+//    .AllowAnyMethod()
+//    .AllowAnyHeader()
+//    .SetIsOriginAllowed(origin => true)
+//    .AllowCredentials()
+//);
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+
 
 app.Run();
