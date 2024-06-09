@@ -80,6 +80,8 @@ builder.Services.AddSingleton(emailConfig);
 //Se agrega el repositorio Email para utilizarlo en el proyecto
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
+//builder.Services.AddControllers();
+//Se agrega para que funcione la serializacion y deserializacion json
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Authentication.Login;
 using User.Managment.Data.Models.Authentication.SignUp;
