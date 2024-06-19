@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Stripe.Checkout;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -63,8 +64,8 @@ namespace CapernovaAPI.Controllers
                             brand_name = "Capernova",
                             landing_page = "NO_PREFERENCE",
                             user_action = "PAY_NOW", //Accion para que paypal muestre el monto
-                            return_url = "http://localhost:3000/confirmPay", //pagina para confirmar el pago
-                            cancel_url = "http://localhost:3000/cancelPay", //pagina para cancelar el pago
+                            return_url = "https://localhost:3000/confirmPay", //pagina para confirmar el pago
+                            cancel_url = "https://localhost:3000/cancelPay", //pagina para cancelar el pago
                         }
                     };
 
@@ -155,6 +156,87 @@ namespace CapernovaAPI.Controllers
                 throw;
             }
         }
+
+
+        [HttpPost]
+        [Route("paymentCard")]
+        public async Task<ActionResult<ApiResponse>> PaymentCard() //Aqui falta agregar el carrito de compras
+        {
+            try
+            {
+                //se establece la url base
+                var domain = "https://localhost:3000";
+                //Se agrega las configuraciones del stripe
+                var options = new SessionCreateOptions
+                {
+                    LineItems = new List<SessionLineItemOptions>
+                {
+                    new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = 100,
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "Cocina Capernova",
+                            },
+                        },
+                        Quantity = 1,
+                    },
+                },
+                    Mode = "payment",
+                    SuccessUrl = domain +"/confirmPay?status=true", //Aqui falata agregar el id de la compra para poder consultar despues con la plataforma
+                    CancelUrl = domain + "/cancelPay?status=false",
+
+                };
+
+                var service = new SessionService();
+                Session session = await service.CreateAsync(options);
+
+                //return Json(new { clientSecret = session.RawJObject["client_secret"] });
+                _response.isSuccess = true;
+                _response.Message = "Se ha generado su pedido";
+                _response.StatusCode = HttpStatusCode.RedirectMethod;
+                //_response.Result = session.Id;
+                //Response.Headers.Add("Location", session.Url);
+                _response.Result = session.Url;
+                return Ok(_response);
+            }
+            catch (Exception e)
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = e.Message.ToString();
+                return BadRequest(_response);
+                
+            }
+            
+        }
+
+        /// <summary>
+        /// En esta funcion se debe agregar el id para poder enviar a la pagina web el ID de la compra para su verificacion
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("orderConfirm")]
+        public async Task<ActionResult<ApiResponse>> OrderConfirm(string status)
+        {
+            if(status == "true")
+            {
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "La solicitud de pago se ha generado";
+                _response.Result = "qwertyuiop1234567890";
+                return Ok(_response);
+            }
+            _response.isSuccess = false;
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.Message = "La solicitud de pago no se ha generado";
+            return BadRequest(_response);
+        }
         
+
     }
 }

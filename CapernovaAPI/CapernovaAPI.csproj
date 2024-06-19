@@ -15,10 +15,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Stripe.net" Version="40.8.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Capernova.Utility\Capernova.Utility.csproj" />
     <ProjectReference Include="..\User.Managment.Data\User.Managment.Data.csproj" />
     <ProjectReference Include="..\User.Managment.Repository\User.Managment.Repository.csproj" />
   </ItemGroup>

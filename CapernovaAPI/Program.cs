@@ -1,9 +1,11 @@
 
 
+using Capernova.Utility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
 using User.Managment.Repository.Models;
@@ -37,6 +39,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
 );
+
+//Se agrega el servicio de Stripe para el pago con tarjeta
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 //Se agrega el servicio para Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -87,6 +92,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//se agrega el APIkey para generar las solicitudes para el pago con tarjeta
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,6 +110,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+
 //Se agrega a la aplicacion el permiso de utilizar CORS
 app.UseCors();
 
@@ -112,6 +122,8 @@ app.UseCors();
 //    .SetIsOriginAllowed(origin => true)
 //    .AllowCredentials()
 //);
+
+
 
 app.UseAuthorization();
 

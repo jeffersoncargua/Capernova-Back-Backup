@@ -33,5 +33,7 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "La cuidad de residencia de usuario es requerido")]
         public string City { get; set; }
 
+        public string Role { get; set; }
+
     }
 }
