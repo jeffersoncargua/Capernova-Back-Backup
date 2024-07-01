@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.Managment;
 
 namespace User.Managment.Data.Data
 {
@@ -12,7 +13,10 @@ namespace User.Managment.Data.Data
 
         }
 
-        
+        public DbSet<Publicidad> PublicidadTbl { get; set; }
+        public DbSet<Course> CourseTbl { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
