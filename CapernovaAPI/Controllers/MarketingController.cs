@@ -45,7 +45,7 @@ namespace CapernovaAPI.Controllers
         [Route("createPublicidad")]
         public async Task<ActionResult<ApiResponse>> CreatePublicidad([FromBody] PublicidadDto model)
         {
-            if (_db.PublicidadTbl.FirstOrDefault(u => u.Titulo.ToLower() == model.Titulo.ToLower()) != null)
+            if ( _db.PublicidadTbl.FirstOrDefault(u => u.Titulo.ToLower() == model.Titulo.ToLower()) != null)
             {
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;

@@ -40,6 +40,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
 );
 
+//Se agrega los repositorios de las entidades que se van a ocupar en el proyecto
+builder.Services.AddScoped<ICourseRepositoty, CourseRepository>();
+
 //Se agrega el servicio de Stripe para el pago con tarjeta
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 

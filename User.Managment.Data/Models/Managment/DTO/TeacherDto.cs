@@ -6,18 +6,15 @@ using System.Threading.Tasks;
 
 namespace User.Managment.Data.Models.Managment.DTO
 {
-    public class UserDto
+    public class TeacherDto
     {
         public string Id { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
-
-        public string UserName { get; set; }
-
-        public string City { get; set; }
-
+        public string Email { get; set; }
         public string Phone { get; set; }
+        public string? Biografy { get; set; }
+        public string? PhotoURL { get; set; }
 
-        public string Role { get; set; }
     }
 }

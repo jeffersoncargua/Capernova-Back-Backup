@@ -1,10 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.Authentication.SignUp;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Repository.Models;
+using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
 {
@@ -12,14 +20,529 @@ namespace CapernovaAPI.Controllers
     [ApiController]    
     public class ManagmentController : ControllerBase
     {
-        //private readonly UserManager<ApplicationUser> _userManager;
-        //private readonly RoleManager<IdentityRole> _roleManager;
-        
-        public ManagmentController(ApplicationDbContext db)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager; //Permite controlar el envio del codigo OTP
+        private readonly IEmailRepository _emailRepository;
+        private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _db;
+        private readonly ICourseRepositoty _dbCourse;
+        protected ApiResponse _response;
+        private string secretKey;
+
+        public ManagmentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager
+            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db, ICourseRepositoty dbCourse)
         {
-            //_userManager = userManager;
-            //_roleManager = roleManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _emailRepository = emailRepository;
+            _configuration = configuration;
+            _signInManager = signInManager;
+            _db = db;
+            _dbCourse = dbCourse;
+            this._response = new();
+            secretKey = configuration.GetValue<string>("JWT:Secret");
+        }
+
+        [HttpPost]
+        [Route("registration")]
+        public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterUser registerUser)
+        {
+            try
+            {
+                //Se chequea si el usuario existe
+                var userExist = await _userManager.FindByEmailAsync(registerUser.Email);
+                if (userExist != null)
+                {
+                   
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El usuario ya esta registrado";
+                    _response.isSuccess = false;
+                    return BadRequest(_response);
+                }
+                //Se prepara el user con la informacion que se va almacenar en la base de datos
+                ApplicationUser user = new()
+                {
+                    Name = registerUser.Name,
+                    UserName = registerUser.Email,
+                    LastName = registerUser.LastName,
+                    Email = registerUser.Email,
+                    PasswordHash = registerUser.Password,
+                    PhoneNumber = registerUser.Phone,
+                    Ciudad = registerUser.City,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    TwoFactorEnabled = true,
+                };
+                //Se consulta si el rol existe en la base de datos, esto para poder asignarle uno existente
+                //string role = "User";
+                if (await _roleManager.RoleExistsAsync(registerUser.Role))
+                {
+                    //Se almacena en la base de datos
+                    var result = await _userManager.CreateAsync(user, registerUser.Password);
+                    if (!result.Succeeded)
+                    {
+                        //List<string> errores = new List<string>();
+                        foreach (var error in result.Errors)
+                        {
+                            _response.Errors.Add(error.Description);
+                        }
+
+                        //return StatusCode(StatusCodes.Status500InternalServerError,
+                        //    new Response { Status = "Error", Message =  errores.First() });
+                        _response.isSuccess = false;
+                        _response.StatusCode = HttpStatusCode.BadRequest;
+                        _response.Message = _response.Errors.FirstOrDefault()!;
+                        return BadRequest(_response);
+
+                    }
+
+                    //Se le asigna el rol al usuario 
+                    await _userManager.AddToRoleAsync(user, registerUser.Role);
+
+                    //Se agrega el token para verificar el email       
+                    var tokenEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);                 
+                    //Se genera el link para enviar el token y el usuario
+                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
+
+                    //Se arma el mensaje con el email del usuario registrado y el enlace de confirmacion del correo
+                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
+                    //Se envia el mensaje que se va a remitir por correo electrónico
+                    _emailRepository.SendEmail(message);
+
+                    Teacher teacher = new()
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        Phone = user.PhoneNumber
+                    };
+
+                    await _db.TeacherTbl.AddAsync(teacher);
+                    await _db.SaveChangesAsync();
+                    
+
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.isSuccess = true;
+                    _response.Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación";
+                    return Ok(_response);
+                }
+                else
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.isSuccess = false;
+                    _response.Message = "El rol no existe";
+                    return NotFound(_response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
+
+
+        }
+
+        [HttpGet("getTalent")]
+        public async Task<ActionResult<ApiResponse>> GetTalent([FromQuery] string? searchRole, [FromQuery] string? searchName)
+        {
+            try
+            {
+
+                var roles = await _db.Roles.ToListAsync();
+                var rolAdmin = roles.Find(u => u.Name == "Admin");
+                var rolSecretary = roles.Find(u => u.Name == "Secretary");
+                var rolTeacher = roles.Find(u => u.Name == "Teacher");
+                var rolStudent = roles.Find(u => u.Name == "Student");
+                var rolUser = roles.Find(u => u.Name == "User");
+
+
+                if (!string.IsNullOrEmpty(searchRole) && !string.IsNullOrEmpty(searchName))
+                {
+                    //El resultSearch permite almacenar los usuarios de acuerdo a la busqueda que se realice en la base de datos
+                    //segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                    //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                    var resultSearch = (
+                        from au in _db.Users.Where(x => x.Name.ToLower().Contains(searchName) || x.LastName.ToLower().Contains(searchName))
+                        from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                        from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Name == searchRole )
+                            //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                        select new UserDto
+                        {
+                            Id = au.Id,
+                            Name = au.Name,
+                            LastName = au.LastName,
+                            UserName = au.UserName,
+                            Phone = au.PhoneNumber,
+                            Role = ar.Name,
+                        }
+                    ).ToList();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de usuarios";
+                    _response.Result = resultSearch;
+                    return Ok(_response);
+                }
+
+                if (!string.IsNullOrEmpty(searchRole) || !string.IsNullOrEmpty(searchName))
+                {
+                    if (!string.IsNullOrEmpty(searchName))
+                    {
+                        //El resultSearch permite almacenar los usuarios de acuerdo a la busqueda que se realice en la base de datos
+                        //segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                        //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                        var resultSearchName = (
+                            from au in _db.Users.Where(x => x.Name.ToLower().Contains(searchName) || x.LastName.ToLower().Contains(searchName))
+                            from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                            from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent.Id && x.Id != rolUser.Id)
+                                //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                            select new UserDto
+                            {
+                                Id = au.Id,
+                                Name = au.Name,
+                                LastName = au.LastName,
+                                UserName = au.UserName,
+                                Phone = au.PhoneNumber,
+                                Role = ar.Name,
+                            }
+                        ).ToList();
+
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Se ha obtenido la lista de usuarios";
+                        _response.Result = resultSearchName;
+                        return Ok(_response);
+                    }
+                    //El resultSearch permite almacenar los usuarios de acuerdo a la busqueda que se realice en la base de datos
+                    //segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                    //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                    var resultSearchRole = (
+                        from au in _db.Users
+                        from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                        from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Name == searchRole)
+                            //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                        select new UserDto
+                        {
+                            Id = au.Id,
+                            Name = au.Name,
+                            LastName = au.LastName,
+                            UserName = au.UserName,
+                            Phone = au.PhoneNumber,
+                            Role = ar.Name,
+                        }
+                    ).ToList();
+
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de usuarios";
+                    _response.Result = resultSearchRole;
+                    return Ok(_response);
+
+                }
+
+                
+
+                //El result permite almacenar los usuarios de acuerdo al rol de usuario, en este caso los roles del tipo administrativo y/o colaboradores
+                //en la base de datos segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                var result = (
+                    from au in _db.Users
+                    from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent.Id && x.Id != rolUser.Id) //En esta linea se busca los roles con excepcion de Student y User
+                    //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                    select new UserDto
+                    {
+                        Id = au.Id,
+                        Name = au.Name,
+                        LastName = au.LastName,
+                        UserName = au.UserName,
+                        Phone = au.PhoneNumber,
+                        Role = ar.Name,
+                    }
+                ).ToList();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de usuarios";
+                _response.Result = result;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
+        }
+
+        [HttpDelete]
+        [Route("deleteUser")]
+        public async Task<ActionResult<ApiResponse>> DeleteUser([FromQuery] string id)
+        {
+            try
+            {
+
+                var course = await _dbCourse.GetAllAsync(u => u.TeacherId == id, tracked:false);
+
+                if (course != null)
+                {
+                    foreach (var item in course)
+                    {
+                        Course model = new()
+                        {
+                            Id = item.Id,
+                            TeacherId = null,
+                            Titulo = item.Titulo,
+                            Descripcion = item.Descripcion,
+                            Price = item.Price,
+                            Deberes = item.Deberes,
+                            Pruebas = item.Pruebas,
+                            NotaFinal = item.NotaFinal,
+                            Capitulos = item.Capitulos,
+                            ImageUrl = item.ImageUrl,
+                            IsActive = item.IsActive,
+                            State = item.State,
+                            //Teacher = null
+                        };
+                        await _dbCourse.UpdateAsync(model);
+                        //await _dbCourse.SaveAsync();
+
+                    }
+                }
+
+                //Esta seccion permitira eliminar el usuario si existe en otra tabla
+                var teacher = await _db.TeacherTbl.FirstOrDefaultAsync(u => u.Id == id);
+                if (teacher != null)
+                {
+                    _db.TeacherTbl.Remove(teacher);
+                    await _db.SaveChangesAsync();
+
+                }
+
+
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido realizar esta accion";
+                    return BadRequest(_response);
+                }
+
+                _db.Users.Remove(user);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha eliminado el registro correctamente";
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
             
+        }
+
+
+        [HttpGet("getStudents")]
+        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] string? search)
+        {
+            try
+            {
+                var roles = await _db.Roles.ToListAsync();
+                var rolStudent = roles.Find(u => u.Name == "Student");
+                if (!string.IsNullOrEmpty(search))
+                {
+                    //El result permite almacenar los usuarios de acuerdo al rol de usuario, en este caso los roles del tipo administrativo y/o colaboradores
+                    //en la base de datos segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                    //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                    var resultSearch = (
+                        from au in _db.Users.Where(x => x.Name.ToLower().Contains(search) || x.LastName.ToLower().Contains(search))
+                        from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                        from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent.Id) //En esta linea se busca los roles con excepcion de Student y User
+                                                                                                                       //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                        select new UserDto
+                        {
+                            Id = au.Id,
+                            Name = au.Name,
+                            LastName = au.LastName,
+                            UserName = au.UserName,
+                            Phone = au.PhoneNumber,
+                        }
+                    ).ToList();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Estudiantes";
+                    _response.Result = resultSearch;
+                    return Ok(_response);
+                }
+
+                //El result permite almacenar los usuarios de acuerdo al rol de usuario, en este caso los roles del tipo administrativo y/o colaboradores
+                //en la base de datos segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
+                //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
+                var result = (
+                    from au in _db.Users
+                    from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
+                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent.Id) //En esta linea se busca los roles con excepcion de Student y User
+                                                                                                 //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
+                    select new UserDto
+                    {
+                        Id = au.Id,
+                        Name = au.Name,
+                        LastName = au.LastName,
+                        UserName = au.UserName,
+                        Phone = au.PhoneNumber,
+                    }
+                ).ToList();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de Estudiantes";
+                _response.Result = result;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
+        }
+
+        [HttpPut("assigmentCourse/{id:int}", Name ="AssigmentCourse")]
+        public async Task<ActionResult<ApiResponse>> AssigmentCourse(int id,[FromBody] string teacherId)
+        {
+            try
+            {
+                //if (id != courseDto.Id)
+                //{
+                //    _response.isSuccess = false;
+                //    _response.StatusCode = HttpStatusCode.BadRequest;
+                //    _response.Message = "Ha ocurrido un problema mientras se actualizaba el registro";
+                //    return BadRequest(_response);
+                //}
+                var course = await _dbCourse.GetAsync(u => u.Id == id, tracked:false);
+                if (course == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro no existe";
+                    return BadRequest(_response);
+                }
+
+                //var capitulos = JsonConvert.SerializeObject(course.Capitulos);
+                //var deberes = JsonConvert.SerializeObject(course.Deberes);
+                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
+
+                Course model = new()
+                {
+                    Id = course.Id,
+                    TeacherId = teacherId,
+                    Titulo = course.Titulo,
+                    Descripcion = course.Descripcion,
+                    Price = course.Price,
+                    Deberes = course.Deberes,
+                    Pruebas = course.Pruebas,
+                    NotaFinal = course.NotaFinal,
+                    Capitulos = course.Capitulos,
+                    ImageUrl = course.ImageUrl,
+                    IsActive = course.IsActive,
+                    State = course.State
+                };
+
+                await _dbCourse.UpdateAsync(model);
+                await _dbCourse.SaveAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha añadido el curso";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
+        }
+
+        [HttpPut("deleteAssigmentCourse/{id:int}", Name = "DeleteAssigmentCourse")]
+        public async Task<ActionResult<ApiResponse>> DeleteAssigmentCourse(int id, [FromBody] string teacherId)
+        {
+            try
+            {
+                //if (id != courseDto.Id)
+                //{
+                //    _response.isSuccess = false;
+                //    _response.StatusCode = HttpStatusCode.BadRequest;
+                //    _response.Message = "Ha ocurrido un problema mientras se actualizaba el registro";
+                //    return BadRequest(_response);
+                //}
+                var course = await _dbCourse.GetAsync(u => u.Id == id, tracked: false);
+                if (course == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro no existe";
+                    return BadRequest(_response);
+                }
+
+                //var capitulos = JsonConvert.SerializeObject(course.Capitulos);
+                //var deberes = JsonConvert.SerializeObject(course.Deberes);
+                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
+
+                Course model = new()
+                {
+                    Id = course.Id,
+                    TeacherId = null,
+                    Titulo = course.Titulo,
+                    Descripcion = course.Descripcion,
+                    Price = course.Price,
+                    Deberes = course.Deberes,
+                    Pruebas = course.Pruebas,
+                    NotaFinal = course.NotaFinal,
+                    Capitulos = course.Capitulos,
+                    ImageUrl = course.ImageUrl,
+                    IsActive = course.IsActive,
+                    State = course.State
+                };
+
+                await _dbCourse.UpdateAsync(model);
+                await _dbCourse.SaveAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha eliminado el curso asignado";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+
+            return _response;
         }
 
     }

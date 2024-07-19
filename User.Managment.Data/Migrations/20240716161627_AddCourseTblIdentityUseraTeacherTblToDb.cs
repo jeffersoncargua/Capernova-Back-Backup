@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace User.Managment.Data.Migrations
 {
-    public partial class AddTblIdentityandPublicidadandCourse : Migration
+    public partial class AddCourseTblIdentityUseraTeacherTblToDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,7 +30,7 @@ namespace User.Managment.Data.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Cuidad = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Ciudad = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -52,24 +52,6 @@ namespace User.Managment.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CourseTbl",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Titulo = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<double>(type: "float", nullable: false),
-                    isActive = table.Column<bool>(type: "bit", nullable: false),
-                    Capitulos = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CourseTbl", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PublicidadTbl",
                 columns: table => new
                 {
@@ -81,6 +63,40 @@ namespace User.Managment.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PublicidadTbl", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentTbl",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Photo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cursos = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentTbl", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TeacherTbl",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Biografy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhotoURL = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeacherTbl", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,20 +205,45 @@ namespace User.Managment.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "2ba678d2-3578-41d7-b9e1-600e2c268b21", "2", "User", "USER" });
+            migrationBuilder.CreateTable(
+                name: "CourseTbl",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Titulo = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true),
+                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Capitulos = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Deberes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Pruebas = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NotaFinal = table.Column<double>(type: "float", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseTbl", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseTbl_TeacherTbl_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "TeacherTbl",
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "e2336da7-868b-4b40-8ffe-a0acae7a4737", "3", "Student", "STUDENT" });
-
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "ecf79a96-b632-4294-906f-c28feee43e34", "1", "Admin", "ADMIN" });
+                values: new object[,]
+                {
+                    { "3337602a-ce6b-4867-9168-aa2344547ea6", "2", "User", "USER" },
+                    { "5767a6b6-042c-4aff-92ae-e89b94e8b4f8", "4", "Teacher", "TEACHER" },
+                    { "9ae739c6-78c9-4341-b090-e8ae4ef5bc1c", "5", "Secretary", "SECRETARY" },
+                    { "9f771620-4199-43a2-a2f4-d81de230dee3", "1", "Admin", "ADMIN" },
+                    { "bbd62306-e137-4d0a-b6b1-2ab12d9bf968", "3", "Student", "STUDENT" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -242,6 +283,11 @@ namespace User.Managment.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseTbl_TeacherId",
+                table: "CourseTbl",
+                column: "TeacherId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -268,10 +314,16 @@ namespace User.Managment.Data.Migrations
                 name: "PublicidadTbl");
 
             migrationBuilder.DropTable(
+                name: "StudentTbl");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "TeacherTbl");
         }
     }
 }

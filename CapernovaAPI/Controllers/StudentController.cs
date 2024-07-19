@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SelectPdf;
 using System.ComponentModel;
 using System.Net;
@@ -23,7 +24,7 @@ namespace CapernovaAPI.Controllers
         [HttpGet("getCertificate/{id:int}")]
         public async Task<ActionResult<ApiResponse>> GetCertificate(int id)
         {
-            var course = _db.CourseTbl.FirstOrDefault(u => u.Id ==id);
+            var course = await _db.CourseTbl.FirstOrDefaultAsync(u => u.Id ==id);
             if (course == null)
             {
                 _response.isSuccess = false;

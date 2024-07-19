@@ -42,87 +42,100 @@ namespace CapernovaAPI.Controllers
         [HttpPost]
         [Route("register")]
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterUser registerUser)
-        {            
-            //Se chequea si el usuario existe
-            var userExist = await _userManager.FindByEmailAsync(registerUser.Email);
-            if (userExist != null)
+        {
+            try
             {
-                //return StatusCode(StatusCodes.Status403Forbidden,
-                //    new Response { Status = "Error", Message = "El usuario ya esta registrado" });
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "El usuario ya esta registrado";
-                _response.isSuccess = false;
-                return BadRequest(_response);
-            }
-            //Se prepara el user con la informacion que se va almacenar en la base de datos
-            ApplicationUser user = new()
-            {
-                Name = registerUser.Name,
-                UserName = registerUser.Email,
-                LastName = registerUser.LastName,
-                Email = registerUser.Email,
-                PasswordHash = registerUser.Password,
-                PhoneNumber = registerUser.Phone,
-                Cuidad = registerUser.City,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                TwoFactorEnabled = true,
-            };
-            //Se consulta si el rol existe en la base de datos, esto para poder asignarle uno existente
-            //string role = "User";
-            if (await _roleManager.RoleExistsAsync(registerUser.Role))
-            {
-                //Se almacena en la base de datos
-                var result = await _userManager.CreateAsync(user, registerUser.Password);
-                if (!result.Succeeded)
+                //Se chequea si el usuario existe
+                var userExist = await _userManager.FindByEmailAsync(registerUser.Email);
+                if (userExist != null)
                 {
-                    //List<string> errores = new List<string>();
-                    foreach (var error in result.Errors)
+                    //return StatusCode(StatusCodes.Status403Forbidden,
+                    //    new Response { Status = "Error", Message = "El usuario ya esta registrado" });
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El usuario ya esta registrado";
+                    _response.isSuccess = false;
+                    return BadRequest(_response);
+                }
+                //Se prepara el user con la informacion que se va almacenar en la base de datos
+                ApplicationUser user = new()
+                {
+                    Name = registerUser.Name,
+                    UserName = registerUser.Email,
+                    LastName = registerUser.LastName,
+                    Email = registerUser.Email,
+                    PasswordHash = registerUser.Password,
+                    PhoneNumber = registerUser.Phone,
+                    Ciudad = registerUser.City,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    TwoFactorEnabled = true,
+                };
+                //Se consulta si el rol existe en la base de datos, esto para poder asignarle uno existente
+                //string role = "User";
+                if (await _roleManager.RoleExistsAsync(registerUser.Role))
+                {
+                    //Se almacena en la base de datos
+                    var result = await _userManager.CreateAsync(user, registerUser.Password);
+                    if (!result.Succeeded)
                     {
-                        _response.Errors.Add(error.Description);
+                        //List<string> errores = new List<string>();
+                        foreach (var error in result.Errors)
+                        {
+                            _response.Errors.Add(error.Description);
+                        }
+
+                        //return StatusCode(StatusCodes.Status500InternalServerError,
+                        //    new Response { Status = "Error", Message =  errores.First() });
+                        _response.isSuccess = false;
+                        _response.StatusCode = HttpStatusCode.BadRequest;
+                        _response.Message = _response.Errors.FirstOrDefault()!;
+                        return BadRequest(_response);
+
                     }
 
-                    //return StatusCode(StatusCodes.Status500InternalServerError,
-                    //    new Response { Status = "Error", Message =  errores.First() });
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = _response.Errors.FirstOrDefault()!;
-                    return BadRequest(_response);
+                    //Se le asigna el rol al usuario 
+                    await _userManager.AddToRoleAsync(user, registerUser.Role);
 
+                    //Se agrega el token para verificar el email
+                    //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var tokenEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //Se codifica el token para que en base 64 para que no coloca caracteres que luego se eliminen
+                    //var tokenEncode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenEmail));
+                    //Se genera el link para enviar el token y el usuario
+                    //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authentication", new { token, email = user.Email }, Request.Scheme);
+                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
+
+
+                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
+                    //var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el enlace<a href='http://localhost:3000/confirmEmail'>{confirmationLink!}</a>");
+                    _emailRepository.SendEmail(message);
+
+                    //return StatusCode(StatusCodes.Status201Created,
+                    //        new Response { Status = "Success", Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación" });
+                    _response.StatusCode = HttpStatusCode.Created;
+                    _response.isSuccess = true;
+                    _response.Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación";
+                    return Ok(_response);
                 }
-
-                //Se le asigna el rol al usuario 
-                await _userManager.AddToRoleAsync(user, registerUser.Role);
-
-                //Se agrega el token para verificar el email
-                //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var tokenEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                //Se codifica el token para que en base 64 para que no coloca caracteres que luego se eliminen
-                //var tokenEncode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenEmail));
-                //Se genera el link para enviar el token y el usuario
-                //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
-                
-
-                var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
-                //var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el enlace<a href='http://localhost:3000/confirmEmail'>{confirmationLink!}</a>");
-                _emailRepository.SendEmail(message);
-
-                //return StatusCode(StatusCodes.Status201Created,
-                //        new Response { Status = "Success", Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación" });
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.isSuccess = true;
-                _response.Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación";
-                return Ok(_response);
+                else
+                {
+                    //return StatusCode(StatusCodes.Status500InternalServerError,
+                    //    new Response { Status = "Error", Message = "El rol no existe!" });
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.isSuccess = false;
+                    _response.Message = "El rol no existe";
+                    return NotFound(_response);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                //return StatusCode(StatusCodes.Status500InternalServerError,
-                //    new Response { Status = "Error", Message = "El rol no existe!" });
-                _response.StatusCode = HttpStatusCode.NotFound;
                 _response.isSuccess = false;
-                _response.Message = "El rol no existe";
-                return NotFound(_response);
+                _response.Errors = new List<string> { ex.ToString() };
+
             }
+
+            return _response;
+
+            
         }
 
         [HttpGet("ConfirmEmail")]

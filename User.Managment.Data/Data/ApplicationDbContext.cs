@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Managment;
+using User.Managment.Data.Models.Student;
 
 namespace User.Managment.Data.Data
 {
@@ -15,6 +16,9 @@ namespace User.Managment.Data.Data
 
         public DbSet<Publicidad> PublicidadTbl { get; set; }
         public DbSet<Course> CourseTbl { get; set; }
+        public DbSet<Teacher> TeacherTbl { get; set; }
+        public DbSet<Student> StudentTbl { get; set; }
+
 
 
 
@@ -31,7 +35,9 @@ namespace User.Managment.Data.Data
                 (
                     new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN"},
                     new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
-                    new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" }
+                    new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
+                    new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },
+                    new IdentityRole() { Name = "Secretary", ConcurrencyStamp = "5", NormalizedName = "SECRETARY" }
                 );
         }
 

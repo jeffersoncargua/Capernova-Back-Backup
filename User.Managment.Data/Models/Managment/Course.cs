@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,9 +19,18 @@ namespace User.Managment.Data.Models.Managment
         public string Titulo { get; set; }
         [Required]
         public string Descripcion { get; set; }
+        
         [Required]
         public double Price { get; set; }
-        public bool isActive { get; set; }
-        public string Capitulos { get; set; } //Este cmapo permite guardar el listado de vdeos
+        public bool? IsActive { get; set; }
+        public string? State { get; set; } //Este campo permite saber si el curso ha sido aprobado o no
+        public string? Capitulos { get; set; } //Este campo permite guardar el listado de vdeos
+        
+        public string? TeacherId { get; set; } //Este campo permite almacenar la id del profesor que va a impartir este curso
+        [ForeignKey("TeacherId")]
+        public Teacher? Teacher { get; set; }
+        public string? Deberes { get; set; } //Este campo permitira almacenar los deberes del estudiante
+        public string? Pruebas { get; set; } //Este campo permitira almacenar los deberes del estudiante
+        public double? NotaFinal { get; set; }
     }
 }

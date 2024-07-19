@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "La cuidad de residencia de usuario es requerido")]
         public string City { get; set; }
 
-        public string Role { get; set; }
+        public string Role { get; set; } //Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
 
     }
 }
