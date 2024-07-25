@@ -34,7 +34,7 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "La cuidad de residencia de usuario es requerido")]
         public string City { get; set; }
 
-        public string Role { get; set; } //Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
+        public string? Role { get; set; } //Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
 
     }
 }

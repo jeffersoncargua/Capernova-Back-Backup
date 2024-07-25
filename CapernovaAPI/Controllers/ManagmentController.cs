@@ -109,19 +109,23 @@ namespace CapernovaAPI.Controllers
                     //Se envia el mensaje que se va a remitir por correo electrónico
                     _emailRepository.SendEmail(message);
 
-                    Teacher teacher = new()
+                    if (registerUser.Role == "Teacher")
                     {
-                        Id = user.Id,
-                        Name = user.Name,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        Phone = user.PhoneNumber
-                    };
+                        Teacher teacher = new()
+                        {
+                            Id = user.Id,
+                            Name = user.Name,
+                            LastName = user.LastName,
+                            Email = user.Email,
+                            Phone = user.PhoneNumber
+                        };
 
-                    await _db.TeacherTbl.AddAsync(teacher);
-                    await _db.SaveChangesAsync();
+                        await _db.TeacherTbl.AddAsync(teacher);
+                        await _db.SaveChangesAsync();
+                    }
+
                     
-
+                    
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.isSuccess = true;
                     _response.Message = "El usuario ha sido registrado y se ha enviado un correo para su confirmación";
@@ -543,6 +547,40 @@ namespace CapernovaAPI.Controllers
             }
 
             return _response;
+        }
+
+        [HttpGet]
+        [Route("getAllCourse")]
+        public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery] string? search)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search),includeProperties:"Teacher");
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Cursos";
+                    _response.Result = coursesQuery;
+                    return Ok(_response);
+                }
+
+                var courses = await _dbCourse.GetAllAsync(includeProperties: "Teacher");
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de Cursos";
+                _response.Result = courses;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+
         }
 
     }

@@ -125,6 +125,8 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "El rol no existe";
                     return NotFound(_response);
                 }
+
+
             }
             catch (Exception ex)
             {
@@ -196,8 +198,11 @@ namespace CapernovaAPI.Controllers
                         {
                             Subject = new ClaimsIdentity(new Claim[]
                             {
-                                 new Claim(ClaimTypes.Name, user.UserName),                       
+                                 new Claim(ClaimTypes.Name, user.UserName),
                                  new Claim(ClaimTypes.Role, userRoles.First()),
+                                 new Claim(ClaimTypes.NameIdentifier, user.Id),
+                                 new Claim(ClaimTypes.Actor, user.Name),
+                                 new Claim(ClaimTypes.GivenName, user.LastName),
                                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
                             }),

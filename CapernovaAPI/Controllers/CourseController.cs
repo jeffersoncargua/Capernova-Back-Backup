@@ -129,7 +129,7 @@ namespace CapernovaAPI.Controllers
                     NotaFinal = 0,
                     Price = course.Price,
                     IsActive = course.IsActive,
-                    Capitulos = capitulos
+                    Capitulos = capitulos,
                 };
 
                 await _dbCourse.CreateAsync(model);
@@ -167,7 +167,8 @@ namespace CapernovaAPI.Controllers
 
                 var capitulos = JsonConvert.SerializeObject(course.CapituloList);
                 var deberes = JsonConvert.SerializeObject(course.Deberes);
-                
+                var pruebas = JsonConvert.SerializeObject(course.Pruebas);
+
                 double notaFinal = 0;
 
 
@@ -177,11 +178,13 @@ namespace CapernovaAPI.Controllers
                     ImageUrl = course.ImageUrl,
                     Titulo = course.Titulo,
                     Descripcion = course.Descripcion,
+                    Pruebas = pruebas,
                     Deberes = deberes,
                     NotaFinal = notaFinal,
                     Price = course.Price,
                     IsActive = course.IsActive,
                     Capitulos = capitulos,
+                    TeacherId=course.TeacherId,
                 };
 
                 await _dbCourse.UpdateAsync(model);
