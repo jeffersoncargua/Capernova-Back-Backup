@@ -1,7 +1,8 @@
 
 
 using Capernova.Utility;
-using Microsoft.AspNetCore.Authentication.Cookies;
+//using Google.Apis.Auth.AspNetCore3;
+//using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ builder.Services.AddCors(options =>
 
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins(frontEndURL).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        builder.WithOrigins(frontEndURL).AllowAnyMethod().AllowAnyHeader().AllowCredentials(); 
     });
    
 });
@@ -98,6 +99,21 @@ builder.Services.AddSwaggerGen();
 //se agrega el APIkey para generar las solicitudes para el pago con tarjeta
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
+
+//Servicio de autenticacion para utilizar google drive
+//builder.Services.AddAuthentication(o =>
+//{
+//    o.DefaultAuthenticateScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+//    o.DefaultForbidScheme = GoogleOpenIdConnectDefaults.AuthenticationScheme;
+//    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+//}).AddCookie()
+//.AddGoogleOpenIdConnect(options =>
+//{
+//    options.ClientId = "533765406103-0mt3gsdbckirrrk7920dsdn0552fmkoe.apps.googleusercontent.com";
+//    options.ClientSecret = "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";
+//});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -126,7 +142,8 @@ app.UseCors();
 //    .AllowCredentials()
 //);
 
-
+//Permite realizar la autenticacion ya que se va a emplear la autenticacion de google
+app.UseAuthentication();
 
 app.UseAuthorization();
 

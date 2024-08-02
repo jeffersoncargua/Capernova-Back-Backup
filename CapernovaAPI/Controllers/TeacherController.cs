@@ -1,9 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿//using Google.Apis.Auth.AspNetCore3;
+//using Google.Apis.Auth.OAuth2;
+//using Google.Apis.Drive.v3;
+//using Google.Apis.Services;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Drive.v3;
+using Google.Apis.Services;
+using Google.Apis.Upload;
+using Google.Apis.Util.Store;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+//using Microsoft.OpenApi.Writers;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.Managment;
+using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Repository.IRepository;
+using static Google.Apis.Drive.v3.DriveService;
 
 namespace CapernovaAPI.Controllers
 {
@@ -13,21 +28,33 @@ namespace CapernovaAPI.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly ICourseRepositoty _dbCourse;
+        //private readonly IWebHostEnvironment _hostEnvironment;
+        //private readonly GoogleDriveService _googleDriveService;
+        private readonly IConfiguration _configuration;
         protected ApiResponse _response;
+        protected string clientSecret;
+        protected string clientId;
+        protected string authUri;
 
-        public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse)
+        public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse, IConfiguration configuration)
         {
             _db = db;
-            _dbCourse = dbCourse;
+            _dbCourse = dbCourse;            
+            //_hostEnvironment = hostEnvironment;
+            //_googleDriveService = googleDriveService;
+            _configuration = configuration;
+            this.clientId = _configuration["GoogleDrive:ClientId"];
+            this.clientSecret = _configuration["GoogleDrive:ClientSecret"];
+            this.authUri = _configuration["GoogleDrive:RedirectUri"];
             this._response = new();
         }
 
-        [HttpGet(Name = "getAllCourse")]
+        [HttpGet("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery]string id)
         {
             try
             {
-                var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id);
+                var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id,includeProperties:"Teacher");
                 if (teacherCourse == null)
                 {
                     _response.isSuccess = false;
@@ -51,5 +78,231 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+
+
+        [HttpPut("updateTeacher", Name = "updateTeacher")]
+        public async Task<ActionResult<ApiResponse>> UpdateTeacher([FromQuery]string id, [FromBody] TeacherDto teacherDto)
+        {
+            try
+            {
+                if (teacherDto.Id != id || teacherDto == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ha ocurrido un error en el sistema, intentelo nuevamente!";
+                    return BadRequest(_response);
+                }
+
+
+                var teacher = await _db.TeacherTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (teacher == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El usuario no esta registrado!";
+                    return BadRequest(_response);
+                }
+
+               
+
+                Teacher model = new()
+                {
+                    Id = teacherDto.Id,
+                    Name = teacherDto.Name,
+                    LastName = teacherDto.LastName,
+                    Phone = teacherDto.Phone,
+                    Biografy = teacherDto.Biografy,
+                    Email = teacherDto.Email,
+                    PhotoURL = teacherDto.PhotoURL
+                };
+
+                _db.TeacherTbl.Update(model);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Su información se ha actualizado correctamente!";
+                return Ok(_response);
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpPut("updateImageTeacher",Name = "updateImageTeacher")]
+        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        public async Task<ActionResult<ApiResponse>> UpdateImageTeacher([FromQuery] string id, IFormFile? file)
+        {
+            try
+            {
+                var teacherDto = await _db.TeacherTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if(teacherDto == null || teacherDto.Id != id)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido realizar su solicitud!";
+                    return BadRequest(_response);
+                }
+
+                if (file != null)
+                {
+                    var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
+
+                    //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
+                    if (teacherDto.PhotoURL != null)
+                    {
+                        DeleteFile(service, teacherDto.PhotoURL); 
+                    }
+
+                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
+                    string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+
+                    Teacher modelWithPhoto = new()
+                    {
+                        Id = teacherDto.Id,
+                        Name = teacherDto.Name,
+                        LastName = teacherDto.LastName,
+                        Phone = teacherDto.Phone,
+                        Biografy = teacherDto.Biografy,
+                        Email = teacherDto.Email,
+                        PhotoURL = idFile
+                    };
+
+                    _db.TeacherTbl.Update(modelWithPhoto);
+                    //_db.TeacherTbl.Update(teacher);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Su fotografía se ha actualizado correctamente!";
+                    return Ok(_response);
+
+                }
+
+                //Teacher model = new()
+                //{
+                //    Id = teacherDto.Id,
+                //    Name = teacherDto.Name,
+                //    LastName = teacherDto.LastName,
+                //    Phone = teacherDto.Phone,
+                //    Biografy = teacherDto.Biografy,
+                //    Email = teacherDto.Email,
+                //    PhotoURL = teacherDto.PhotoURL
+                //};
+
+                //_db.TeacherTbl.Update(model);
+                //await _db.SaveChangesAsync();
+
+                //_response.isSuccess = true;
+                //_response.StatusCode = HttpStatusCode.OK;
+                //_response.Message = "Su información se ha actualizado correctamente!";
+                //return Ok(_response);
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha podido actualizar su fotografía!";
+                return BadRequest(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+
+        }
+
+        /// <summary>
+        /// Esta funcion permite sincronizar las credenciales obtenidas para enlazar el proyecto .net con google drive
+        /// Si se necesita informacion de como realizarlo se adjunta el link de instrucciones: https://medium.com/geekculture/upload-files-to-google-drive-with-c-c32d5c8a7abc
+        /// </summary>
+        /// <returns>Se retorna el inicio de sesion de la aplicacion con google drive</returns>
+        private static DriveService GetService()
+        {
+            var tokenResponse = new TokenResponse
+            {
+                AccessToken = "ya29.a0AXooCgsvuAe6XKaacOA92BxRwvdXKupaNY1KCxc1kjY_5ndtRyYSF4zrfQo1xv8m4fROatf5OL82Ol1fm9cXxAj9L102xzyiQ9VJHZ9KqUvne-AdE_rvJJUNHkyMrJTcqnFnY0DdqnKprr6PemJtxMQvSqeVI36MzZuTaCgYKAT0SARASFQHGX2MiBOGhYeU4RpPzroPCDSmB_A0171",
+                RefreshToken = "1//042rXkey-rej9CgYIARAAGAQSNwF-L9Irfp-MlpbqVrElYYi5qLEl4saJI3l-nmgeMY6K7TIhA5as2gIYSbZYqTs8qfd6PfAaa8g",
+            };
+
+            var applicationName = "CapernovaTest";
+            var userName = "jeffersoncargua@gmail.com";
+
+            var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = new ClientSecrets
+                {
+                    ClientId = "533765406103-0mt3gsdbckirrrk7920dsdn0552fmkoe.apps.googleusercontent.com",
+                    ClientSecret = "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"
+                },
+                Scopes = new[] { Scope.Drive },
+                DataStore = new FileDataStore(applicationName),
+                
+            });
+
+            var credential = new UserCredential(apiCodeFlow, userName, tokenResponse);
+
+            var service = new DriveService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = applicationName
+            });
+
+            return service;
+        }
+
+        /// <summary>
+        /// Esta funcion permite cargar un archivo en google drive
+        /// Entre estos archivos que se pueden cargar son documentos, fotos y audios, pero no videos.
+        /// </summary>
+        /// <param name="service">Es la sesion que se abrio para enlazar la aplicacion con google drive</param>
+        /// <param name="file">Es el archivo que se va a subir que puede ser foto, documentos o musica</param>
+        /// <param name="idFolder">Es el identificador de la carpeta donde se va a subir el archivo para este caso es la carpeta PruebaCapernova en Google Drive</param>
+        /// <returns>Retorna el IdFile que se creo en google drive</returns>
+        private async Task<string> UploadFile(DriveService service,IFormFile file,string idFolder)
+        {
+
+            string fileMime = file.ContentType;
+            var driveFile = new Google.Apis.Drive.v3.Data.File();
+            driveFile.Name = file.Name;
+            driveFile.MimeType = file.ContentType;
+            driveFile.Parents = new string[] { idFolder };            
+
+            var request = service.Files.Create(driveFile, file.OpenReadStream(),fileMime); //OpenReadStream permite abrir el archivo para enviarlo al servicio de Google Drive
+
+            //request.Fields permite que se generen los campos que queremos obtener informacion como el id, webViewLink, etc. Vease os campos que tiene en el ResponseBody.{Fields}
+            request.Fields = "id, webViewLink"; //Se agrego webViewlink para obtener el link de enlace
+
+            
+            var response = await request.UploadAsync();
+
+            if (response.Status != UploadStatus.Completed)
+            {
+                throw response.Exception;
+            }            
+
+            return request.ResponseBody.Id;
+        }
+
+        /// <summary>
+        /// Esta función permite eliminar un archivo con el IdFile que se encuentre en el google drive 
+        /// </summary>
+        /// <param name="service">Es la sesion que se abrio para enlazar la aplicacion con google drive</param>
+        /// <param name="idFile">Es el identificador del archivo a eliminar</param>
+        private async void DeleteFile(DriveService service, string idFile)
+        {
+            var command = service.Files.Delete(idFile);
+            var result = await command.ExecuteAsync();
+        }
+
+
     }
+
 }

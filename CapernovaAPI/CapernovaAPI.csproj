@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.68.0.3466" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.30" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.30" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.30" />
@@ -24,6 +25,11 @@
     <ProjectReference Include="..\Capernova.Utility\Capernova.Utility.csproj" />
     <ProjectReference Include="..\User.Managment.Data\User.Managment.Data.csproj" />
     <ProjectReference Include="..\User.Managment.Repository\User.Managment.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Imagenes\Student\" />
+    <Folder Include="Imagenes\Teacher\" />
   </ItemGroup>
 
 </Project>
