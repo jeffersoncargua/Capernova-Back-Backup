@@ -12,8 +12,8 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240716161627_AddCourseTblIdentityUseraTeacherTblToDb")]
-    partial class AddCourseTblIdentityUseraTeacherTblToDb
+    [Migration("20240805222628_alterCourseTblAddNullabeFolderId")]
+    partial class alterCourseTblAddNullabeFolderId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "9f771620-4199-43a2-a2f4-d81de230dee3",
+                            Id = "40ae5cc6-cd6b-4896-ad26-43791cd11ca6",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "3337602a-ce6b-4867-9168-aa2344547ea6",
+                            Id = "46787fc5-70f5-4de1-9583-a62547593915",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "bbd62306-e137-4d0a-b6b1-2ab12d9bf968",
+                            Id = "af821abe-9f56-484b-b7ec-251cc5d92c49",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "5767a6b6-042c-4aff-92ae-e89b94e8b4f8",
+                            Id = "7ffef63c-4b44-41d2-8c73-7a54908f45f0",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "9ae739c6-78c9-4341-b090-e8ae4ef5bc1c",
+                            Id = "7570fc81-ea70-42b5-9b05-9bb2730a08bf",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -268,7 +268,7 @@ namespace User.Managment.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Managment.Course", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Capitulo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -276,48 +276,241 @@ namespace User.Managment.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Capitulos")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Deberes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Descripcion")
+                    b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageUrl")
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CapituloTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Course", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Codigo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<double?>("NotaFinal")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Pruebas")
+                    b.Property<string>("Detalle")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("State")
+                    b.Property<string>("FolderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagenUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Precio")
+                        .HasColumnType("float");
 
                     b.Property<string>("TeacherId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TeacherId");
 
                     b.ToTable("CourseTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Deber", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("DeberTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.EstudianteVideo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Estado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("VideoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("VideoId");
+
+                    b.ToTable("EstudianteVideoTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.NotaDeber", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<double?>("Calificacion")
+                        .HasColumnType("float");
+
+                    b.Property<int>("DeberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observacion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeberId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("NotaDeberTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.NotaPrueba", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<double?>("Calificacion")
+                        .HasColumnType("float");
+
+                    b.Property<int>("DeberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observacion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeberId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("NotaPruebaTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Prueba", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Test")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("PruebaTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Video", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CapituloId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrdenReproduccion")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CapituloId");
+
+                    b.ToTable("VideoTbl");
                 });
 
             modelBuilder.Entity("User.Managment.Data.Models.Managment.Publicidad", b =>
@@ -379,9 +572,6 @@ namespace User.Managment.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Cursos")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -398,7 +588,7 @@ namespace User.Managment.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Photo")
+                    b.Property<string>("PhotoUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -457,13 +647,114 @@ namespace User.Managment.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Managment.Course", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Capitulo", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Course", b =>
                 {
                     b.HasOne("User.Managment.Data.Models.Managment.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Deber", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.EstudianteVideo", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Student.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User.Managment.Data.Models.Course.Video", "Video")
+                        .WithMany()
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.NotaDeber", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Deber", "Deber")
+                        .WithMany()
+                        .HasForeignKey("DeberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User.Managment.Data.Models.Student.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deber");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.NotaPrueba", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Prueba", "Prueba")
+                        .WithMany()
+                        .HasForeignKey("DeberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User.Managment.Data.Models.Student.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Prueba");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Prueba", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.Course.Video", b =>
+                {
+                    b.HasOne("User.Managment.Data.Models.Course.Capitulo", "Capitulo")
+                        .WithMany()
+                        .HasForeignKey("CapituloId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Capitulo");
                 });
 #pragma warning restore 612, 618
         }

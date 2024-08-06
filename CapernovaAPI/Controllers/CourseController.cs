@@ -5,8 +5,10 @@ using Stripe;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
-using User.Managment.Data.Models.Managment;
-using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Data.Models.Course;
+using User.Managment.Data.Models.Course.DTO;
+//using User.Managment.Data.Models.Managment;
+//using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
@@ -22,7 +24,12 @@ namespace CapernovaAPI.Controllers
             _dbCourse = dbCourse;
             this._respose = new();
         }
-
+        
+        /// <summary>
+        /// Este controlador permite obtener todos los cursos registrados hasta el momento en la base de datos
+        /// </summary>
+        /// <param name="search">Es el modelo que permite obtener un curso en especifico de acuerdo al titulo del curso</param>
+        /// <returns>Retorna una lista de cursos y en el caso de tener una busqueda especifica retorna un listado con los cursos especificos</returns>
         [HttpGet]
         [Route("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAll([FromQuery] string? search)
@@ -39,23 +46,9 @@ namespace CapernovaAPI.Controllers
                     return Ok(_respose);
                 }
 
-                var courses = await _dbCourse.GetAllAsync();
+                var courses = await _dbCourse.GetAllAsync(); //devuelve una lista con los cursos 
                 //var courses = await _db.CourseTbl.ToListAsync(); //si funciona la linea anterior se elimina esta linea
-                //List<CourseDto> courseDtos = new List<CourseDto>();
-
-                //foreach (var item in courses)
-                //{
-                //    CapituloDto capitulos = JsonConvert.DeserializeObject<CapituloDto>(item.Capitulos);
-                //    CourseDto course = new() {
-                //        Id = item.Id,
-                //        ImageUrl = item.ImageUrl,
-                //        Titulo = item.Titulo,
-                //        Descripcion = item.Descripcion,
-                //        Price = item.Price,
-                //        isActive = item.isActive,
-                //        CapituloList = capitulos
-                //    };
-                //}
+                
                 _respose.isSuccess = true;
                 _respose.StatusCode = HttpStatusCode.OK;
                 _respose.Message = "Se ha obtenido la lista de Cursos";
@@ -72,12 +65,17 @@ namespace CapernovaAPI.Controllers
   
         }
 
+        /// <summary>
+        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener
+        /// </summary>
+        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso</param>
+        /// <returns></returns>
         [HttpGet("getCourse/{id:int}", Name ="getCourse")]
         public async Task<ActionResult<ApiResponse>> GetCourse(int id)
         {
             try
             {
-                var course = await _dbCourse.GetAsync(u => u.Id == id);
+                var course = await _dbCourse.GetAsync(u => u.Id == id);// devuelve el curso cuyo id sea igual al Id del curso
                 if (course == null)
                 {
                     _respose.isSuccess = false;
@@ -114,22 +112,25 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_respose);
                 }
 
-                var capitulos = JsonConvert.SerializeObject(course.CapituloList);
-                var deberes = JsonConvert.SerializeObject(course.Deberes);
-                var pruebas = JsonConvert.SerializeObject(course.Pruebas);
+                //var capitulos = JsonConvert.SerializeObject(course.CapituloList);
+                //var deberes = JsonConvert.SerializeObject(course.Deberes);
+                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
 
                 Course model = new()
                 {
-                    ImageUrl = course.ImageUrl,
+                    Codigo = course.Codigo,
+                    ImagenUrl = course.ImagenUrl,
                     Titulo = course.Titulo,
-                    Descripcion = course.Descripcion,
-                    State = course.State,
-                    Deberes = deberes,
-                    Pruebas = pruebas,
-                    NotaFinal = 0,
-                    Price = course.Price,
-                    IsActive = course.IsActive,
-                    Capitulos = capitulos,
+                    Detalle = course.Detalle,
+                    //State = course.State,
+                    //Deberes = deberes,
+                    //Pruebas = pruebas,
+                    //NotaFinal = 0,
+                    Precio = course.Precio,
+                 //   FolderId = course.FolderId,
+                //    IsActive = course.IsActive,
+                //    Capitulos = capitulos,
+                    
                 };
 
                 await _dbCourse.CreateAsync(model);
@@ -165,26 +166,28 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_respose);
                 }
 
-                var capitulos = JsonConvert.SerializeObject(course.CapituloList);
-                var deberes = JsonConvert.SerializeObject(course.Deberes);
-                var pruebas = JsonConvert.SerializeObject(course.Pruebas);
+                //var capitulos = JsonConvert.SerializeObject(course.CapituloList);
+                //var deberes = JsonConvert.SerializeObject(course.Deberes);
+                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
 
-                double notaFinal = 0;
+                //double notaFinal = 0;
 
 
                 Course model = new()
                 {
                     Id = course.Id,
-                    ImageUrl = course.ImageUrl,
+                    Codigo = course.Codigo,
+                    ImagenUrl = course.ImagenUrl,
                     Titulo = course.Titulo,
-                    Descripcion = course.Descripcion,
-                    Pruebas = pruebas,
-                    Deberes = deberes,
-                    NotaFinal = notaFinal,
-                    Price = course.Price,
-                    IsActive = course.IsActive,
-                    Capitulos = capitulos,
-                    TeacherId=course.TeacherId,
+                    Detalle = course.Detalle,
+                    FolderId = course.FolderId,
+                    //Pruebas = pruebas,
+                    //Deberes = deberes,
+                    //NotaFinal = notaFinal,
+                    Precio = course.Precio,
+                    //IsActive = course.IsActive,
+                    //Capitulos = capitulos,
+                    TeacherId = course.TeacherId
                 };
 
                 await _dbCourse.UpdateAsync(model);
@@ -234,5 +237,6 @@ namespace CapernovaAPI.Controllers
             return _respose;
 
         }
+
     }
 }

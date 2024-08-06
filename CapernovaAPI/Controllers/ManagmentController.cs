@@ -9,8 +9,11 @@ using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Authentication.SignUp;
+using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
+//using User.Managment.Data.Models.Managment;
+//using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Models;
 using User.Managment.Repository.Repository.IRepository;
 
@@ -44,6 +47,11 @@ namespace CapernovaAPI.Controllers
             secretKey = configuration.GetValue<string>("JWT:Secret");
         }
 
+        /// <summary>
+        /// Este controlador permite registrar usuarios con los tipos de roles existentes en la base de datos que son: User,Admin,Student,Teacher y Secretary
+        /// </summary>
+        /// <param name="registerUser">Es el modelo con la informacion que se recibe del front-end</param>
+        /// <returns>Retorna la respuesta del registro que puede ser satisfactoria o no</returns>
         [HttpPost]
         [Route("registration")]
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterUser registerUser)
@@ -151,6 +159,13 @@ namespace CapernovaAPI.Controllers
 
         }
 
+        /// <summary>
+        /// Este controlador permite obtener todos los usuarios que se encuentren registrados en la base de datos, donde se realiza operaciones
+        /// de Linq para poder obtener la union de las tablas de Users, UserRoles y Roles 
+        /// </summary>
+        /// <param name="searchRole">Permite buscar un rol en particular dentro de los usuarios con rol registrados</param>
+        /// <param name="searchName">Permite buscar un usuario en particular en base a su nombre y apellido</param>
+        /// <returns>Retorna una lista con los usurios registrados en la base de datos</returns>
         [HttpGet("getTalent")]
         public async Task<ActionResult<ApiResponse>> GetTalent([FromQuery] string? searchRole, [FromQuery] string? searchName)
         {
@@ -304,16 +319,18 @@ namespace CapernovaAPI.Controllers
                         {
                             Id = item.Id,
                             TeacherId = null,
+                            Codigo = item.Codigo,
+                            FolderId = item.FolderId,
                             Titulo = item.Titulo,
-                            Descripcion = item.Descripcion,
-                            Price = item.Price,
-                            Deberes = item.Deberes,
-                            Pruebas = item.Pruebas,
-                            NotaFinal = item.NotaFinal,
-                            Capitulos = item.Capitulos,
-                            ImageUrl = item.ImageUrl,
-                            IsActive = item.IsActive,
-                            State = item.State,
+                            Detalle = item.Detalle,
+                            Precio = item.Precio,
+                            //Deberes = item.Deberes,
+                            //Pruebas = item.Pruebas,
+                            //NotaFinal = item.NotaFinal,
+                            //Capitulos = item.Capitulos,
+                            ImagenUrl = item.ImagenUrl,
+                            //IsActive = item.IsActive,
+                            //State = item.State,
                             //Teacher = null
                         };
                         await _dbCourse.UpdateAsync(model);
@@ -460,16 +477,18 @@ namespace CapernovaAPI.Controllers
                 {
                     Id = course.Id,
                     TeacherId = teacherId,
+                    Codigo = course.Codigo,
                     Titulo = course.Titulo,
-                    Descripcion = course.Descripcion,
-                    Price = course.Price,
-                    Deberes = course.Deberes,
-                    Pruebas = course.Pruebas,
-                    NotaFinal = course.NotaFinal,
-                    Capitulos = course.Capitulos,
-                    ImageUrl = course.ImageUrl,
-                    IsActive = course.IsActive,
-                    State = course.State
+                    Detalle = course.Detalle,
+                    Precio = course.Precio,
+                    FolderId = course.FolderId,
+                    //Deberes = course.Deberes,
+                    //Pruebas = course.Pruebas,
+                    //NotaFinal = course.NotaFinal,
+                    //Capitulos = course.Capitulos,
+                    ImagenUrl = course.ImagenUrl,
+                    //IsActive = course.IsActive,
+                    //State = course.State
                 };
 
                 await _dbCourse.UpdateAsync(model);
@@ -520,15 +539,17 @@ namespace CapernovaAPI.Controllers
                     Id = course.Id,
                     TeacherId = null,
                     Titulo = course.Titulo,
-                    Descripcion = course.Descripcion,
-                    Price = course.Price,
-                    Deberes = course.Deberes,
-                    Pruebas = course.Pruebas,
-                    NotaFinal = course.NotaFinal,
-                    Capitulos = course.Capitulos,
-                    ImageUrl = course.ImageUrl,
-                    IsActive = course.IsActive,
-                    State = course.State
+                    Codigo = course.Codigo,
+                    Detalle = course.Detalle,
+                    Precio = course.Precio,
+                    //Deberes = course.Deberes,
+                    //Pruebas = course.Pruebas,
+                    //NotaFinal = course.NotaFinal,
+                    //Capitulos = course.Capitulos,
+                    ImagenUrl = course.ImagenUrl,
+                    //IsActive = course.IsActive,
+                    //State = course.State
+                    FolderId = course.FolderId
                 };
 
                 await _dbCourse.UpdateAsync(model);
@@ -549,6 +570,12 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
+
+        /// <summary>
+        /// Este controlador permite obtener todos los cursos para poder observar su informacion en el front-end tanto del administrador como el de la secretaria
+        /// </summary>
+        /// <param name="search">Es el campo que contiene los caracteres que tengan coincidencia con el titulo del curso</param>
+        /// <returns>Retorna una lista con todos los cursos y en el caso de buscar con search devuelve una lista de acuerdo con el search</returns>
         [HttpGet]
         [Route("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery] string? search)

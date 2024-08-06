@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using User.Managment.Data.Data;
 
@@ -11,9 +12,10 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240805225404_alterCourseTbldeleteFolderId")]
+    partial class alterCourseTbldeleteFolderId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7b2e14c0-f5f2-44c9-bde5-953cbbc9dbbb",
+                            Id = "9da60f83-cc66-4222-a293-1278327cd86c",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f8a78efa-cc5b-4a62-8d21-bcfbc63367c4",
+                            Id = "48986b37-36a5-46ac-a7ac-32c895e02f1d",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "219ad934-0d25-4021-9392-a6f155d94a38",
+                            Id = "60514743-ab06-44e2-8bf5-5544b00885a9",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "65189451-c8c2-46bc-8b1d-5aba0490223e",
+                            Id = "cb79cc4a-9dd0-4bbc-8767-b42225091548",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "2ac1e30f-e6bf-44bd-a4c3-5d22d0e26b9d",
+                            Id = "38440e89-2e81-4c48-9eb2-a32356eb377a",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -302,9 +304,6 @@ namespace User.Managment.Data.Migrations
 
                     b.Property<string>("Detalle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FolderId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagenUrl")

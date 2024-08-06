@@ -50,10 +50,20 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpGet("getAllCourse")]
-        public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery]string id)
+        public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery]string id, [FromQuery] string? search)
         {
             try
             {
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.TeacherId == id,includeProperties:"Teacher");
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Cursos";
+                    _response.Result = coursesQuery;
+                    return Ok(_response);
+                }
+
                 var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id,includeProperties:"Teacher");
                 if (teacherCourse == null)
                 {

@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Student;
+using Course = User.Managment.Data.Models.Course.Course;
 
 namespace User.Managment.Data.Data
 {
@@ -15,9 +17,19 @@ namespace User.Managment.Data.Data
         }
 
         public DbSet<Publicidad> PublicidadTbl { get; set; }
-        public DbSet<Course> CourseTbl { get; set; }
+        //public DbSet<Course> CourseTbl { get; set; }
         public DbSet<Teacher> TeacherTbl { get; set; }
         public DbSet<Student> StudentTbl { get; set; }
+        public DbSet<Course> CourseTbl { get; set; }
+        public DbSet<Capitulo> CapituloTbl { get; set; }
+        public DbSet<Video> VideoTbl { get; set; }
+        public DbSet<Deber> DeberTbl { get; set; }
+        public DbSet<Prueba> PruebaTbl { get; set; }
+        public DbSet<NotaDeber> NotaDeberTbl { get; set; }
+        public DbSet<NotaPrueba> NotaPruebaTbl { get; set; }
+        public DbSet<EstudianteVideo> EstudianteVideoTbl { get; set; }
+
+
 
 
 

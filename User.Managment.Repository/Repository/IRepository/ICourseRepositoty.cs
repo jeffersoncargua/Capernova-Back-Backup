@@ -4,7 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using User.Managment.Data.Models.Managment;
+using User.Managment.Data.Models.Course;
+//using User.Managment.Data.Models.Managment;
 
 namespace User.Managment.Repository.Repository.IRepository
 {

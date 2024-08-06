@@ -174,30 +174,32 @@ namespace CapernovaAPI.Controllers
         [HttpPost]
         [Route("login")]
         public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginModel loginModel)
-        {   
-            //Verificar la existencia del usario
-            var user = await _userManager.FindByEmailAsync(loginModel.Email);
-            //Verificar la respuesta del user 
-            if (user != null )
-            {
-                //Se valida la contraseña de usuario
-                if (await _userManager.CheckPasswordAsync(user, loginModel.Password))
+        {
+            try 
+            { 
+                //Verificar la existencia del usario
+                var user = await _userManager.FindByEmailAsync(loginModel.Email);
+                //Verificar la respuesta del user 
+                if (user != null)
                 {
-                    //Se averigua si el usuario ha confirmado su correo electrónico
-                    if (await _userManager.IsEmailConfirmedAsync(user))
+                    //Se valida la contraseña de usuario
+                    if (await _userManager.CheckPasswordAsync(user, loginModel.Password))
                     {
-                        //Se obtiene el rol de usuario
-                        var userRoles = await _userManager.GetRolesAsync(user);
-
-                        //Se genera un jwt Token
-                        var tokenHandler = new JwtSecurityTokenHandler();
-                        //Se obtiene la clave de JWT:Secret del archivo appSettings.json
-                        var key = Encoding.ASCII.GetBytes(secretKey);
-
-                        var tokenDescriptior = new SecurityTokenDescriptor
+                        //Se averigua si el usuario ha confirmado su correo electrónico
+                        if (await _userManager.IsEmailConfirmedAsync(user))
                         {
-                            Subject = new ClaimsIdentity(new Claim[]
+                            //Se obtiene el rol de usuario
+                            var userRoles = await _userManager.GetRolesAsync(user);
+
+                            //Se genera un jwt Token
+                            var tokenHandler = new JwtSecurityTokenHandler();
+                            //Se obtiene la clave de JWT:Secret del archivo appSettings.json
+                            var key = Encoding.ASCII.GetBytes(secretKey);
+
+                            var tokenDescriptior = new SecurityTokenDescriptor
                             {
+                                Subject = new ClaimsIdentity(new Claim[]
+                                {
                                  new Claim(ClaimTypes.Name, user.UserName),
                                  new Claim(ClaimTypes.Role, userRoles.First()),
                                  new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -205,103 +207,113 @@ namespace CapernovaAPI.Controllers
                                  new Claim(ClaimTypes.GivenName, user.LastName),
                                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
-                            }),
-                            Expires = DateTime.UtcNow.AddDays(7),
-                            SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                        };
+                                }),
+                                Expires = DateTime.UtcNow.AddDays(7),
+                                SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                            };
 
 
 
-                        //Se generan claims(informacion de usuario)
-                        //var authClaims = new List<Claim>
-                        //{
-                        //    new Claim(ClaimTypes.Name, user.UserName),
-                        //    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                        //};
-                        //Se agrega el rol de usuario a la lista
-                        //var userRoles = await _userManager.GetRolesAsync(user);
-                        //foreach (var role in userRoles)
-                        //{
-                        //    authClaims.Add(new Claim(ClaimTypes.Role, role));
-                        //}
+                            //Se generan claims(informacion de usuario)
+                            //var authClaims = new List<Claim>
+                            //{
+                            //    new Claim(ClaimTypes.Name, user.UserName),
+                            //    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                            //};
+                            //Se agrega el rol de usuario a la lista
+                            //var userRoles = await _userManager.GetRolesAsync(user);
+                            //foreach (var role in userRoles)
+                            //{
+                            //    authClaims.Add(new Claim(ClaimTypes.Role, role));
+                            //}
 
-                        // Se consulta si se tiene activado el TwoFactor
-                        //if (user.TwoFactorEnabled)
-                        //{
-                        //    //Permite desconectar a los usuarios que esten logeados
-                        //    await _signInManager.SignOutAsync();
-                        //    //permite logear a un usuario de manera asincronica
-                        //    await _signInManager.PasswordSignInAsync(user, loginModel.Password, false, true);                            
+                            // Se consulta si se tiene activado el TwoFactor
+                            //if (user.TwoFactorEnabled)
+                            //{
+                            //    //Permite desconectar a los usuarios que esten logeados
+                            //    await _signInManager.SignOutAsync();
+                            //    //permite logear a un usuario de manera asincronica
+                            //    await _signInManager.PasswordSignInAsync(user, loginModel.Password, false, true);                            
 
-                        //    //Se genera el codigo para le ingreso a la plataforma
-                        //    var token = await _userManager.GenerateTwoFactorTokenAsync(user,"Email");
-
-
-
-                        //    //Se envia el mensaje al correo 
-                        //    var message = new Message(new string[] { user.Email! }, "Código para ingreso a la plataforma", $"El codigo es {token!}");
-                        //    _emailRepository.SendEmail(message);
-
-                        //    //return StatusCode(StatusCodes.Status200OK,
-                        //    //    new Response { Status = "Success", Message = $"Se ha enviado un codigo al correo {user.Email}" });
-                        //    _response.StatusCode = HttpStatusCode.OK;
-                        //    _response.isSuccess = true;
-                        //    _response.Message = $"Se ha enviado un codigo al correo {user.Email}";
-                        //    return Ok(_response);
-                        //}
-
-                        //Se genera el token con los claims                  
-                        //var jwtToken = GetToken(authClaims);
-                        //se regresa un token de acceso
-
-                        //return Ok(new
-                        //{
-                        //    Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                        //    expiration = jwtToken.ValidTo
-                        //});
-
-                        var token = tokenHandler.CreateToken(tokenDescriptior);
+                            //    //Se genera el codigo para le ingreso a la plataforma
+                            //    var token = await _userManager.GenerateTwoFactorTokenAsync(user,"Email");
 
 
 
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.isSuccess = true;
-                        _response.Message = "Login exitoso";
-                        _response.Result = new
+                            //    //Se envia el mensaje al correo 
+                            //    var message = new Message(new string[] { user.Email! }, "Código para ingreso a la plataforma", $"El codigo es {token!}");
+                            //    _emailRepository.SendEmail(message);
+
+                            //    //return StatusCode(StatusCodes.Status200OK,
+                            //    //    new Response { Status = "Success", Message = $"Se ha enviado un codigo al correo {user.Email}" });
+                            //    _response.StatusCode = HttpStatusCode.OK;
+                            //    _response.isSuccess = true;
+                            //    _response.Message = $"Se ha enviado un codigo al correo {user.Email}";
+                            //    return Ok(_response);
+                            //}
+
+                            //Se genera el token con los claims                  
+                            //var jwtToken = GetToken(authClaims);
+                            //se regresa un token de acceso
+
+                            //return Ok(new
+                            //{
+                            //    Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                            //    expiration = jwtToken.ValidTo
+                            //});
+
+                            var token = tokenHandler.CreateToken(tokenDescriptior);
+
+
+
+                            _response.StatusCode = HttpStatusCode.OK;
+                            _response.isSuccess = true;
+                            _response.Message = "Login exitoso";
+                            _response.Result = new
+                            {
+                                Token = tokenHandler.WriteToken(token),
+                                expiration = token.ValidTo
+                            };
+                            return Ok(_response);
+
+                        }
+                        else
                         {
-                            Token = tokenHandler.WriteToken(token),
-                            expiration = token.ValidTo
-                        };
-                        return Ok(_response);
-
+                            //return StatusCode(StatusCodes.Status400BadRequest,
+                            //new Response { Status = "Error", Message = "El usuario no ha verificado su cuenta" });
+                            _response.StatusCode = HttpStatusCode.BadRequest;
+                            _response.isSuccess = false;
+                            _response.Message = "El usuario no ha verificado su cuenta";
+                            return BadRequest(_response);
+                        }
                     }
                     else
                     {
                         //return StatusCode(StatusCodes.Status400BadRequest,
-                        //new Response { Status = "Error", Message = "El usuario no ha verificado su cuenta" });
+                        //    new Response { Status = "Error", Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!" });
                         _response.StatusCode = HttpStatusCode.BadRequest;
                         _response.isSuccess = false;
-                        _response.Message = "El usuario no ha verificado su cuenta";
+                        _response.Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!";
                         return BadRequest(_response);
                     }
                 }
-                else
-                {
-                    //return StatusCode(StatusCodes.Status400BadRequest,
-                    //    new Response { Status = "Error", Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!" });
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.isSuccess = false;
-                    _response.Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!";
-                    return BadRequest(_response);
-                } 
+
+                //return StatusCode(StatusCodes.Status400BadRequest,
+                //            new Response { Status = "Error", Message = "Usuario no registrado!" });
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.isSuccess = false;
+                _response.Message = "Usuario no registrado!";
+                return BadRequest(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
             }
 
-            //return StatusCode(StatusCodes.Status400BadRequest,
-            //            new Response { Status = "Error", Message = "Usuario no registrado!" });
-            _response.StatusCode = HttpStatusCode.BadRequest;
-            _response.isSuccess = false;
-            _response.Message = "Usuario no registrado!";
-            return BadRequest(_response);
+            return _response;
+            
+           
         }
 
 

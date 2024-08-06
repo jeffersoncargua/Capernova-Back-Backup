@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+
+namespace User.Managment.Data.Models.Course
+{
+    public class NotaDeber
+    {
+        [Key]
+        public int Id { get; set; }
+        public string? Estado { get; set; }
+        public string? Observacion { get; set; }
+        public string? FileUrl { get; set; }
+        public double? Calificacion { get; set; }
+        [Required]
+        public string StudentId { get; set; }
+        [ForeignKey("StudentId")]
+        public Student.Student? Student { get; set; }
+        [Required]
+        public int DeberId { get; set; }
+        [ForeignKey("DeberId")]
+        public Deber? Deber { get; set; }
+    }
+}

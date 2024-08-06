@@ -15,6 +15,6 @@ namespace User.Managment.Data.Models.Student.DTO
         public string Email { get; set; }
         public string Phone { get; set; }
         public string? Photo { get; set; }
-        public List<CourseDto>? Courses { get; set; }
+        //public List<CourseDto>? Courses { get; set; }
     }
 }
