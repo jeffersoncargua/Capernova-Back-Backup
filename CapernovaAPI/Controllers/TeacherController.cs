@@ -43,11 +43,42 @@ namespace CapernovaAPI.Controllers
             //_hostEnvironment = hostEnvironment;
             //_googleDriveService = googleDriveService;
             _configuration = configuration;
-            this.clientId = _configuration["GoogleDrive:ClientId"];
-            this.clientSecret = _configuration["GoogleDrive:ClientSecret"];
-            this.authUri = _configuration["GoogleDrive:RedirectUri"];
+            this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
+            this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
+            this.authUri = _configuration["GoogleDrive:RedirectUri"]; //permite obtener del archivo appsettings.json el redirectUri de ggolge drive
             this._response = new();
         }
+
+        [HttpGet("getAllTeacher")]
+        public async Task<ActionResult<ApiResponse>> GetAllTeacher()
+        {
+            try
+            {
+                var teacherlist = await _db.TeacherTbl.ToListAsync();
+                if(teacherlist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.Message = "No se obtuvieron resultados";
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.Message = "Se obtuvo la lista de profesores satisfactoriamente";
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Result = teacherlist;
+                return Ok(_response);
+
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+        }
+
 
         [HttpGet("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery]string id, [FromQuery] string? search)

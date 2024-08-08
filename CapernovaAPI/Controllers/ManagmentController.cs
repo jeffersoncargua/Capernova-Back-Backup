@@ -303,12 +303,11 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("deleteUser")]
-        public async Task<ActionResult<ApiResponse>> DeleteUser([FromQuery] string id)
+        [Route("deleteUser/{id}",Name ="deleteUser")]
+        public async Task<ActionResult<ApiResponse>> DeleteUser(string id)
         {
             try
             {
-
                 var course = await _dbCourse.GetAllAsync(u => u.TeacherId == id, tracked:false);
 
                 if (course != null)
