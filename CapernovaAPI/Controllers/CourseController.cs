@@ -1,14 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Stripe;
 using System.Net;
-using User.Managment.Data.Data;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Course.DTO;
-//using User.Managment.Data.Models.Managment;
-//using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
