@@ -3,6 +3,8 @@ using System.Net;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Course.DTO;
+using User.Managment.Data.Models.ProductosServicios;
+using User.Managment.Data.Models.ProductosServicios.Dto;
 using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
@@ -12,10 +14,12 @@ namespace CapernovaAPI.Controllers
     public class CourseController : ControllerBase
     {
         private readonly ICourseRepositoty _dbCourse;
+        private readonly IProductoRepositoy _dbProducto;
         protected ApiResponse _respose;
-        public CourseController(ICourseRepositoty dbCourse)
+        public CourseController(ICourseRepositoty dbCourse, IProductoRepositoy dbProducto)
         {
             _dbCourse = dbCourse;
+            _dbProducto = dbProducto;
             this._respose = new();
         }
         
@@ -92,13 +96,49 @@ namespace CapernovaAPI.Controllers
             return _respose;
         }
 
+        /// <summary>
+        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener
+        /// </summary>
+        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso</param>
+        /// <returns></returns>
+        [HttpGet("getCourseCode", Name = "getCourseCode")]
+        public async Task<ActionResult<ApiResponse>> GetCourseCode([FromQuery] string codigo)
+        {
+            try
+            {
+                var course = await _dbCourse.GetAsync(u => u.Codigo == codigo);// devuelve el curso cuyo id sea igual al Id del curso
+                if (course == null)
+                {
+                    _respose.isSuccess = false;
+                    _respose.StatusCode = HttpStatusCode.BadRequest;
+                    _respose.Message = "El registro no existe!";
+                    return BadRequest(_respose);
+                }
+
+
+
+                _respose.isSuccess = true;
+                _respose.StatusCode = HttpStatusCode.OK;
+                _respose.Message = "Se ha obtenido el curso con exito!";
+                _respose.Result = course;
+                return Ok(_respose);
+            }
+            catch (Exception ex)
+            {
+                _respose.isSuccess = false;
+                _respose.Errors = new List<string>() { ex.ToString() };
+            }
+            return _respose;
+        }
+
+
         [HttpPost]
         [Route("createCourse")]
         public async Task<ActionResult<ApiResponse>> CreateCourse([FromBody] CourseDto course)
         {
             try
             {
-                if (await _dbCourse.GetAsync(u => u.Id == course.Id) != null)
+                if (await _dbCourse.GetAsync(u => u.Titulo == course.Titulo) != null)
                 {
                     _respose.isSuccess = false;
                     _respose.StatusCode = HttpStatusCode.BadRequest;
@@ -106,29 +146,35 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_respose);
                 }
 
-                //var capitulos = JsonConvert.SerializeObject(course.CapituloList);
-                //var deberes = JsonConvert.SerializeObject(course.Deberes);
-                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
-
+                //Se genera el modelo del curso que se va a enviar a almacenar en la base de datos
                 Course model = new()
                 {
                     Codigo = course.Codigo,
                     ImagenUrl = course.ImagenUrl,
                     Titulo = course.Titulo,
                     Detalle = course.Detalle,
-                    //State = course.State,
-                    //Deberes = deberes,
-                    //Pruebas = pruebas,
-                    //NotaFinal = 0,
-                    Precio = course.Precio,
-                 //   FolderId = course.FolderId,
-                //    IsActive = course.IsActive,
-                //    Capitulos = capitulos,
-                    
+                    Precio = course.Precio,   
                 };
 
                 await _dbCourse.CreateAsync(model);
                 await _dbCourse.SaveAsync();
+
+                Producto producto = new()
+                {
+                    Codigo = course.Codigo,
+                    ImagenUrl = course.ImagenUrl,
+                    Titulo = course.Titulo,
+                    Detalle = course.Detalle,
+                    Precio = course.Precio,
+                    Tipo = "curso",
+                    Cantidad = 1,
+
+                };
+
+                await _dbProducto.CreateAsync(producto);
+                await _dbProducto.SaveAsync();
+
+
 
                 _respose.isSuccess = true;
                 _respose.StatusCode = HttpStatusCode.Created;
@@ -152,20 +198,14 @@ namespace CapernovaAPI.Controllers
             {
                 //var courseFromDb =await _db.CourseTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == course.Id);
                 var courseFromDb = await _dbCourse.GetAsync(u => u.Id == course.Id, tracked: false);
-                if (courseFromDb == null || course == null || id != course.Id)
+                var productoFromDb = await _dbProducto.GetAsync(u => u.Codigo == courseFromDb.Codigo, tracked: false);
+                if (courseFromDb == null || course == null || id != course.Id || productoFromDb == null)
                 {
                     _respose.isSuccess = false;
                     _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "El registro ha actualizar no existe";
+                    _respose.Message = "Error, ha ocurrido un error y no se pudo actualizar el registro";
                     return BadRequest(_respose);
                 }
-
-                //var capitulos = JsonConvert.SerializeObject(course.CapituloList);
-                //var deberes = JsonConvert.SerializeObject(course.Deberes);
-                //var pruebas = JsonConvert.SerializeObject(course.Pruebas);
-
-                //double notaFinal = 0;
-
 
                 Course model = new()
                 {
@@ -175,17 +215,28 @@ namespace CapernovaAPI.Controllers
                     Titulo = course.Titulo,
                     Detalle = course.Detalle,
                     FolderId = course.FolderId,
-                    //Pruebas = pruebas,
-                    //Deberes = deberes,
-                    //NotaFinal = notaFinal,
                     Precio = course.Precio,
-                    //IsActive = course.IsActive,
-                    //Capitulos = capitulos,
+
                     TeacherId = course.TeacherId
                 };
 
                 await _dbCourse.UpdateAsync(model);
                 await _dbCourse.SaveAsync();
+
+                Producto producto = new()
+                {
+                    Id = productoFromDb.Id,
+                    Codigo = course.Codigo,
+                    ImagenUrl = course.ImagenUrl,
+                    Titulo = course.Titulo,
+                    Detalle = course.Detalle,
+                    Precio = course.Precio,
+                    Tipo = productoFromDb.Tipo,
+                    Cantidad = productoFromDb.Cantidad,
+                };
+
+                await _dbProducto.UpdateAsync(producto);
+                await _dbProducto.SaveAsync();
 
                 _respose.isSuccess = true;
                 _respose.StatusCode = HttpStatusCode.OK;
@@ -206,8 +257,9 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                var course = await _dbCourse.GetAsync(u => u.Id == id);
-                if (course == null)
+                var course = await _dbCourse.GetAsync(u => u.Id == id,tracked:false);
+                var producto = await _dbProducto.GetAsync(u => u.Codigo == course.Codigo, tracked: false);
+                if (course == null || producto == null)
                 {
                     _respose.isSuccess = false;
                     _respose.StatusCode = HttpStatusCode.BadRequest;
@@ -217,6 +269,10 @@ namespace CapernovaAPI.Controllers
 
                 await _dbCourse.RemoveAsync(course);
                 await _dbCourse.SaveAsync();
+
+                await _dbProducto.RemoveAsync(producto);
+                await _dbProducto.SaveAsync();
+
 
                 _respose.isSuccess = true;
                 _respose.StatusCode = HttpStatusCode.OK;

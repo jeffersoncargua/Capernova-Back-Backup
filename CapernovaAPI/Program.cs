@@ -43,6 +43,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 //Se agrega los repositorios de las entidades que se van a ocupar en el proyecto
 builder.Services.AddScoped<ICourseRepositoty, CourseRepository>();
+builder.Services.AddScoped<IProductoRepositoy, ProductoRepositoy>();
 
 //Se agrega el servicio de Stripe para el pago con tarjeta
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));

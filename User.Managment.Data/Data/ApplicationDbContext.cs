@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
+using User.Managment.Data.Models.PaypalOrder;
+using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Data.Models.Student;
 using Course = User.Managment.Data.Models.Course.Course;
 
@@ -28,11 +30,20 @@ namespace User.Managment.Data.Data
         public DbSet<NotaDeber> NotaDeberTbl { get; set; }
         public DbSet<NotaPrueba> NotaPruebaTbl { get; set; }
         public DbSet<EstudianteVideo> EstudianteVideoTbl { get; set; }
+        public DbSet<Matricula> MatriculaTbl { get; set; }
+        public DbSet<Producto> ProductoTbl { get; set; }
+        public DbSet<ShoppingCart> ShoppingCartTbl { get; set; }
+        public DbSet<Facturacion> FacturacionTbl { get; set; }
 
 
 
 
 
+        /// <summary>
+        /// Muy importante: No olvidarse cuando se hayan generado los Roles de Usuario por primera vez, se debe comentar el codigo de OnModelCreating y SeedRoles para que con las
+        /// actualizaciones no se eliminen los registros ya almacenados.
+        /// </summary>
+        /// <param name="builder"></param>
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

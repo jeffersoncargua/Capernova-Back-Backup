@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using User.Managment.Data.Data;
 
@@ -11,9 +12,10 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240820220308_AddIndexProductoTipo")]
+    partial class AddIndexProductoTipo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fb5f07f1-06d3-45d2-ab96-6cbcb0da117e",
+                            Id = "07b29794-c0b5-4989-ad17-dcda4abe775f",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "85093123-61ee-4ba3-b4c1-da9cc7ef9d86",
+                            Id = "6b556c2d-fa8d-4ac2-9934-66b95125fd0b",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "d280250d-77c0-4efe-977e-364f14de445f",
+                            Id = "ca645d23-1cbf-475c-b761-ee45ed3d4e63",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "e9468390-25a1-4115-a182-6e4fc789289a",
+                            Id = "2a4c397f-a0a7-4429-8863-f7647d52720f",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "4963f4ca-3b0e-46ac-be34-606e2544d265",
+                            Id = "6670cee8-cbfc-4f0f-97d4-f34c04d9434a",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -298,7 +300,7 @@ namespace User.Managment.Data.Migrations
 
                     b.Property<string>("Codigo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Detalle")
                         .IsRequired()
@@ -322,8 +324,6 @@ namespace User.Managment.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Codigo");
 
                     b.HasIndex("TeacherId");
 
@@ -668,7 +668,7 @@ namespace User.Managment.Data.Migrations
                     b.Property<string>("Detalle")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImagenUrl")
+                    b.Property<string>("Imagen")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Precio")

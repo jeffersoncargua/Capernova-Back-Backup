@@ -340,9 +340,11 @@ namespace CapernovaAPI.Controllers
             }
             catch (Exception ex)
             {
-
-                throw;
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
             }
+
+            return _response;
         }
 
 
