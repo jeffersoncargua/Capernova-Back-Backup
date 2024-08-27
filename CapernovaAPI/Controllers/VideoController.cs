@@ -37,7 +37,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el/los capitulos de este capitulo";
+                _response.Message = "Se ha obtenido el/los videos de este capitulo";
                 _response.Result = videos;
                 return Ok(_response);
             }

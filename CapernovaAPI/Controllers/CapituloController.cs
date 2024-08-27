@@ -75,7 +75,7 @@ namespace CapernovaAPI.Controllers
             {
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se han encontrado el capitulo asignados a este curso!!";
+                _response.Message = "No se ha encontrado el capitulo asignado a este curso!!";
                 _response.Errors = new List<string> { ex.ToString() };
             }
 
