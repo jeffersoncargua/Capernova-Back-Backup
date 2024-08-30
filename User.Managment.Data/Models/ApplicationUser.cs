@@ -14,6 +14,10 @@ namespace User.Managment.Data.Models
 
         public string? Ciudad { get; set; }
 
+        //public string? DirecionPrincipal { get; set; }
+
+        //public string? DireccionSecundaria { get; set; }
+
 
     }
 }

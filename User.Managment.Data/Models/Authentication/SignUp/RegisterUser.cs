@@ -34,6 +34,11 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "La cuidad de residencia de usuario es requerido")]
         public string City { get; set; }
 
+        //[Required(ErrorMessage = "La direccion principal de residencia de usuario es requerido")]
+        //public string? DirectionMain { get; set; } //Direccion principal
+        //[Required(ErrorMessage = "La direccion secundaria de residencia de usuario es requerido")]
+        //public string? DirectionSec { get; set; } //Direccion Secundaria
+
         public string? Role { get; set; } //Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
 
     }

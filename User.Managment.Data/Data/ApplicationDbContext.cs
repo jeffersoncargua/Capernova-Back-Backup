@@ -7,6 +7,7 @@ using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.PaypalOrder;
 using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Data.Models.Student;
+using User.Managment.Data.Models.Ventas;
 using Course = User.Managment.Data.Models.Course.Course;
 
 namespace User.Managment.Data.Data
@@ -33,7 +34,8 @@ namespace User.Managment.Data.Data
         public DbSet<Matricula> MatriculaTbl { get; set; }
         public DbSet<Producto> ProductoTbl { get; set; }
         public DbSet<ShoppingCart> ShoppingCartTbl { get; set; }
-        public DbSet<Facturacion> FacturacionTbl { get; set; }
+        public DbSet<Venta> VentaTbl { get; set; }
+        public DbSet<Pedido> PedidoTbl { get; set; }
 
 
 
@@ -45,24 +47,24 @@ namespace User.Managment.Data.Data
         /// </summary>
         /// <param name="builder"></param>
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            SeedRoles(builder);
+        //protected override void OnModelCreating(ModelBuilder builder)
+        //{
+        //    base.OnModelCreating(builder);
+        //    SeedRoles(builder);
 
-        }
+        //}
 
-        private static void SeedRoles(ModelBuilder builder)
-        {
-            builder.Entity<IdentityRole>().HasData
-                (
-                    new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN"},
-                    new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
-                    new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
-                    new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },
-                    new IdentityRole() { Name = "Secretary", ConcurrencyStamp = "5", NormalizedName = "SECRETARY" }
-                );
-        }
+        //private static void SeedRoles(ModelBuilder builder)
+        //{
+        //    builder.Entity<IdentityRole>().HasData
+        //        (
+        //            new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN"},
+        //            new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
+        //            new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
+        //            new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },
+        //            new IdentityRole() { Name = "Secretary", ConcurrencyStamp = "5", NormalizedName = "SECRETARY" }
+        //        );
+        //}
 
 
     }

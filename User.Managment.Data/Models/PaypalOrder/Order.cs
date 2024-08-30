@@ -28,4 +28,5 @@ namespace User.Managment.Data.Models.PaypalOrder
         public string Tipo { get; set; }
 
     }
+
 }

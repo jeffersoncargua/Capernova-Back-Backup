@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using User.Managment.Data.Data;
 
@@ -11,9 +12,10 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240828003543_AddVentaTblAndShoppingTbl")]
+    partial class AddVentaTblAndShoppingTbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1a52cc55-2ec0-4c70-ab47-0ae92375239d",
+                            Id = "d90745f7-5c5a-4f9a-baad-833d53802583",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "7e066ab6-e8f7-4ba4-8981-9b506c2989b3",
+                            Id = "f85fc566-f4ea-43b4-a4ca-e8405a01bc8d",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "e2355967-ed2b-439f-9218-e3f97dada559",
+                            Id = "7eca842e-8ef3-4e6e-9147-a57497a521e5",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "f0a1e1a8-12ae-47d9-b818-50a7f24162a6",
+                            Id = "a6a03fc1-d43c-4781-aeef-d77687a44904",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "a25dbf13-9f7a-4841-baa9-664e0120a1f0",
+                            Id = "fe64a82b-8583-42b1-9c24-260f852b60e3",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -670,13 +672,10 @@ namespace User.Managment.Data.Migrations
                     b.ToTable("StudentTbl");
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Pedido", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Cliente", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DirectionMain")
                         .IsRequired()
@@ -686,20 +685,25 @@ namespace User.Managment.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Emision")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Productos")
+                    b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("VentaId")
-                        .HasColumnType("int");
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VentaId");
-
-                    b.ToTable("PedidoTbl");
+                    b.ToTable("Cliente");
                 });
 
             modelBuilder.Entity("User.Managment.Data.Models.Ventas.ShoppingCart", b =>
@@ -714,10 +718,6 @@ namespace User.Managment.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProductoCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProductoImagen")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -746,39 +746,23 @@ namespace User.Managment.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ClienteId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Emision")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<double>("Total")
                         .HasColumnType("float");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClienteId");
+
                     b.HasIndex("Emision");
-
-                    b.HasIndex("LastName");
-
-                    b.HasIndex("Phone");
 
                     b.HasIndex("UserId");
 
@@ -965,7 +949,7 @@ namespace User.Managment.Data.Migrations
                     b.Navigation("Estudiante");
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Pedido", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.Ventas.ShoppingCart", b =>
                 {
                     b.HasOne("User.Managment.Data.Models.Ventas.Venta", "Venta")
                         .WithMany()
@@ -976,15 +960,19 @@ namespace User.Managment.Data.Migrations
                     b.Navigation("Venta");
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Ventas.ShoppingCart", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Venta", b =>
                 {
-                    b.HasOne("User.Managment.Data.Models.Ventas.Venta", "Venta")
+                    b.HasOne("User.Managment.Data.Models.Ventas.Cliente", "Cliente")
                         .WithMany()
-                        .HasForeignKey("VentaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClienteId");
 
-                    b.Navigation("Venta");
+                    b.HasOne("User.Managment.Data.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using User.Managment.Data.Data;
 
@@ -11,9 +12,10 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240828164815_AlterVentaTbl")]
+    partial class AlterVentaTbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1a52cc55-2ec0-4c70-ab47-0ae92375239d",
+                            Id = "66dc0cb7-827d-4409-8002-fab756f843fd",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "7e066ab6-e8f7-4ba4-8981-9b506c2989b3",
+                            Id = "3f45430d-cd35-486a-a23b-2e17ca27967c",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "e2355967-ed2b-439f-9218-e3f97dada559",
+                            Id = "b0801c74-76f8-4587-aa36-5a644f529670",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "f0a1e1a8-12ae-47d9-b818-50a7f24162a6",
+                            Id = "2a346fb8-12b2-4c23-aa11-0d41673e0837",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "a25dbf13-9f7a-4841-baa9-664e0120a1f0",
+                            Id = "809f5a24-8575-492b-894e-446f6872ce6e",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -670,38 +672,6 @@ namespace User.Managment.Data.Migrations
                     b.ToTable("StudentTbl");
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Pedido", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("DirectionMain")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DirectionSec")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Emision")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Productos")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VentaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VentaId");
-
-                    b.ToTable("PedidoTbl");
-                });
-
             modelBuilder.Entity("User.Managment.Data.Models.Ventas.ShoppingCart", b =>
                 {
                     b.Property<int>("Id")
@@ -714,10 +684,6 @@ namespace User.Managment.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProductoCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProductoImagen")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -963,17 +929,6 @@ namespace User.Managment.Data.Migrations
                     b.Navigation("Curso");
 
                     b.Navigation("Estudiante");
-                });
-
-            modelBuilder.Entity("User.Managment.Data.Models.Ventas.Pedido", b =>
-                {
-                    b.HasOne("User.Managment.Data.Models.Ventas.Venta", "Venta")
-                        .WithMany()
-                        .HasForeignKey("VentaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Venta");
                 });
 
             modelBuilder.Entity("User.Managment.Data.Models.Ventas.ShoppingCart", b =>
