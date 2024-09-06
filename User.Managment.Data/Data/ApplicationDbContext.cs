@@ -58,7 +58,7 @@ namespace User.Managment.Data.Data
         //{
         //    builder.Entity<IdentityRole>().HasData
         //        (
-        //            new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN"},
+        //            new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN" },
         //            new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
         //            new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
         //            new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },

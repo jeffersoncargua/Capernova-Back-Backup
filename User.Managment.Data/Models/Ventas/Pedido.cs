@@ -21,5 +21,6 @@ namespace User.Managment.Data.Models.Ventas
         public Venta? Venta { get; set; }
         public string DirectionMain { get; set; }
         public string DirectionSec { get; set; }
+        public string? Estado { get; set; }
     }
 }

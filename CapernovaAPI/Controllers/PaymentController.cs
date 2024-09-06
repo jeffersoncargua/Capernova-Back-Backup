@@ -806,7 +806,8 @@ namespace CapernovaAPI.Controllers
                     Productos = productos,
                     VentaId = venta.Id,
                     DirectionMain = cliente.DirectionMain,
-                    DirectionSec = cliente.DirectionSec
+                    DirectionSec = cliente.DirectionSec,
+                    Estado = "POR ENTREGAR"
                 };
 
                 await _db.PedidoTbl.AddAsync(pedido);

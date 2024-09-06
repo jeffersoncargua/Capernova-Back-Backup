@@ -269,8 +269,8 @@ namespace CapernovaAPI.Controllers
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "1//04g20EZfzZbYXCgYIARAAGAQSNwF-L9IrKXyHWcMGoayvusrsDROdz5EyMBoBkCYDeDLQVoApQVPW_JqS5yHHE7TKzHzI2hj8V68",
-                RefreshToken = "ya29.a0AcM612weXWVwZAU56xtadWQ6Hinc2tC_kFwLy6JSWctZin0hF45Mb-VpcTqpYuhzMHHTAMix6_JhidweKhcoxR7CDgirIIdpZfe18g4dto-EORZIEipWLls0u9yiY9Lr2gZxfc5zSlZDQboFquMprmPtg79HC1r2e0amaCgYKAXcSARASFQHGX2MiqD1fs0IU955zNRQFeR0Pyg0171",
+                AccessToken = "ya29.a0AcM612wbbA-WaD2EfhrSlham0ROey3qfGH97v--LiqXGTpDblLiATf0uqr6u9PH47s6C9-M8M1AavVH9ZntXLka320FZihjyQkB29pyGJYzrWE8FiMcUcSYhbcTXvPXsYARxYrdLIQew_t80xsia_RCtqUc6i316tu2Ugk-aaCgYKAcQSARASFQHGX2MiqZhMRTqpPtkiYYRQPew9-w0175",
+                RefreshToken = "1//04ZiMEftaDgeqCgYIARAAGAQSNwF-L9IrQ1GglPJz6swCd375YH2nHYnUqlhMOnN103qpP5QARmX7IuMtmt6av1hxVmPLMiJgExk",
             };
 
             var applicationName = "CapernovaTest";
