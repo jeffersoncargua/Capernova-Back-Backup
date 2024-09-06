@@ -34,14 +34,16 @@ namespace CapernovaAPI.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _configuration;
         private readonly ICourseRepositoty _dbCourse;
+        private readonly IMatriculaRepository _dbMatricula;
         protected ApiResponse _response;
         protected string clientSecret;
         protected string clientId;
         protected string authUri;
-        public StudentController(ApplicationDbContext db, IConfiguration configuration, ICourseRepositoty dbCourse)
+        public StudentController(ApplicationDbContext db, IConfiguration configuration, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula)
         {
             _db=db;
             _dbCourse = dbCourse;
+            _dbMatricula = dbMatricula;
             _configuration = configuration;
             this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
             this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
@@ -222,7 +224,8 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                var cursos = await _db.MatriculaTbl.AsNoTracking().Where(u => u.EstudianteId == id).ToListAsync();
+                //var cursos = await _db.MatriculaTbl.AsNoTracking().Where(u => u.EstudianteId == id).ToListAsync();
+                var cursos = await _dbMatricula.GetAllAsync(u => u.EstudianteId == id,tracked:false,includeProperties:"Curso");
                 if (cursos == null)
                 {
                     _response.isSuccess = false;
@@ -358,6 +361,7 @@ namespace CapernovaAPI.Controllers
                     {
                         StudentId = estudianteVideoDto.StudentId,
                         VideoId = estudianteVideoDto.VideoId,
+                        CursoId = estudianteVideoDto.CursoId,
                         Estado = "Visto"
                     };
 
@@ -387,11 +391,11 @@ namespace CapernovaAPI.Controllers
 
         [HttpGet]
         [Route("getViewVideos")]
-        public async Task<ActionResult<ApiResponse>> GetViewVideos([FromQuery] string? studentId) // permite crear la visualuzacion del video por el estudiante
+        public async Task<ActionResult<ApiResponse>> GetViewVideos([FromQuery] string? studentId, [FromQuery] int cursoId) // permite crear la visualuzacion del video por el estudiante
         {
             try
             {
-                var viewExist = await _db.EstudianteVideoTbl.Where(u => u.StudentId == studentId).ToListAsync();
+                var viewExist = await _db.EstudianteVideoTbl.Where(u => u.StudentId == studentId && u.CursoId == cursoId).ToListAsync();
                 if (viewExist == null || studentId! == null)
                 {
                     _response.isSuccess = false;
@@ -440,7 +444,8 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha actualizado el estado de la matricula del estudiante!!";                    
+                    _response.Message = "Se ha actualizado el estado de la matricula del estudiante!!";   
+                    _response.Result = model;
                     return Ok(_response);
                 }
 
@@ -448,6 +453,47 @@ namespace CapernovaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.Message = "No se ha podido actualizar el estado de la matricula del estudiante!!";
                 return BadRequest(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+        }
+
+        [HttpPost]
+        [Route("createComentario")]
+        public async Task<ActionResult<ApiResponse>> CreateComentario([FromBody] ComentarioDto comentarioDto)
+        {
+            try
+            {
+                if(comentarioDto == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido registar su comentario";
+                    return BadRequest(_response);
+                }
+
+                Comentario model = new()
+                {
+                    Name = comentarioDto.Name,
+                    LastName = comentarioDto.LastName,
+                    PhotoUrl = comentarioDto.PhotoUrl,
+                    FeedBack = comentarioDto.FeedBack,
+                    Titulo = comentarioDto.Titulo
+                };
+
+                await _db.ComentarioTbl.AddAsync(model);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha registrado su comentario. Muchas Gracias!!";
+                _response.Result = model;
+                return Ok(_response);
             }
             catch (Exception ex)
             {

@@ -14,6 +14,9 @@ namespace User.Managment.Data.Models.Course.DTO
         public string? Estado { get; set; }
         [Required]
         public int VideoId { get; set; }
+
+        [Required]
+        public int CursoId { get; set; }
         [Required]
         public string StudentId { get; set; }
     }

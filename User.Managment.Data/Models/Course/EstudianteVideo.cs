@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,6 +10,7 @@ using User.Managment.Data.Models.Student;
 
 namespace User.Managment.Data.Models.Course
 {
+    [Index(nameof(EstudianteVideo.CursoId))]
     public class EstudianteVideo
     {
         [Key]
@@ -18,6 +20,10 @@ namespace User.Managment.Data.Models.Course
         public int VideoId { get; set; }
         [ForeignKey("VideoId")]
         public Video? Video { get; set; }
+
+        [Required]
+        public int CursoId { get; set; }
+
         [Required]
         public string StudentId { get; set; }
         [ForeignKey("StudentId")]

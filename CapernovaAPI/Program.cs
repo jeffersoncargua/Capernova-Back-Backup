@@ -45,6 +45,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ICourseRepositoty, CourseRepository>();
 builder.Services.AddScoped<IProductoRepositoy, ProductoRepositoy>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IMatriculaRepository, MatriculaRepository>();
 
 //Se agrega el servicio de Stripe para el pago con tarjeta
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));

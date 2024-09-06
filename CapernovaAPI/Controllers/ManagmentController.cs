@@ -609,5 +609,37 @@ namespace CapernovaAPI.Controllers
 
         }
 
+
+        [HttpGet]
+        [Route("getComentarios")]
+        public async Task<ActionResult<ApiResponse>> GetComentarios([FromQuery] string? search)
+        {
+            try
+            {
+                var comentarios = await _db.ComentarioTbl.ToListAsync();
+                if(comentarios != null)
+                {
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de comentarios";
+                    _response.Result = comentarios;
+                    return Ok(_response);
+                }
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha obtenido la lista de comentarios";
+                return BadRequest(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+
+        }
+
     }
 }
