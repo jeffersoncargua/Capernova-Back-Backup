@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Repository.IRepository;
@@ -28,6 +29,7 @@ namespace CapernovaAPI.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly ICourseRepositoty _dbCourse;
+        private readonly IMatriculaRepository _dbMatricula;
         //private readonly IWebHostEnvironment _hostEnvironment;
         //private readonly GoogleDriveService _googleDriveService;
         private readonly IConfiguration _configuration;
@@ -36,10 +38,11 @@ namespace CapernovaAPI.Controllers
         protected string clientId;
         protected string authUri;
 
-        public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse, IConfiguration configuration)
+        public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, IConfiguration configuration)
         {
             _db = db;
-            _dbCourse = dbCourse;            
+            _dbCourse = dbCourse;    
+            _dbMatricula = dbMatricula;
             //_hostEnvironment = hostEnvironment;
             //_googleDriveService = googleDriveService;
             _configuration = configuration;
@@ -259,6 +262,109 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+
+        [HttpGet("getStudents",Name = "getStudents")]
+        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId,[FromQuery] string? search)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(search) && cursoId == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido obtener la lista de estudiantes. Elija un curso!";
+                    return BadRequest(_response);
+                }else if (!string.IsNullOrEmpty(search))
+                {
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante.LastName == search || u.Estudiante.Name ==search), tracked: false, includeProperties: "Curso,Estudiante");
+                    if (studentList != null) 
+                    {
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Se ha podido obtener el estudiante en especifico";
+                        _response.Result = studentList;
+                        return Ok(_response);
+                    }
+
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
+
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId, tracked: false, includeProperties: "Curso,Estudiante");
+                    if (studentList != null)
+                    {
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Se ha podido obtener el estudiante en especifico";
+                        _response.Result = studentList;
+                        return Ok(_response);
+                    }
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
+                    return BadRequest(_response);
+                }
+                
+                
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpPut("updateNotaDeber", Name = "updateNotaDeber")]
+        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        public async Task<ActionResult<ApiResponse>> UpdateNotaDeber([FromQuery] int? id, [FromQuery] string studentId, [FromBody] string? calificacion)
+        {
+            try
+            {
+                var notaDeberExist = await _db.NotaDeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.StudentId == studentId);
+                if (notaDeberExist != null)
+                {
+                    NotaDeber model = new()
+                    {
+                        Id = notaDeberExist.Id,
+                        Observacion = notaDeberExist.Observacion,
+                        Estado = notaDeberExist.Estado,
+                        Calificacion = Convert.ToDouble(calificacion),
+                        DeberId = notaDeberExist.DeberId,
+                        StudentId = notaDeberExist.StudentId,
+                        FileUrl= notaDeberExist.FileUrl
+                    };
+
+                    _db.NotaDeberTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha calificado el deber con exito!!";
+                    return Ok(_response);
+                }
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha podido calificar el deber!!";
+                return BadRequest(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+
+        }
+
 
         /// <summary>
         /// Esta funcion permite sincronizar las credenciales obtenidas para enlazar el proyecto .net con google drive

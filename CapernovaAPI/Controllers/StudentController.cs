@@ -463,6 +463,171 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
+
+        [HttpGet("getDeberes", Name = "getDeberes")]
+        public async Task<ActionResult<ApiResponse>> GetDeberes([FromQuery] int? id)
+        {
+            try
+            {
+                var deberes = await _db.DeberTbl.AsNoTracking().Where(u => u.CourseId == id).ToListAsync();
+                if (deberes == null || deberes.Count == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se han encontrado los deberes asignados a este curso!!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido los deberes de este curso";
+                _response.Result = deberes;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se han encontrado los deberes asignados a este curso!!";
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+
+            return _response;
+        }
+
+        [HttpGet("getNotaDeber", Name = "getNotaDeber")]
+        public async Task<ActionResult<ApiResponse>> GetNotaDeber([FromQuery] int? id, [FromQuery] string studentId)
+        {
+            try
+            {
+                var notaDeber = await _db.NotaDeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.DeberId == id && u.StudentId==studentId);
+                if (notaDeber == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se han encontrado la nota asignado a este deber!!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la calificación de este deber";
+                _response.Result = notaDeber;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha encontrado la nota de este deber!!";
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+
+            return _response;
+        }
+
+        [HttpPut("upsertNotaDeber", Name = "upsertNotaDeber")]
+        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        public async Task<ActionResult<ApiResponse>> UpsertNotaDeber([FromQuery] int id, [FromQuery] string studentId, IFormFile? file)
+        {
+            try
+            {
+                var notaDeberDto = await _db.NotaDeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.DeberId == id && u.StudentId==studentId);
+                if (notaDeberDto != null)
+                {
+                    if (file != null)
+                    {
+                        var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
+
+                        //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
+                        if (notaDeberDto.FileUrl != null)
+                        {
+                            DeleteFile(service, notaDeberDto.FileUrl);
+                        }
+
+                        //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
+                        string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+
+
+                        NotaDeber model = new()
+                        {
+                            Id = notaDeberDto.Id,
+                            Estado = "Entregado",
+                            Observacion = file.FileName,
+                            FileUrl = idFile,
+                            StudentId = studentId,
+                            Calificacion = notaDeberDto.Calificacion,
+                            DeberId = id
+                        };
+
+                        //await _db.NotaDeberTbl.AddAsync(model);
+                        _db.NotaDeberTbl.Update(model);
+                        await _db.SaveChangesAsync();
+
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Su deber ha sido entregado correctamente!";
+                        return Ok(_response);
+
+                    }
+
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha cargado el deber. Inténtelo nuevamente!";
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    if (file != null)
+                    {
+                        var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
+
+                        //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
+                        string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+
+
+                        NotaDeber model = new()
+                        {
+                            Estado = "Entregado",
+                            Observacion = file.FileName,
+                            FileUrl = idFile,
+                            StudentId = studentId,
+                            DeberId = id
+                        };
+
+                        await _db.NotaDeberTbl.AddAsync(model);
+                        //_db.NotaDeberTbl.Update(model);
+                        await _db.SaveChangesAsync();
+
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Su deber ha sido entregado correctamente!";
+                        return Ok(_response);
+
+                    }
+
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha cargado el deber. Inténtelo nuevamente!";
+                    return BadRequest(_response);
+                }
+
+                //_response.isSuccess = false;
+                //_response.StatusCode = HttpStatusCode.BadRequest;
+                //_response.Message = "No se ha podido entregar el deber. Inténtelo nuevamente!";
+                //return BadRequest(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+
+        }
+
+
         [HttpPost]
         [Route("createComentario")]
         public async Task<ActionResult<ApiResponse>> CreateComentario([FromBody] ComentarioDto comentarioDto)

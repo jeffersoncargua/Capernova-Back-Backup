@@ -36,7 +36,6 @@ namespace User.Managment.Data.Data
         public DbSet<ShoppingCart> ShoppingCartTbl { get; set; }
         public DbSet<Venta> VentaTbl { get; set; }
         public DbSet<Pedido> PedidoTbl { get; set; }
-
         public DbSet<Comentario> ComentarioTbl { get; set; }
 
 
@@ -49,24 +48,24 @@ namespace User.Managment.Data.Data
         /// </summary>
         /// <param name="builder"></param>
 
-        //protected override void OnModelCreating(ModelBuilder builder)
-        //{
-        //    base.OnModelCreating(builder);
-        //    SeedRoles(builder);
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            SeedRoles(builder);
 
-        //}
+        }
 
-        //private static void SeedRoles(ModelBuilder builder)
-        //{
-        //    builder.Entity<IdentityRole>().HasData
-        //        (
-        //            new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN" },
-        //            new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
-        //            new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
-        //            new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },
-        //            new IdentityRole() { Name = "Secretary", ConcurrencyStamp = "5", NormalizedName = "SECRETARY" }
-        //        );
-        //}
+        private static void SeedRoles(ModelBuilder builder)
+        {
+            builder.Entity<IdentityRole>().HasData
+                (
+                    new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN" },
+                    new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER" },
+                    new IdentityRole() { Name = "Student", ConcurrencyStamp = "3", NormalizedName = "STUDENT" },
+                    new IdentityRole() { Name = "Teacher", ConcurrencyStamp = "4", NormalizedName = "TEACHER" },
+                    new IdentityRole() { Name = "Secretary", ConcurrencyStamp = "5", NormalizedName = "SECRETARY" }
+                );
+        }
 
 
     }
