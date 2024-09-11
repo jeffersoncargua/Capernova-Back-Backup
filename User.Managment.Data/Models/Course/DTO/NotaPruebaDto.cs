@@ -13,11 +13,10 @@ namespace User.Managment.Data.Models.Course.DTO
         public int Id { get; set; }
         public string? Estado { get; set; }
         public string? Observacion { get; set; }
-        public string? FileUrl { get; set; }
         public double? Calificacion { get; set; }
         [Required]
         public string StudentId { get; set; }
         [Required]
-        public int DeberId { get; set; }
+        public int PruebaId { get; set; }
     }
 }

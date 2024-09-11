@@ -277,7 +277,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }else if (!string.IsNullOrEmpty(search))
                 {
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante.LastName == search || u.Estudiante.Name ==search), tracked: false, includeProperties: "Curso,Estudiante");
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante.LastName.Contains(search) || u.Estudiante.Name.Contains(search) || u.Estudiante.Email.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
                     if (studentList != null) 
                     {
                         _response.isSuccess = true;
@@ -328,7 +328,7 @@ namespace CapernovaAPI.Controllers
             try
             {
                 var notaDeberExist = await _db.NotaDeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.StudentId == studentId);
-                if (notaDeberExist != null)
+                if (notaDeberExist != null && !string.IsNullOrEmpty(calificacion))
                 {
                     NotaDeber model = new()
                     {
@@ -354,6 +354,74 @@ namespace CapernovaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.Message = "No se ha podido calificar el deber!!";
                 return BadRequest(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+
+        }
+
+
+        [HttpPut("upsertNotaPrueba", Name = "upsertNotaPrueba")]
+        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        public async Task<ActionResult<ApiResponse>> UpsertNotaPrueba([FromQuery] int id, [FromQuery] string studentId, [FromBody] string? calificacion)
+        {
+            try
+            {
+                var notaPruebaDto = await _db.NotaPruebaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.PruebaId == id && u.StudentId == studentId);
+                if (notaPruebaDto != null && !string.IsNullOrEmpty(calificacion))
+                {
+                    NotaPrueba model = new()
+                    {
+                        Id = notaPruebaDto.Id,
+                        Observacion = notaPruebaDto.Observacion,
+                        Estado = notaPruebaDto.Estado,
+                        Calificacion = Convert.ToDouble(calificacion),
+                        PruebaId = notaPruebaDto.PruebaId,
+                        StudentId = notaPruebaDto.StudentId,
+                    };
+
+                    _db.NotaPruebaTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha actualizado la calificación de la prueba con exito!!";
+                    return Ok(_response);
+                }
+                else if(!string.IsNullOrEmpty(calificacion))
+                {
+                    NotaPrueba model = new()
+                    {
+                        Observacion = "Revisado",
+                        Estado = "Calificado",
+                        Calificacion = Convert.ToDouble(calificacion),
+                        PruebaId = id,
+                        StudentId = studentId
+                    };
+
+                    await _db.NotaPruebaTbl.AddAsync(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha calificado la prueba con exito!!";
+                    return Ok(_response);
+                }
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha podido calificar la prueba!!";
+                return BadRequest(_response);
+
+                //_response.isSuccess = false;
+                //_response.StatusCode = HttpStatusCode.BadRequest;
+                //_response.Message = "No se ha podido entregar el deber. Inténtelo nuevamente!";
+                //return BadRequest(_response);
 
             }
             catch (Exception ex)

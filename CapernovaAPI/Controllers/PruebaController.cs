@@ -20,7 +20,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpGet("getAllPruebas/{id:int}", Name = "getAllPruebas")]
-        public async Task<ActionResult<ApiResponse>> getAllPruebas(int? id)
+        public async Task<ActionResult<ApiResponse>> GetAllPruebas(int? id)
         {
             try
             {

@@ -628,6 +628,70 @@ namespace CapernovaAPI.Controllers
         }
 
 
+        [HttpGet("getPruebas", Name = "getPruebas")]
+        public async Task<ActionResult<ApiResponse>> GetPruebas([FromQuery] int? id)
+        {
+            try
+            {
+                var deberes = await _db.PruebaTbl.AsNoTracking().Where(u => u.CourseId == id).ToListAsync();
+                if (deberes == null || deberes.Count == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se han encontrado las pruebas asignados a este curso!!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido las pruebas de este curso";
+                _response.Result = deberes;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se han encontrado las pruebas asignados a este curso!!";
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+
+            return _response;
+        }
+
+
+        [HttpGet("getNotaPrueba", Name = "getNotaPrueba")]
+        public async Task<ActionResult<ApiResponse>> GetNotaPrueba([FromQuery] int? id, [FromQuery] string studentId)
+        {
+            try
+            {
+                var notaDeber = await _db.NotaPruebaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.PruebaId == id && u.StudentId == studentId);
+                if (notaDeber == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se han encontrado la nota asignado a esta prueba!!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la calificación de esta prueba";
+                _response.Result = notaDeber;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha encontrado la nota de esta prueba!!";
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+
+            return _response;
+        }
+
+
         [HttpPost]
         [Route("createComentario")]
         public async Task<ActionResult<ApiResponse>> CreateComentario([FromBody] ComentarioDto comentarioDto)

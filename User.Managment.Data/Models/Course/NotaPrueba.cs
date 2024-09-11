@@ -14,15 +14,14 @@ namespace User.Managment.Data.Models.Course
         public int Id { get; set; }
         public string? Estado { get; set; }
         public string? Observacion { get; set; }
-        public string? FileUrl { get; set; }
         public double? Calificacion { get; set; }
         [Required]
         public string StudentId { get; set; }
         [ForeignKey("StudentId")]
         public Student.Student? Student { get; set; }
         [Required]
-        public int DeberId { get; set; }
-        [ForeignKey("DeberId")]
+        public int PruebaId { get; set; }
+        [ForeignKey("PruebaId")]
         public Prueba? Prueba { get; set; }
     }
 }
