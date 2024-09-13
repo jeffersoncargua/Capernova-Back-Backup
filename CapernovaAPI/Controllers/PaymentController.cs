@@ -835,6 +835,7 @@ namespace CapernovaAPI.Controllers
                             IsActive = true,
                             Estado = matriculaExist.Estado,
                             NotaFinal = matriculaExist.NotaFinal,
+                            CertificadoId = matriculaExist.CertificadoId
                         };
                         _db.MatriculaTbl.Update(matricula);
                         await _db.SaveChangesAsync();

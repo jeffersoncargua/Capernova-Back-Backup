@@ -25,6 +25,7 @@ namespace User.Managment.Data.Models.PaypalOrder
         public bool? IsActive { get; set; }
         public string? Estado { get; set; }
         public double? NotaFinal { get; set; }
+        public string? CertificadoId { get; set; }
 
     }
 }

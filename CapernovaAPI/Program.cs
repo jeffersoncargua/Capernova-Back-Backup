@@ -46,6 +46,8 @@ builder.Services.AddScoped<ICourseRepositoty, CourseRepository>();
 builder.Services.AddScoped<IProductoRepositoy, ProductoRepositoy>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<IMatriculaRepository, MatriculaRepository>();
+builder.Services.AddScoped<IDeberRepository, DeberRepository>();
+
 
 //Se agrega el servicio de Stripe para el pago con tarjeta
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));

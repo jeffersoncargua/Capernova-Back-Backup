@@ -24,6 +24,7 @@ using User.Managment.Data.Models.Course.DTO;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.PaypalOrder.Dto;
 using User.Managment.Data.Models.PaypalOrder;
+using System.Drawing;
 
 namespace CapernovaAPI.Controllers
 {
@@ -35,15 +36,17 @@ namespace CapernovaAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ICourseRepositoty _dbCourse;
         private readonly IMatriculaRepository _dbMatricula;
+        private readonly IDeberRepository _dbDeber;
         protected ApiResponse _response;
         protected string clientSecret;
         protected string clientId;
         protected string authUri;
-        public StudentController(ApplicationDbContext db, IConfiguration configuration, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula)
+        public StudentController(ApplicationDbContext db, IConfiguration configuration, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, IDeberRepository dbDeber)
         {
             _db=db;
             _dbCourse = dbCourse;
             _dbMatricula = dbMatricula;
+            _dbDeber = dbDeber;
             _configuration = configuration;
             this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
             this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
@@ -113,7 +116,7 @@ namespace CapernovaAPI.Controllers
                     LastName = studentDto.LastName,
                     Phone = studentDto.Phone,                    
                     Email = student.Email,
-                    PhotoUrl = studentDto.Photo
+                    PhotoUrl = student.PhotoUrl
                 };
 
                 _db.StudentTbl.Update(model);
@@ -154,13 +157,16 @@ namespace CapernovaAPI.Controllers
                     var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
 
                     //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
-                    if (studentDto!.PhotoUrl != null)
+                    if (studentDto.PhotoUrl != null)
                     {
                         DeleteFile(service, studentDto.PhotoUrl);
                     }
 
-                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
-                    string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion
+                    //Este link es el identificador de la anterior carpeta para almacenar las fotos de perfil del estudiante : 1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa
+                    //Este link es el identificador de la nueva carpeta para almacenar las fotos de perfil del estudiante : 1libChFMmx_kjW2Z_wDfa4x6BItruM-Ik 
+                    //Estos links estan vinculados a las carpetas de Drive de google por lo que se debe revisar su forderId en google drive
+                    string idFile = await UploadFile(service, file, "1libChFMmx_kjW2Z_wDfa4x6BItruM-Ik");
 
                     Student modelWithPhoto = new()
                     {
@@ -436,7 +442,8 @@ namespace CapernovaAPI.Controllers
                         EstudianteId = matriculaExist.EstudianteId,
                         IsActive = matriculaExist.IsActive,
                         Estado = "Completado",
-                        NotaFinal= matriculaExist.NotaFinal
+                        NotaFinal= matriculaExist.NotaFinal,
+                        CertificadoId = matriculaExist.CertificadoId
                     };
 
                     _db.MatriculaTbl.Update(model);
@@ -539,6 +546,17 @@ namespace CapernovaAPI.Controllers
                     {
                         var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
 
+                        var curso = await _dbDeber.GetAsync(u => u.Id == id,tracked:false,includeProperties:"Course");
+
+                        //Esta función permite determinar si existe una carpeta donde se pueda almacenar los deberes
+                        if (curso == null)
+                        {
+                            _response.isSuccess = false;
+                            _response.StatusCode = HttpStatusCode.BadRequest;
+                            _response.Message = "Se presento un erro al cargar el deber, inténtalo más tarde!";
+                            return BadRequest(_response);
+                        }
+
                         //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
                         if (notaDeberDto.FileUrl != null)
                         {
@@ -546,7 +564,8 @@ namespace CapernovaAPI.Controllers
                         }
 
                         //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
-                        string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+                        //string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+                        string idFile = await UploadFile(service, file, curso.Course!.FolderId!);
 
 
                         NotaDeber model = new()
@@ -554,7 +573,7 @@ namespace CapernovaAPI.Controllers
                             Id = notaDeberDto.Id,
                             Estado = "Entregado",
                             Observacion = file.FileName,
-                            FileUrl = idFile,
+                            //FileUrl = idFile,
                             StudentId = studentId,
                             Calificacion = notaDeberDto.Calificacion,
                             DeberId = id
@@ -733,11 +752,11 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
-        [HttpGet("getCertificate/{id:int}")]
-        public async Task<ActionResult<ApiResponse>> GetCertificate(int id)
+        [HttpGet("getCertificate",Name = "getCertificate")]
+        public async Task<ActionResult<ApiResponse>> GetCertificate([FromQuery]string? studentId, [FromQuery] int? cursoId)
         {
-            var course = await _db.CourseTbl.FirstOrDefaultAsync(u => u.Id ==id);
-            if (course == null)
+            var estudianteExist = await _dbMatricula.GetAsync(u => u.EstudianteId == studentId && u.CursoId == cursoId,tracked:false,includeProperties:"Estudiante,Curso");
+            if (estudianteExist == null)
             {
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
@@ -754,8 +773,8 @@ namespace CapernovaAPI.Controllers
             htmlContent += "<h1 style='margin-top: 160px; margin-buttom : 0px ;padding: 0;font-size: 48px;font-weight: 600;font-family:'Lato';'>CERTIFICADO DE CAPACITACIÓN</h1>";
             htmlContent += "<h2 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 30px;font-weight: 400;'>POR APROBACIÓN</h2>";
             htmlContent += "<h3 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 20px;font-weight: 400'>ESTE CERTIFICADO SE OTORGA A:</h3>";
-            htmlContent += "<h1 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px; padding: 0px; font-size: 48px;font-weight: 500;'>César Almachi</h1>";
-            htmlContent += $"<p style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 18px;font-weight: 400;text-align: justify;max-width: 800px;line-height: 1.5;'>Por haber cursado todos los niveles de manera satisfactoria y con los más altos estándares de educación brindados por el Centro de Capacitación para Profesionales, Emprendedores e Innovación \"Capernova\", el curso de Experto en {course.Titulo} con Técnica Franceso con 120 horas de estudio.</p>";
+            htmlContent += $"<h1 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px; padding: 0px; font-size: 48px;font-weight: 500;'>{estudianteExist.Estudiante.Name +" "+estudianteExist.Estudiante.LastName}</h1>";
+            htmlContent += $"<p style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 18px;font-weight: 400;text-align: justify;max-width: 800px;line-height: 1.5;'>Por haber cursado todos los niveles de manera satisfactoria y con los más altos estándares de educación brindados por el Centro de Capacitación para Profesionales, Emprendedores e Innovación \"Capernova\", el curso de Experto en {estudianteExist.Curso.Titulo} con 120 horas de estudio.</p>";
             htmlContent += "<br><br><br><br><br><br><br><br>";
             htmlContent += "</div>";
             htmlContent += "</div>";
@@ -765,9 +784,9 @@ namespace CapernovaAPI.Controllers
 
             //Margenes del documento
             converter.Options.MarginTop = 5;
+            converter.Options.MarginRight = 35;
+            converter.Options.MarginBottom = 5;
             converter.Options.MarginLeft = 35;
-            converter.Options.MarginTop = 5;
-            converter.Options.MarginTop = 5;
 
             //doc.Margins.Top = 5;
             //doc.Margins.Right = 10;
@@ -783,7 +802,10 @@ namespace CapernovaAPI.Controllers
             //convertir el documento html a pdf
             PdfDocument doc = converter.ConvertHtmlString(htmlContent);
 
+
             byte[] pdfFile = doc.Save();
+
+            
 
             doc.Close();
 
@@ -809,19 +831,19 @@ namespace CapernovaAPI.Controllers
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "ya29.a0AcM612wbbA-WaD2EfhrSlham0ROey3qfGH97v--LiqXGTpDblLiATf0uqr6u9PH47s6C9-M8M1AavVH9ZntXLka320FZihjyQkB29pyGJYzrWE8FiMcUcSYhbcTXvPXsYARxYrdLIQew_t80xsia_RCtqUc6i316tu2Ugk-aaCgYKAcQSARASFQHGX2MiqZhMRTqpPtkiYYRQPew9-w0175",
-                RefreshToken = "1//04ZiMEftaDgeqCgYIARAAGAQSNwF-L9IrQ1GglPJz6swCd375YH2nHYnUqlhMOnN103qpP5QARmX7IuMtmt6av1hxVmPLMiJgExk",
+                AccessToken = "1//04quDscV9HjH_CgYIARAAGAQSNwF-L9IrMn1Zx-Y28Y0Ni6pBrRWvjzzxO62UfHY8nHphuAFbYvldpeLCHGBOfw5fZ99DmtiQJsk",
+                RefreshToken = "ya29.a0AcM612yjzyXWYySDvg1PEy5yfoFZLJ9cJ2KogE97jyvbntHVJlhcHEghGoV493xFdW7zWLAQd46INKGPr0gyzBCt5q3kjX9WT3sLv62XiaIc6W12cDNf9Zg5OgOA5YUltxoXXsNpZbM_a4Ovsqs6EC9NOqYekfev0kyqcm-daCgYKAUoSARESFQHGX2MirBlOouYEKWgyd2EsVJHeAg0175",
             };
 
-            var applicationName = "CapernovaTest";
-            var userName = "jeffersoncargua@gmail.com";
+            var applicationName = "Capernova";
+            var userName = "capernova.edu.ec@gmail.com";
 
             var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
             {
                 ClientSecrets = new ClientSecrets
                 {
-                    ClientId = "533765406103-0mt3gsdbckirrrk7920dsdn0552fmkoe.apps.googleusercontent.com",
-                    ClientSecret = "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"
+                    ClientId = "63608082167-e4ju7bra09p6hhr5dr44b5kg54ov25is.apps.googleusercontent.com",
+                    ClientSecret = "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"
                 },
                 Scopes = new[] { Scope.Drive },
                 DataStore = new FileDataStore(applicationName),
@@ -854,7 +876,8 @@ namespace CapernovaAPI.Controllers
 
             string fileMime = file.ContentType;
             var driveFile = new Google.Apis.Drive.v3.Data.File();
-            driveFile.Name = file.Name;
+            //driveFile.Name = file.Name;
+            driveFile.Name = file.FileName;
             driveFile.MimeType = file.ContentType;
             driveFile.Parents = new string[] { idFolder };
 
@@ -884,7 +907,6 @@ namespace CapernovaAPI.Controllers
             var command = service.Files.Delete(idFile);
             var result = await command.ExecuteAsync();
         }
-
 
         #endregion
     }

@@ -204,8 +204,11 @@ namespace CapernovaAPI.Controllers
                         DeleteFile(service, teacherDto.PhotoURL); 
                     }
 
-                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
-                    string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion
+                    //Este link es el identificador de la anterior carpeta para almacenar las fotos de perfil del estudiante : 1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa
+                    //Este link es el identificador de la nueva carpeta para almacenar las fotos de perfil del estudiante : 1gDJvaSjLHmLjEPNAz42uWnSY7P3ltnIS
+                    //Estos links estan vinculados a las carpetas de Drive de google por lo que se debe revisar su forderId en google drive
+                    string idFile = await UploadFile(service, file, "1gDJvaSjLHmLjEPNAz42uWnSY7P3ltnIS");
 
                     Teacher modelWithPhoto = new()
                     {
@@ -443,24 +446,24 @@ namespace CapernovaAPI.Controllers
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "ya29.a0AcM612wbbA-WaD2EfhrSlham0ROey3qfGH97v--LiqXGTpDblLiATf0uqr6u9PH47s6C9-M8M1AavVH9ZntXLka320FZihjyQkB29pyGJYzrWE8FiMcUcSYhbcTXvPXsYARxYrdLIQew_t80xsia_RCtqUc6i316tu2Ugk-aaCgYKAcQSARASFQHGX2MiqZhMRTqpPtkiYYRQPew9-w0175",
-                RefreshToken = "1//04ZiMEftaDgeqCgYIARAAGAQSNwF-L9IrQ1GglPJz6swCd375YH2nHYnUqlhMOnN103qpP5QARmX7IuMtmt6av1hxVmPLMiJgExk",
+                AccessToken = "1//04quDscV9HjH_CgYIARAAGAQSNwF-L9IrMn1Zx-Y28Y0Ni6pBrRWvjzzxO62UfHY8nHphuAFbYvldpeLCHGBOfw5fZ99DmtiQJsk",
+                RefreshToken = "ya29.a0AcM612yjzyXWYySDvg1PEy5yfoFZLJ9cJ2KogE97jyvbntHVJlhcHEghGoV493xFdW7zWLAQd46INKGPr0gyzBCt5q3kjX9WT3sLv62XiaIc6W12cDNf9Zg5OgOA5YUltxoXXsNpZbM_a4Ovsqs6EC9NOqYekfev0kyqcm-daCgYKAUoSARESFQHGX2MirBlOouYEKWgyd2EsVJHeAg0175",
             };
 
-            var applicationName = "CapernovaTest";
-            var userName = "jeffersoncargua@gmail.com";
+            var applicationName = "Capernova";
+            var userName = "capernova.edu.ec@gmail.com";
 
             var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
             {
                 ClientSecrets = new ClientSecrets
                 {
-                    ClientId = "533765406103-0mt3gsdbckirrrk7920dsdn0552fmkoe.apps.googleusercontent.com",
-                    ClientSecret = "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"
+                    ClientId = "63608082167-e4ju7bra09p6hhr5dr44b5kg54ov25is.apps.googleusercontent.com",
+                    ClientSecret = "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"
                 },
                 Scopes = new[] { Scope.Drive },
                 DataStore = new FileDataStore(applicationName),
-                
-                
+
+
             });
 
             var credential = new UserCredential(apiCodeFlow, userName, tokenResponse);
@@ -488,7 +491,7 @@ namespace CapernovaAPI.Controllers
 
             string fileMime = file.ContentType;
             var driveFile = new Google.Apis.Drive.v3.Data.File();
-            driveFile.Name = file.Name;
+            driveFile.Name = file.FileName;
             driveFile.MimeType = file.ContentType;
             driveFile.Parents = new string[] { idFolder };            
 
