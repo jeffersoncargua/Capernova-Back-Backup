@@ -799,22 +799,54 @@ namespace CapernovaAPI.Controllers
             //orientacion del documento
             converter.Options.PdfPageOrientation = PdfPageOrientation.Landscape;
 
-            //convertir el documento html a pdf
+            //convertir el documento html a pdf para enviar al front-end
             PdfDocument doc = converter.ConvertHtmlString(htmlContent);
 
-
             byte[] pdfFile = doc.Save();
-
-            
 
             doc.Close();
 
             FileResult fileResult = new FileContentResult(pdfFile, "application/pdf");
             fileResult.FileDownloadName = "Certificado.pdf";
 
+            var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
+
+            //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
+            if (estudianteExist.CertificadoId != null)
+            {
+                DeleteFile(service, estudianteExist.CertificadoId);
+            }
+
+            // Este es el identificador de la carpeta certificados del drive : 1YLyHkBIblNH_9rYwO0Ipjt6q0m2R0ULR
+            string idCertificado = await UploadCertificado(service, pdfFile, "1YLyHkBIblNH_9rYwO0Ipjt6q0m2R0ULR", "application/pdf", estudianteExist.Estudiante.Name, estudianteExist.Estudiante.LastName);
+
+            if (string.IsNullOrEmpty(idCertificado))
+            {
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "Ha ocurrido un problema al intentar descargar el certificado";
+                return BadRequest(_response);
+            }
+
+            Matricula model = new()
+            {
+                Id = estudianteExist.Id,
+                CursoId = estudianteExist.CursoId,
+                EstudianteId = estudianteExist.EstudianteId,
+                IsActive = estudianteExist.IsActive,
+                Estado = estudianteExist.Estado,
+                NotaFinal = estudianteExist.NotaFinal,
+                CertificadoId = idCertificado
+            };
+
+            await _dbMatricula.UpdateAsync(model);
+            await _dbMatricula.SaveAsync();
+
+
             _response.isSuccess = true;
             _response.StatusCode = HttpStatusCode.OK;
-            _response.Message = "Se ha enviado el certificado";
+            //_response.Message = "Se ha enviado el certificado";
+            _response.Message = idCertificado;
             _response.Result = fileResult;
             return Ok(_response);
 
@@ -831,8 +863,8 @@ namespace CapernovaAPI.Controllers
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "1//04quDscV9HjH_CgYIARAAGAQSNwF-L9IrMn1Zx-Y28Y0Ni6pBrRWvjzzxO62UfHY8nHphuAFbYvldpeLCHGBOfw5fZ99DmtiQJsk",
-                RefreshToken = "ya29.a0AcM612yjzyXWYySDvg1PEy5yfoFZLJ9cJ2KogE97jyvbntHVJlhcHEghGoV493xFdW7zWLAQd46INKGPr0gyzBCt5q3kjX9WT3sLv62XiaIc6W12cDNf9Zg5OgOA5YUltxoXXsNpZbM_a4Ovsqs6EC9NOqYekfev0kyqcm-daCgYKAUoSARESFQHGX2MirBlOouYEKWgyd2EsVJHeAg0175",
+                AccessToken = "1//041RZI9XjNKndCgYIARAAGAQSNwF-L9IrDHtXlf1YKnHX154_FU17iqFU0G6TLTp81PGKC536tFq1b1-nfxOUUuFfyeizhTRCWZk",
+                RefreshToken = "ya29.a0AcM612z91d38R-wIrRFy146Q_vyLco_fGmqGekveWI3dHCcM6wa-kefeGIBljTjPyyM1Ho40bz6BbJt_6IT8K2NzTYiUcgEOh82idxWR2cozrTrB1kOoYbpe2KZ-6-ofLWkIzPhzytQvXDqDvlRLcY2SE5R86vhF1B1jyMgZaCgYKAWUSARESFQHGX2Mi649NnNCgkAXS1RtYM2KQrA0175",
             };
 
             var applicationName = "Capernova";
@@ -907,6 +939,43 @@ namespace CapernovaAPI.Controllers
             var command = service.Files.Delete(idFile);
             var result = await command.ExecuteAsync();
         }
+
+
+
+        /// <summary>
+        /// Esta funcion permite cargar un archivo en google drive
+        /// Entre estos archivos que se pueden cargar son documentos, fotos y audios, pero no videos.
+        /// </summary>
+        /// <param name="service">Es la sesion que se abrio para enlazar la aplicacion con google drive</param>
+        /// <param name="file">Es el archivo que se va a subir que puede ser foto, documentos o musica</param>
+        /// <param name="idFolder">Es el identificador de la carpeta donde se va a subir el archivo para este caso es la carpeta PruebaCapernova en Google Drive</param>
+        /// <returns>Retorna el IdFile que se creo en google drive</returns>
+        private async Task<string> UploadCertificado(DriveService service, byte[] fileBytes, string idFolder, string contentType , string fileName, string fileLastName)
+        {
+
+            string fileMime = contentType;
+            var driveFile = new Google.Apis.Drive.v3.Data.File();
+            //driveFile.Name = file.Name;
+            driveFile.Name = fileName+""+fileLastName+".pdf";
+            driveFile.MimeType = contentType;
+            driveFile.Parents = new string[] { idFolder };
+            Stream fileStream = new MemoryStream(fileBytes);
+            var request = service.Files.Create(driveFile, fileStream, fileMime); //OpenReadStream permite abrir el archivo para enviarlo al servicio de Google Drive
+
+            //request.Fields permite que se generen los campos que queremos obtener informacion como el id, webViewLink, etc. Vease os campos que tiene en el ResponseBody.{Fields}
+            request.Fields = "id, webViewLink"; //Se agrego webViewlink para obtener el link de enlace
+
+
+            var response = await request.UploadAsync();
+
+            if (response.Status != UploadStatus.Completed)
+            {
+                throw response.Exception;
+            }
+
+            return request.ResponseBody.Id;
+        }
+
 
         #endregion
     }
