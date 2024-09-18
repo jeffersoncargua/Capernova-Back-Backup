@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Stripe;
-using Stripe.Checkout;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -16,6 +15,7 @@ using User.Managment.Data.Models.Student;
 using User.Managment.Data.Models.Transaction;
 using User.Managment.Data.Models.Ventas;
 using User.Managment.Data.Models.Ventas.Dto;
+using User.Managment.Repository.Models;
 using User.Managment.Repository.Repository.IRepository;
 using Amount = User.Managment.Data.Models.PaypalOrder.Amount;
 using PurchaseUnit = User.Managment.Data.Models.PaypalOrder.PurchaseUnit;
@@ -30,13 +30,15 @@ namespace CapernovaAPI.Controllers
         private readonly ApplicationDbContext _db;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        //private readonly IProductoRepositoy _dbProduc;
-        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        private readonly IEmailRepository _emailRepository;
+        
+        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IEmailRepository emailRepository)
         {
             _db = db;
             _roleManager = roleManager;
             _userManager = userManager;
             //_dbProduc = dbProduc;
+            _emailRepository = emailRepository;
             this._response = new();
         }
 
@@ -237,7 +239,7 @@ namespace CapernovaAPI.Controllers
                         amount = new Amount
                         {
                             currency_code = "USD",
-                            value = model.Total.ToString(), //Aqui va el valor total de la venta
+                            value = model.Total!.ToString(), //Aqui va el valor total de la venta
                             breakdown = new Breakdown()
                             {
                                 item_total = new ItemTotal
@@ -306,9 +308,8 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "La solicitud de pago no se ha generado";
-                    _response.Errors = new List<string>() { response.ReasonPhrase.ToString() };
+                    _response.Errors = new List<string>() { response.ReasonPhrase!.ToString() };
                     return BadRequest(_response);
-
                 }
             }
             catch (Exception ex)
@@ -361,10 +362,10 @@ namespace CapernovaAPI.Controllers
                         _response.isSuccess = true;
                         _response.StatusCode = HttpStatusCode.OK;
                         var jsonResponse = response.Content.ReadAsStringAsync().Result;
-                        PaypalTransaction objeto = JsonConvert.DeserializeObject<PaypalTransaction>(jsonResponse);
+                        PaypalTransaction objeto = JsonConvert.DeserializeObject<PaypalTransaction>(jsonResponse)!;
                         _response.Message = "La transacción se ha realizado correctamente";
                         //Se envia el id de la transaccion que se realizo
-                        _response.Result = objeto.purchase_units[0].payments.captures[0].id;
+                        _response.Result = objeto!.purchase_units[0].payments.captures[0].id;
                         return Ok(_response);
                     }
 
@@ -391,8 +392,8 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                var cartList = JsonConvert.DeserializeObject<List<ShoppingCartDto>>(confirmOrder.Productos);
-                var userClient = JsonConvert.DeserializeObject<Cliente>(confirmOrder.Orden);
+                var cartList = JsonConvert.DeserializeObject<List<ShoppingCartDto>>(confirmOrder.Productos!);
+                var userClient = JsonConvert.DeserializeObject<Cliente>(confirmOrder.Orden!);
                 if (confirmOrder == null)
                 {
                     _response.isSuccess = false;
@@ -438,7 +439,7 @@ namespace CapernovaAPI.Controllers
                     //await _db.SaveChangesAsync();
 
                     //var ventaExist = _db.VentaTbl.Where(u => u.UserId == userSystem.Id).OrderByDescending(x => x.Emision).Take(1).FirstOrDefault();
-                    var ventaExist = await GenerarVenta(confirmOrder.Total!, clienteDto);
+                    var ventaExist = await GenerarVenta(confirmOrder.Total!, clienteDto, confirmOrder.TransaccionId!);
                     if (ventaExist == null)
                     {
                         _response.isSuccess = false;
@@ -490,6 +491,9 @@ namespace CapernovaAPI.Controllers
                     //}
 
                     await GenerarPedido(productosPedido, ventaExist, clienteDto);
+
+                    //Aqui se va a enviar el mensaje por whatsapp al capernova para gestionar el envío
+                    EnviarPedido(productosPedido, ventaExist, clienteDto);
 
                     var cursos = cartList!.Where(u => u.Tipo == "curso").ToList(); //permite obtener solo los cursos del carrito de compras
 
@@ -607,7 +611,7 @@ namespace CapernovaAPI.Controllers
                     //await _db.SaveChangesAsync();
 
                     //var ventaExist = _db.VentaTbl.Where(u => u.UserId == userClient.Id).OrderByDescending(x => x.Emision).Take(1).FirstOrDefault();
-                    var ventaExist = await GenerarVenta(confirmOrder.Total!, clienteDto);
+                    var ventaExist = await GenerarVenta(confirmOrder.Total!, clienteDto, confirmOrder.TransaccionId!);
                     if (ventaExist == null)
                     {
                         _response.isSuccess = false;
@@ -655,6 +659,10 @@ namespace CapernovaAPI.Controllers
                     //    await _db.SaveChangesAsync();
                     //}
                     await GenerarPedido(productosPedido, ventaExist, clienteDto);
+
+                    //Aqui se va a enviar el mensaje por whatsapp al capernova para gestionar el envío
+                    EnviarPedido(productosPedido, ventaExist, clienteDto);
+
                 }
 
 
@@ -754,17 +762,19 @@ namespace CapernovaAPI.Controllers
         //}
 
         #region Funciones
-        private async Task<Venta>  GenerarVenta(string total, ClienteDto cliente)
+        private async Task<Venta>  GenerarVenta(string total, ClienteDto cliente,string transaccionId)
         {
             Venta venta = new()
             {
                 Emision = DateTime.Now,
+                TransaccionId = transaccionId,
                 Total = double.Parse(total, CultureInfo.InvariantCulture),
                 UserId = cliente.Id,
                 Name = cliente.Name,
                 LastName = cliente.LastName,
                 Email = cliente.Email,
-                Phone = cliente.Phone
+                Phone = cliente.Phone,
+                Estado = "Pagado"
             };
 
             await _db.VentaTbl.AddAsync(venta);
@@ -814,6 +824,45 @@ namespace CapernovaAPI.Controllers
                 await _db.SaveChangesAsync();
             }
             
+
+        }
+
+
+        private void EnviarPedido(List<ShoppingCartDto> productosPedido, Venta venta, ClienteDto cliente)
+        {
+            string textMessage = "";
+            if (productosPedido.Count > 0)
+            {
+                //textMessage += $""; 
+                textMessage += $"<h1 style='font-size: 50px' ><b>Se ha realizado un pedido!!</b></h1>";
+                textMessage += $"<h2><b>Nombre:</b>{venta.Name}</h2>";
+                textMessage += $"<h2><b>Apellido:</b>{venta.LastName}</h2>";
+                textMessage += $"<h2><b>Teléfono:</b>{venta.Phone}</h2>";
+                textMessage += $"<h2><b>Direccion Principal:</b>{cliente.DirectionMain}</h2>";
+                textMessage += $"<h2><b>Direccion Secundaria:</b>{cliente.DirectionSec}</h2>";
+                textMessage += $"<h2><b>Pedido:</b></h2>";
+                textMessage += $"<br />";
+                textMessage += $"<table style='width:100%;border:1px solid #000;  border-collapse: collapse; text-align:center'>";
+                textMessage += $"<thead>";
+                textMessage += $"<tr>";
+                textMessage += $"<th style='border: 1px solid #000;border-spacing: 0;' >Producto</th>";
+                textMessage += $"<th style='border: 1px solid #000;border-spacing: 0;'>Cantidad</th>";
+                textMessage += $"</tr>";
+                textMessage += $"</thead>";
+                textMessage += $"<tbody>";
+                foreach (var itemPedido in productosPedido)
+                {
+                    textMessage += $"<tr>";
+                    textMessage += $"<td style='border: 1px solid #000;border-spacing: 0;'>{itemPedido.Titulo}</td>";
+                    textMessage += $"<td style='border: 1px solid #000;border-spacing: 0;'>{itemPedido.Cantidad}</td>";
+                    textMessage += $"</tr>";
+                }
+                textMessage += $"</tbody>";
+                textMessage += $"</table>";
+            }
+
+            var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);
+            _emailRepository.SendEmail(message);
 
         }
 

@@ -116,11 +116,11 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                if (await _dbProducto.GetAsync(u => u.Titulo == productoDto.Titulo) != null)
+                if (await _dbProducto.GetAsync(u => u.Titulo == productoDto.Titulo || u.Codigo == productoDto.Codigo) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El producto ya esta registrado";
+                    _response.Message = "El producto ya esta registrado con un código o titulo similar";
                     return BadRequest(_response);
                 }
 
@@ -131,7 +131,7 @@ namespace CapernovaAPI.Controllers
                     Titulo = productoDto.Titulo,
                     Detalle = productoDto.Detalle,
                     Precio = productoDto.Precio,
-                    Tipo = productoDto.Tipo,
+                    Tipo = productoDto.Tipo!,
                     Cantidad = productoDto.Cantidad,
 
                 };
@@ -176,7 +176,7 @@ namespace CapernovaAPI.Controllers
                     Titulo = productoDto.Titulo,
                     Detalle = productoDto.Detalle,
                     Precio = productoDto.Precio,
-                    Tipo = productoDto.Tipo,
+                    Tipo = productoDto.Tipo!,
                     Cantidad = productoDto.Cantidad,
                 };
 

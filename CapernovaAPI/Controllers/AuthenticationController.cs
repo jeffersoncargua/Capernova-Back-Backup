@@ -102,7 +102,7 @@ namespace CapernovaAPI.Controllers
                     //var tokenEncode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenEmail));
                     //Se genera el link para enviar el token y el usuario
                     //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
+                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}"; //se debe cambiar la url cuando se suba a produccion
 
 
 

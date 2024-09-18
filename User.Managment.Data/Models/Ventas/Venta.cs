@@ -18,6 +18,8 @@ namespace User.Managment.Data.Models.Ventas
         [Key]
         public int Id { get; set; }
         [Required]
+
+        public string TransaccionId { get; set; }
         public DateTime Emision { get; set; }
         public double Total { get; set; }
         public string UserId { get; set; }
@@ -25,6 +27,7 @@ namespace User.Managment.Data.Models.Ventas
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+        public string? Estado { get; set; }
 
     }
 }

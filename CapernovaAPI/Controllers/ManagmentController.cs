@@ -186,15 +186,15 @@ namespace CapernovaAPI.Controllers
                     //segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
                     //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
                     var resultSearch = (
-                        from au in _db.Users.Where(x => x.Name.ToLower().Contains(searchName) || x.LastName.ToLower().Contains(searchName))
+                        from au in _db.Users.Where(x => x.Name!.ToLower().Contains(searchName) || x.LastName!.ToLower().Contains(searchName))
                         from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
                         from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Name == searchRole )
                             //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
                         select new UserDto
                         {
                             Id = au.Id,
-                            Name = au.Name,
-                            LastName = au.LastName,
+                            Name = au.Name!,
+                            LastName = au.LastName!,
                             UserName = au.UserName,
                             Phone = au.PhoneNumber,
                             Role = ar.Name,
@@ -216,15 +216,15 @@ namespace CapernovaAPI.Controllers
                         //segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
                         //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
                         var resultSearchName = (
-                            from au in _db.Users.Where(x => x.Name.ToLower().Contains(searchName) || x.LastName.ToLower().Contains(searchName))
+                            from au in _db.Users.Where(x => x.Name!.ToLower().Contains(searchName) || x.LastName!.ToLower().Contains(searchName))
                             from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
-                            from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent.Id && x.Id != rolUser.Id)
+                            from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent!.Id && x.Id != rolUser!.Id)
                                 //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
                             select new UserDto
                             {
                                 Id = au.Id,
-                                Name = au.Name,
-                                LastName = au.LastName,
+                                Name = au.Name!,
+                                LastName = au.LastName!,
                                 UserName = au.UserName,
                                 Phone = au.PhoneNumber,
                                 Role = ar.Name,
@@ -248,8 +248,8 @@ namespace CapernovaAPI.Controllers
                         select new UserDto
                         {
                             Id = au.Id,
-                            Name = au.Name,
-                            LastName = au.LastName,
+                            Name = au.Name!,
+                            LastName = au.LastName!,
                             UserName = au.UserName,
                             Phone = au.PhoneNumber,
                             Role = ar.Name,
@@ -273,13 +273,13 @@ namespace CapernovaAPI.Controllers
                 var result = (
                     from au in _db.Users
                     from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
-                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent.Id && x.Id != rolUser.Id) //En esta linea se busca los roles con excepcion de Student y User
+                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id != rolStudent!.Id && x.Id != rolUser!.Id) //En esta linea se busca los roles con excepcion de Student y User
                     //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
                     select new UserDto
                     {
                         Id = au.Id,
-                        Name = au.Name,
-                        LastName = au.LastName,
+                        Name = au.Name!,
+                        LastName = au.LastName!,
                         UserName = au.UserName,
                         Phone = au.PhoneNumber,
                         Role = ar.Name,
@@ -392,15 +392,15 @@ namespace CapernovaAPI.Controllers
                     //en la base de datos segun lo requiera el usuario del front-end. En este caso solo filtra la informacion de un tipo de rol en especifico
                     //por lo tanto se realiza inner joins para poder encontrar la informacion que se necesita para enviar al front-end
                     var resultSearch = (
-                        from au in _db.Users.Where(x => x.Name.ToLower().Contains(search) || x.LastName.ToLower().Contains(search))
+                        from au in _db.Users.Where(x => x.Name!.ToLower().Contains(search) || x.LastName!.ToLower().Contains(search))
                         from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
-                        from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent.Id) //En esta linea se busca los roles con excepcion de Student y User
+                        from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent!.Id) //En esta linea se busca los roles con excepcion de Student y User
                                                                                                                        //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
                         select new UserDto
                         {
                             Id = au.Id,
-                            Name = au.Name,
-                            LastName = au.LastName,
+                            Name = au.Name!,
+                            LastName = au.LastName!,
                             UserName = au.UserName,
                             Phone = au.PhoneNumber,
                         }
@@ -419,13 +419,13 @@ namespace CapernovaAPI.Controllers
                 var result = (
                     from au in _db.Users
                     from aur in _db.UserRoles.Where(x => x.UserId == au.Id)
-                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent.Id) //En esta linea se busca los roles con excepcion de Student y User
+                    from ar in _db.Roles.Where(x => x.Id == aur.RoleId && x.Id == rolStudent!.Id) //En esta linea se busca los roles con excepcion de Student y User
                                                                                                  //from ar in _db.Roles.Where(x => x.Id == aur.RoleId)
                     select new UserDto
                     {
                         Id = au.Id,
-                        Name = au.Name,
-                        LastName = au.LastName,
+                        Name = au.Name!,
+                        LastName = au.LastName!,
                         UserName = au.UserName,
                         Phone = au.PhoneNumber,
                     }

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
+using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Data.Models.Ventas;
 using User.Managment.Data.Models.Ventas.Dto;
 using User.Managment.Repository.Repository.IRepository;
@@ -16,11 +17,13 @@ namespace CapernovaAPI.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IPedidoRepository _dbPedido;
+        private readonly IMatriculaRepository _dbMatricula;
         protected ApiResponse _response;
-        public VentaController(ApplicationDbContext db, IPedidoRepository dbPedido)
+        public VentaController(ApplicationDbContext db, IPedidoRepository dbPedido,IMatriculaRepository dbMatricula)
         {
             _db = db;
             _dbPedido = dbPedido;
+            _dbMatricula = dbMatricula;
             this._response = new();
         }
 
@@ -37,7 +40,9 @@ namespace CapernovaAPI.Controllers
                     var startDate = JsonConvert.DeserializeObject<DateTime>(start);
                     var endDate = JsonConvert.DeserializeObject<DateTime>(end);
                     var ventasQuery = await _db.VentaTbl.Where(u => (u.UserId.Contains(search) 
-                    || u.LastName.ToLower().Contains(search))
+                    || u.LastName.ToLower().Contains(search) 
+                    || u.Email.ToLower().Contains(search)
+                    || u.TransaccionId.ToLower().Contains(search))
                     && u.Emision >= startDate  && u.Emision <= endDate).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
@@ -57,7 +62,10 @@ namespace CapernovaAPI.Controllers
                     return Ok(_response);
                 }else if (!string.IsNullOrEmpty(search))
                 {
-                    var ventasQuery = await _db.VentaTbl.Where(u => u.UserId.Contains(search) || u.LastName.ToLower().Contains(search)).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
+                    var ventasQuery = await _db.VentaTbl.Where(u => u.UserId.Contains(search) 
+                    || u.LastName.ToLower().Contains(search)
+                    || u.Email.ToLower().Contains(search)
+                    || u.TransaccionId.ToLower().Contains(search)).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de las ventas";
@@ -158,7 +166,9 @@ namespace CapernovaAPI.Controllers
                     var startDate = JsonConvert.DeserializeObject<DateTime>(start);
                     var endDate = JsonConvert.DeserializeObject<DateTime>(end);
                     var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName.Contains(search)
-                    || u.Venta!.UserId.Contains(search)) && u.Emision >= startDate && u.Emision <= endDate),tracked:false,includeProperties:"Venta");
+                    || u.Venta!.UserId.Contains(search)
+                    || u.Venta.TransaccionId.ToLower().Contains(search)) 
+                    && u.Emision >= startDate && u.Emision <= endDate),tracked:false,includeProperties:"Venta");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de los pedidos";
@@ -179,7 +189,8 @@ namespace CapernovaAPI.Controllers
                 else if (!string.IsNullOrEmpty(search))
                 {
                     var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName.Contains(search)
-                    || u.Venta!.UserId.Contains(search))), tracked: false, includeProperties: "Venta");
+                    || u.Venta!.UserId.Contains(search)
+                    || u.Venta.TransaccionId.ToLower().Contains(search))), tracked: false, includeProperties: "Venta");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de los pedidos";
@@ -205,6 +216,114 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+        [HttpPut("updateVenta/{id:int}", Name = "updateVenta")]
+        public async Task<ActionResult<ApiResponse>> UpdateVenta(int id)
+        {
+            try
+            {
+                var ventaExist = await _db.VentaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (ventaExist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se pudo realizar efectuar el reembolso, inténtelo nuevamente";
+                    return BadRequest(_response);
+                }
+                else
+                {
+                    var shoppingFromDb = await _db.ShoppingCartTbl.AsNoTracking().Where(u => u.VentaId == ventaExist.Id).ToListAsync();
+                    if (shoppingFromDb == null)
+                    {
+                        _response.isSuccess = false;
+                        _response.StatusCode = HttpStatusCode.BadRequest;
+                        _response.Message = "No se pudo realizar efectuar el reembolso, inténtelo nuevamente";
+                        return BadRequest(_response);
+                    }
+                    else
+                    {
+                        foreach (var itemCart in shoppingFromDb)
+                        {
+                            var producto = await _db.ProductoTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Codigo == itemCart.ProductoCode);
+                            if (producto == null)
+                            {
+                                _response.isSuccess = false;
+                                _response.StatusCode = HttpStatusCode.BadRequest;
+                                _response.Message = "No se pudo realizar efectuar el reembolso, inténtelo nuevamente";
+                                return BadRequest(_response);
+                            }
+                            else if (producto.Tipo == "producto") // Esta funcion permite actualizar el stock de los productos del tipo producto cuando se realiza un reembolso
+                            {
+                                Producto productoModel = new()
+                                {
+                                    Id = producto.Id,
+                                    Codigo = producto.Codigo,
+                                    Titulo = producto.Titulo,
+                                    Cantidad = producto.Cantidad + itemCart.Cantidad,
+                                    ImagenUrl = producto.ImagenUrl,
+                                    Precio = producto.Precio,
+                                    Tipo = producto.Tipo,
+                                    Detalle = producto.Detalle
+                                };
+
+                                _db.ProductoTbl.Update(productoModel);
+                                await _db.SaveChangesAsync();
+                            }
+                            else if (producto.Tipo == "curso") //Esta funcion permite eliminar la matricula de un usuario cuando se ha realizado el reembolso
+                            {
+                                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Curso.Codigo == itemCart.ProductoCode && u.EstudianteId == ventaExist.UserId);
+                                if (matriculaExist != null)
+                                {
+                                    _db.MatriculaTbl.Remove(matriculaExist);
+                                    await _db.SaveChangesAsync();
+                                }
+                            }
+
+                            _db.ShoppingCartTbl.Remove(itemCart);
+                            await _db.SaveChangesAsync();
+                        }
+                    }
+
+                    var pedidoFromDb = await _dbPedido.GetAsync(u => u.VentaId == id, tracked: false);
+                    if (pedidoFromDb != null)
+                    {
+                        await _dbPedido.RemoveAsync(pedidoFromDb);
+                        await _dbPedido.SaveAsync();
+                    }
+
+                    Venta updateVenta = new()
+                    {
+                        Id = ventaExist.Id,
+                        TransaccionId = ventaExist.TransaccionId,
+                        Total = ventaExist.Total,
+                        UserId = ventaExist.UserId,
+                        Name = ventaExist.Name,
+                        LastName = ventaExist.LastName,
+                        Email = ventaExist.Email,
+                        Phone = ventaExist.Phone,
+                        Estado = "Reembolsado",
+                        Emision = DateTime.Now
+                    };
+
+                    _db.VentaTbl.Update(updateVenta);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha efectuado el reembolso con exito";
+                    return Ok(_response);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+            return _response;
+
+        }
+
 
         [HttpPut("updatePedido/{id:int}", Name = "updatePedido")]
         public async Task<ActionResult<ApiResponse>> UpdatePedido(int id, [FromBody] PedidoDto pedidoDto)

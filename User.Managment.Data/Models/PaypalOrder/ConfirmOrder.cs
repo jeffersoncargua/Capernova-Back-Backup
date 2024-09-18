@@ -13,6 +13,6 @@ namespace User.Managment.Data.Models.PaypalOrder
         public string? Productos { get; set; }
         public string? Total { get; set; }
         public string? Orden { get; set; }
-        //public string Token { get; set; }
+        public string? TransaccionId { get; set; }
     }
 }
