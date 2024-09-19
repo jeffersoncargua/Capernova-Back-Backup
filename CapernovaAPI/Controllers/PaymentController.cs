@@ -834,13 +834,16 @@ namespace CapernovaAPI.Controllers
             if (productosPedido.Count > 0)
             {
                 //textMessage += $""; 
-                textMessage += $"<h1 style='font-size: 50px' ><b>Se ha realizado un pedido!!</b></h1>";
-                textMessage += $"<h2><b>Nombre:</b>{venta.Name}</h2>";
-                textMessage += $"<h2><b>Apellido:</b>{venta.LastName}</h2>";
-                textMessage += $"<h2><b>Teléfono:</b>{venta.Phone}</h2>";
-                textMessage += $"<h2><b>Direccion Principal:</b>{cliente.DirectionMain}</h2>";
-                textMessage += $"<h2><b>Direccion Secundaria:</b>{cliente.DirectionSec}</h2>";
-                textMessage += $"<h2><b>Pedido:</b></h2>";
+                textMessage += $"<div style='display:flex; justify-content:center;'>";
+                textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
+                textMessage += $"</div>";
+                textMessage += $"<h1 style='text-align:center'><b>Se ha realizado un pedido</b></h1>";
+                textMessage += $"<h4><b>Nombre:</b> <span style='font-weight: normal;'>{venta.Name}</span></h4>";
+                textMessage += $"<h4><b>Apellido:</b> <span style='font-weight: normal;'>{venta.LastName}</span></h4>";
+                textMessage += $"<h4><b>Teléfono:</b> <span style='font-weight: normal;'>{venta.Phone}</span></h4>";
+                textMessage += $"<h4><b>Dirección Principal:</b> <span style='font-weight: normal;'>{cliente.DirectionMain}</span></h4>";
+                textMessage += $"<h4><b>Dirección Secundaria:</b> <span style='font-weight: normal;'>{cliente.DirectionSec}</span></h4>";
+                textMessage += $"<h4><b>Pedido:</b></h4>";
                 textMessage += $"<br />";
                 textMessage += $"<table style='width:100%;border:1px solid #000;  border-collapse: collapse; text-align:center'>";
                 textMessage += $"<thead>";
@@ -859,6 +862,13 @@ namespace CapernovaAPI.Controllers
                 }
                 textMessage += $"</tbody>";
                 textMessage += $"</table>";
+                textMessage += $"<br />";
+                textMessage += $"<p>La entrega de los productos se realizará a domicilio, por lo que uno de nuestros agentes se pondrá en contacto contigo al número de teléfono que nos proporcionaste.</p>";
+                textMessage += $"<p>Para mayor información no dudes en comunicarte al 0987203469, o nuestro whatsapp y te ayudaremos con todas tus inquietudes</p>";
+                textMessage += $"<br />";
+                textMessage += $"<p>Muchas Gracias por preferirnos, tenga un excelente día</p>";
+                textMessage += $"<br />";
+                textMessage += $"<p>Atentamente, Capernova</p>";
             }
 
             var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);

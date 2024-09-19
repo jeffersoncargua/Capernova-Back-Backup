@@ -110,6 +110,39 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
+        /// <summary>
+        /// Este controlador permite obtener el curso de acuerdo al id del producto que se desea obtener
+        /// </summary>
+        /// <param name="id">Es el que contiene el identificador a comparar para obtener el producto</param>
+        /// <returns></returns>
+        [HttpGet("getProductoCode", Name = "getProductoCode")]
+        public async Task<ActionResult<ApiResponse>> GetProductoCode([FromQuery]string codigo)
+        {
+            try
+            {
+                var producto = await _dbProducto.GetAsync(u => u.Codigo == codigo);// devuelve el producto cuyo id sea igual al Id del producto
+                if (producto == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro no existe!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido el producto con exito!";
+                _response.Result = producto;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
         [HttpPost]
         [Route("createProducto")]
         public async Task<ActionResult<ApiResponse>> CreateProducto([FromBody] ProductoDto productoDto)

@@ -573,7 +573,7 @@ namespace CapernovaAPI.Controllers
                             Id = notaDeberDto.Id,
                             Estado = "Entregado",
                             Observacion = file.FileName,
-                            //FileUrl = idFile,
+                            FileUrl = idFile,
                             StudentId = studentId,
                             Calificacion = notaDeberDto.Calificacion,
                             DeberId = id

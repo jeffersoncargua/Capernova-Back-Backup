@@ -18,6 +18,8 @@ using User.Managment.Data.Models;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Data.Models.PaypalOrder.Dto;
+using User.Managment.Data.Models.PaypalOrder;
 using User.Managment.Repository.Repository.IRepository;
 using static Google.Apis.Drive.v3.DriveService;
 
@@ -435,6 +437,50 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+        [HttpPut("updateMatriculaNota/{id:int}", Name = "updateMatriculaNota")]
+        public async Task<ActionResult<ApiResponse>> UpdateMatriculaNota(int id ,[FromBody] string notaFinal)
+        {
+            try
+            {
+                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (matriculaExist != null && notaFinal != null)
+                {
+                    Matricula model = new()
+                    {
+                        Id = matriculaExist.Id,
+                        CursoId = matriculaExist.CursoId,
+                        EstudianteId = matriculaExist.EstudianteId,
+                        IsActive = matriculaExist.IsActive,
+                        Estado = "Completado",
+                        NotaFinal = Convert.ToDouble(notaFinal),
+                        CertificadoId = matriculaExist.CertificadoId
+                    };
+
+                    _db.MatriculaTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha colocado la nota final de la matricula del estudiante!!";
+                    _response.Result = model;
+                    return Ok(_response);
+                }
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se ha podido colocar la nota final en la matricula del estudiante!!";
+                return BadRequest(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+        }
+
 
 
         /// <summary>
