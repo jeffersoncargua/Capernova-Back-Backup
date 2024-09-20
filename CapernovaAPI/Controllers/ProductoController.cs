@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
+using User.Managment.Data.Data;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Data.Models.ProductosServicios.Dto;
@@ -11,11 +13,13 @@ namespace CapernovaAPI.Controllers
     [Route("api/[controller]")]
     public class ProductoController : ControllerBase
     {
+        private readonly ApplicationDbContext _db;
         private readonly IProductoRepositoy _dbProducto;
         protected ApiResponse _response;
-        public ProductoController(IProductoRepositoy dbProducto)
+        public ProductoController(IProductoRepositoy dbProducto, ApplicationDbContext db)
         {
             _dbProducto = dbProducto;
+            _db = db;
             this._response = new();
         }
 
@@ -166,6 +170,7 @@ namespace CapernovaAPI.Controllers
                     Precio = productoDto.Precio,
                     Tipo = productoDto.Tipo!,
                     Cantidad = productoDto.Cantidad,
+                    CategoriaId = productoDto.CategoriaId
 
                 };
 
@@ -211,6 +216,7 @@ namespace CapernovaAPI.Controllers
                     Precio = productoDto.Precio,
                     Tipo = productoDto.Tipo!,
                     Cantidad = productoDto.Cantidad,
+                    CategoriaId = productoDto.CategoriaId
                 };
 
                 await _dbProducto.UpdateAsync(model);
@@ -260,5 +266,176 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+        /// <summary>
+        /// Este controlador permite obtener todos los productos registrados hasta el momento en la base de datos
+        /// </summary>
+        /// <param name="search">Es el modelo que permite obtener la categoria en especifico de acuerdo al nombre de la cateogria</param>
+        /// <returns>Retorna una lista de categorias y en el caso de tener una busqueda especifica retorna un listado con los cursos especificos</returns>
+        [HttpGet]
+        [Route("getAllCategoria")]
+        public async Task<ActionResult<ApiResponse>> GetAllCategoria([FromQuery] string? search, [FromQuery] string? tipo)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo))
+                {
+                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search) && u.Tipo == tipo).ToListAsync();
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Result = categotyQuery;
+                    return Ok(_response);
+                }
+                else if (!string.IsNullOrEmpty(tipo))
+                {
+                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Tipo == tipo).ToListAsync();
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Result = categotyQuery;
+                    return Ok(_response);
+                }
+                else if (!string.IsNullOrEmpty(search))
+                {
+                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search)).ToListAsync();
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Result = categotyQuery;
+                    return Ok(_response);
+                }
+
+                var categorias = await _db.CategoriaTbl.AsNoTracking().ToListAsync(); //devuelve una lista con los productos 
+                                                                                                                                         //var productos = await _db.ProducotsTbl.ToListAsync(); //si funciona la linea anterior se elimina esta linea
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de productos";
+                _response.Result = categorias;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+
+        }
+
+       
+        [HttpPost]
+        [Route("createCategoria")]
+        public async Task<ActionResult<ApiResponse>> CreateCategoria([FromBody] CategoriaDto categoriaDto)
+        {
+            try
+            {
+                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Name == categoriaDto.Name);
+                if (categoriaExist != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "EL registro ya existe";
+                    return BadRequest(_response);
+                }
+
+                Categoria model = new()
+                {
+                    Name = categoriaDto.Name,
+                    Tipo = categoriaDto.Tipo
+                };
+
+                await _db.CategoriaTbl.AddAsync(model);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "La categoría ha sido registrada con éxito";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+            return _response;
+
+        }
+
+        [HttpPut]
+        [Route("updateCategoria/{id:int}", Name = "updateCategoria")]
+        public async Task<ActionResult<ApiResponse>> UpdateCategoria(int id, [FromBody] CategoriaDto categoriaDto)
+        {
+            try
+            {
+                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (categoriaExist != null && categoriaDto != null && categoriaDto.Id == id)
+                {
+                    Categoria model = new()
+                    {
+                        Id = categoriaDto.Id,
+                        Name = categoriaDto.Name,
+                        Tipo = categoriaDto.Tipo
+                    };
+
+                    _db.CategoriaTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "La categoría ha sido actualizado con exito";
+                    return Ok(_response);
+
+                }
+
+                _response.isSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "No se pudo actualizar la categoría";
+                return BadRequest(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+            return _response;
+
+        }
+
+
+        [HttpDelete("deleteCategoria/{id:int}", Name = "deleteCategoria")]
+        public async Task<ActionResult<ApiResponse>> DeleteCategoria(int id)
+        {
+            try
+            {
+                var categoria = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (categoria == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ha ocurrido un error inesperado al eliminar el registro";
+                    return BadRequest(_response);
+                }
+
+                _db.CategoriaTbl.Remove(categoria);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "La categoría ha sido eliminada con éxito";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+            return _response;
+
+        }
+
     }
 }

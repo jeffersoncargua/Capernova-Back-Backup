@@ -24,5 +24,7 @@ namespace User.Managment.Data.Models.Course.DTO
         public double Precio { get; set; }
         public string? TeacherId { get; set; }
         public string? FolderId { get; set; }
+
+        public int CategoriaId { get; set; }
     }
 }

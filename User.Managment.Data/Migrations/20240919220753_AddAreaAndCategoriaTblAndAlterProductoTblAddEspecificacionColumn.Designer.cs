@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using User.Managment.Data.Data;
 
@@ -11,9 +12,10 @@ using User.Managment.Data.Data;
 namespace User.Managment.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240919220753_AddAreaAndCategoriaTblAndAlterProductoTblAddEspecificacionColumn")]
+    partial class AddAreaAndCategoriaTblAndAlterProductoTblAddEspecificacionColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,35 +53,35 @@ namespace User.Managment.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a2a69f4b-4f45-41fd-99e1-e9711506e6dd",
+                            Id = "c4551ffc-4bc1-4e14-9f22-32d3c1cceabd",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "5ce70353-be61-4f2c-9cb6-e3089f114da1",
+                            Id = "bf1f4ad4-2b22-4481-aa9d-b1becc7a733d",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "1ec8f62b-ffbd-4272-b9c9-db4b7eef4306",
+                            Id = "ce946f63-8fc8-45c6-8c9a-6a9883f3d20e",
                             ConcurrencyStamp = "3",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "34317b7e-d807-4910-b132-1ad39f09bb3f",
+                            Id = "b2cd06c3-591f-4dda-9f3e-933d1f49a246",
                             ConcurrencyStamp = "4",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "86033ccf-e8a6-4724-8d7d-f22d46920efc",
+                            Id = "bc3d9917-034b-46aa-9902-926746ed8ff9",
                             ConcurrencyStamp = "5",
                             Name = "Secretary",
                             NormalizedName = "SECRETARY"
@@ -604,7 +606,7 @@ namespace User.Managment.Data.Migrations
                     b.ToTable("MatriculaTbl");
                 });
 
-            modelBuilder.Entity("User.Managment.Data.Models.ProductosServicios.Categoria", b =>
+            modelBuilder.Entity("User.Managment.Data.Models.ProductosServicios.Area", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -616,7 +618,21 @@ namespace User.Managment.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Tipo")
+                    b.HasKey("Id");
+
+                    b.ToTable("AreaTbl");
+                });
+
+            modelBuilder.Entity("User.Managment.Data.Models.ProductosServicios.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -635,15 +651,15 @@ namespace User.Managment.Data.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CategoriaId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Detalle")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Especificacion")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ImagenUrl")
                         .HasColumnType("nvarchar(max)");
@@ -661,10 +677,10 @@ namespace User.Managment.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoriaId");
-
                     b.HasIndex("Codigo")
                         .IsUnique();
+
+                    b.HasIndex("Especificacion");
 
                     b.HasIndex("Tipo");
 
@@ -1037,15 +1053,6 @@ namespace User.Managment.Data.Migrations
                     b.Navigation("Curso");
 
                     b.Navigation("Estudiante");
-                });
-
-            modelBuilder.Entity("User.Managment.Data.Models.ProductosServicios.Producto", b =>
-                {
-                    b.HasOne("User.Managment.Data.Models.ProductosServicios.Categoria", "Categoria")
-                        .WithMany()
-                        .HasForeignKey("CategoriaId");
-
-                    b.Navigation("Categoria");
                 });
 
             modelBuilder.Entity("User.Managment.Data.Models.Ventas.Pedido", b =>

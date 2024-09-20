@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Net;
 using User.Managment.Data.Models;
 using User.Managment.Data.Models.Course;
@@ -168,6 +169,7 @@ namespace CapernovaAPI.Controllers
                     Precio = course.Precio,
                     Tipo = "curso",
                     Cantidad = 1,
+                    CategoriaId = course.CategoriaId
 
                 };
 
@@ -216,27 +218,50 @@ namespace CapernovaAPI.Controllers
                     Detalle = course.Detalle,
                     FolderId = course.FolderId,
                     Precio = course.Precio,
-
                     TeacherId = course.TeacherId
                 };
 
                 await _dbCourse.UpdateAsync(model);
                 await _dbCourse.SaveAsync();
 
-                Producto producto = new()
+                if (course.CategoriaId == 0)
                 {
-                    Id = productoFromDb.Id,
-                    Codigo = course.Codigo,
-                    ImagenUrl = course.ImagenUrl,
-                    Titulo = course.Titulo,
-                    Detalle = course.Detalle,
-                    Precio = course.Precio,
-                    Tipo = productoFromDb.Tipo,
-                    Cantidad = productoFromDb.Cantidad,
-                };
+                    Producto producto = new()
+                    {
+                        Id = productoFromDb.Id,
+                        Codigo = course.Codigo,
+                        ImagenUrl = course.ImagenUrl,
+                        Titulo = course.Titulo,
+                        Detalle = course.Detalle,
+                        Precio = course.Precio,
+                        Tipo = productoFromDb.Tipo,
+                        Cantidad = productoFromDb.Cantidad,
+                        CategoriaId = productoFromDb.CategoriaId
+                    };
 
-                await _dbProducto.UpdateAsync(producto);
-                await _dbProducto.SaveAsync();
+                    await _dbProducto.UpdateAsync(producto);
+                    await _dbProducto.SaveAsync();
+
+                }
+                else
+                {
+                    Producto producto = new()
+                    {
+                        Id = productoFromDb.Id,
+                        Codigo = course.Codigo,
+                        ImagenUrl = course.ImagenUrl,
+                        Titulo = course.Titulo,
+                        Detalle = course.Detalle,
+                        Precio = course.Precio,
+                        Tipo = productoFromDb.Tipo,
+                        Cantidad = productoFromDb.Cantidad,
+                        CategoriaId = course.CategoriaId
+                    };
+
+                    await _dbProducto.UpdateAsync(producto);
+                    await _dbProducto.SaveAsync();
+
+                }
 
                 _respose.isSuccess = true;
                 _respose.StatusCode = HttpStatusCode.OK;

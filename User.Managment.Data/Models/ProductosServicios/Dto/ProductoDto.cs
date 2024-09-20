@@ -16,7 +16,9 @@ namespace User.Managment.Data.Models.ProductosServicios.Dto
         public string Titulo { get; set; }
         [Required]
         public int Cantidad { get; set; }
+        public int? CategoriaId { get; set; }
         public string? ImagenUrl { get; set; }
+        public string? Especificacion { get; set; }
         public string? Detalle { get; set; }
         [Required]
         public double Precio { get; set; }

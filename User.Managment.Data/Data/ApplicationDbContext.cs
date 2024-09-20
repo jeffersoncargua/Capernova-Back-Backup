@@ -37,6 +37,7 @@ namespace User.Managment.Data.Data
         public DbSet<Venta> VentaTbl { get; set; }
         public DbSet<Pedido> PedidoTbl { get; set; }
         public DbSet<Comentario> ComentarioTbl { get; set; }
+        public DbSet<Categoria> CategoriaTbl { get; set; }
 
 
 
