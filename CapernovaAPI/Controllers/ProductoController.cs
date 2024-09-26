@@ -30,11 +30,38 @@ namespace CapernovaAPI.Controllers
         /// <returns>Retorna una lista de cursos y en el caso de tener una busqueda especifica retorna un listado con los cursos especificos</returns>
         [HttpGet]
         [Route("getAllProducto")]
-        public async Task<ActionResult<ApiResponse>> GetAll([FromQuery] string? search, [FromQuery] string? tipo)
+        public async Task<ActionResult<ApiResponse>> GetAll([FromQuery] string? search, [FromQuery] string? tipo, [FromQuery] int? categoriaId = 0)
         {
             try
             {
-                if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo))
+                if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo) && categoriaId != 0)
+                {
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.Tipo == tipo && u.CategoriaId == categoriaId);
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Productos";
+                    _response.Result = productoQuery;
+                    return Ok(_response);
+                }
+                else if (!string.IsNullOrEmpty(tipo) && categoriaId != 0)
+                {
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Tipo == tipo && u.CategoriaId == categoriaId);
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Productos";
+                    _response.Result = productoQuery;
+                    return Ok(_response);
+                }
+                else if (!string.IsNullOrEmpty(search) && categoriaId != 0)
+                {
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.CategoriaId == categoriaId);
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Productos";
+                    _response.Result = productoQuery;
+                    return Ok(_response);
+                }
+                else if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo))
                 {
                     var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.Tipo == tipo);
                     _response.isSuccess = true;
@@ -43,7 +70,7 @@ namespace CapernovaAPI.Controllers
                     _response.Result = productoQuery;
                     return Ok(_response);
                 }
-                else if(!string.IsNullOrEmpty(tipo))
+                else if (!string.IsNullOrEmpty(tipo))
                 {
                     var productoQuery = await _dbProducto.GetAllAsync(u => u.Tipo == tipo);
                     _response.isSuccess = true;

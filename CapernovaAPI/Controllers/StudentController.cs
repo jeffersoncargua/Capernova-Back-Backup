@@ -1,30 +1,24 @@
-﻿using Google.Apis.Auth.OAuth2.Flows;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Upload;
 using Google.Apis.Util.Store;
-using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SelectPdf;
-using System.ComponentModel;
 using System.Net;
 using User.Managment.Data.Data;
 using User.Managment.Data.Models;
-using User.Managment.Data.Models.Managment.DTO;
-using User.Managment.Data.Models.Managment;
-using User.Managment.Data.Models.Ventas;
-using static Google.Apis.Drive.v3.DriveService;
-using User.Managment.Data.Models.Student.DTO;
-using User.Managment.Data.Models.Student;
-using User.Managment.Repository.Repository.IRepository;
-using User.Managment.Data.Models.Course.DTO;
 using User.Managment.Data.Models.Course;
-using User.Managment.Data.Models.PaypalOrder.Dto;
+using User.Managment.Data.Models.Course.DTO;
 using User.Managment.Data.Models.PaypalOrder;
-using System.Drawing;
+using User.Managment.Data.Models.PaypalOrder.Dto;
+using User.Managment.Data.Models.Student;
+using User.Managment.Data.Models.Student.DTO;
+using User.Managment.Repository.Repository.IRepository;
+using static Google.Apis.Drive.v3.DriveService;
 
 namespace CapernovaAPI.Controllers
 {
@@ -601,8 +595,10 @@ namespace CapernovaAPI.Controllers
                     {
                         var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
 
+                        var curso = await _dbDeber.GetAsync(u => u.Id == id, tracked: false, includeProperties: "Course");
+
                         //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion  
-                        string idFile = await UploadFile(service, file, "1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa");
+                        string idFile = await UploadFile(service, file, curso.Course!.FolderId!);
 
 
                         NotaDeber model = new()
@@ -863,8 +859,8 @@ namespace CapernovaAPI.Controllers
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "1//041RZI9XjNKndCgYIARAAGAQSNwF-L9IrDHtXlf1YKnHX154_FU17iqFU0G6TLTp81PGKC536tFq1b1-nfxOUUuFfyeizhTRCWZk",
-                RefreshToken = "ya29.a0AcM612z91d38R-wIrRFy146Q_vyLco_fGmqGekveWI3dHCcM6wa-kefeGIBljTjPyyM1Ho40bz6BbJt_6IT8K2NzTYiUcgEOh82idxWR2cozrTrB1kOoYbpe2KZ-6-ofLWkIzPhzytQvXDqDvlRLcY2SE5R86vhF1B1jyMgZaCgYKAWUSARESFQHGX2Mi649NnNCgkAXS1RtYM2KQrA0175",
+                AccessToken = "1//041-_LTKAaU4PCgYIARAAGAQSNwF-L9IryRCk2mn0RPeywH_05aXr0zchT2NJNBE6_nxIzC_gI8QmM0JdNSCSxkvS_jpL7E9gbuM",
+                RefreshToken = "ya29.a0AcM612wrGyzBrEs3nZjSD_8zgjiOad8fRLn-NNOUvHmSRV3G3IrMevYXimxx5CeWDJaNO0ejNwnOWmj_xmh5tPGB1_6chWhpE4lhnM-R_Dv5FDuxQUnZh8CVOe0iQBOYpvAv_Z8RQGb_qxXDRYQ1Ifl5fz57kH6rS0e_BIo_aCgYKAdYSARESFQHGX2MidkiXOlI6xW0MqLuBEHNLYQ0175",
             };
 
             var applicationName = "Capernova";
