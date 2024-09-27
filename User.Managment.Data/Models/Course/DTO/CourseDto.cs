@@ -25,6 +25,9 @@ namespace User.Managment.Data.Models.Course.DTO
         public string? TeacherId { get; set; }
         public string? FolderId { get; set; }
 
+        public string? BibliotecaUrl { get; set; }
+        public string? ClaseUrl { get; set; }
+
         public int CategoriaId { get; set; }
     }
 }

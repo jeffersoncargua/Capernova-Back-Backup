@@ -154,7 +154,9 @@ namespace CapernovaAPI.Controllers
                     ImagenUrl = course.ImagenUrl,
                     Titulo = course.Titulo,
                     Detalle = course.Detalle,
-                    Precio = course.Precio,   
+                    Precio = course.Precio,
+                    BibliotecaUrl = course.BibliotecaUrl,
+                    ClaseUrl = course.ClaseUrl
                 };
 
                 await _dbCourse.CreateAsync(model);
@@ -218,7 +220,9 @@ namespace CapernovaAPI.Controllers
                     Detalle = course.Detalle,
                     FolderId = course.FolderId,
                     Precio = course.Precio,
-                    TeacherId = course.TeacherId
+                    TeacherId = course.TeacherId,
+                    BibliotecaUrl = course.BibliotecaUrl,
+                    ClaseUrl = course.ClaseUrl
                 };
 
                 await _dbCourse.UpdateAsync(model);

@@ -31,5 +31,8 @@ namespace User.Managment.Data.Models.Course
         public Teacher? Teacher { get; set; }
         public string? FolderId { get; set; } // Permite almacenar informacion en la carpeta asiganada que en este caso sera el nombre o titulo del Curso
 
+        public string? BibliotecaUrl { get; set; }
+        public string? ClaseUrl { get; set; }
+
     }
 }

@@ -22,6 +22,8 @@ namespace User.Managment.Data.Models.PaypalOrder
         public string EstudianteId { get; set; }
         [ForeignKey("EstudianteId")]
         public Student.Student Estudiante { get; set; }
+
+        public DateTime? FechaInscripcion { get; set; }
         public bool? IsActive { get; set; }
         public string? Estado { get; set; }
         public double? NotaFinal { get; set; }

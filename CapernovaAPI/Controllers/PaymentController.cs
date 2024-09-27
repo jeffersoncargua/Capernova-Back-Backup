@@ -578,7 +578,7 @@ namespace CapernovaAPI.Controllers
 
                         //}
 
-                        await GenerarMatricula(cursos, clienteDto);
+                        await GenerarMatricula(cursos, clienteDto,ventaExist);
                     }
 
                 }
@@ -876,7 +876,7 @@ namespace CapernovaAPI.Controllers
 
         }
 
-        private async Task GenerarMatricula(List<ShoppingCartDto> cursos, ClienteDto userStudent)
+        private async Task GenerarMatricula(List<ShoppingCartDto> cursos, ClienteDto userStudent, Venta ventaDto)
         {
             foreach (var itemCourse in cursos)
             {
@@ -889,6 +889,7 @@ namespace CapernovaAPI.Controllers
                         Matricula matricula = new()
                         {
                             Id = matriculaExist.Id,
+                            FechaInscripcion = ventaDto.Emision,
                             CursoId = matriculaExist.CursoId,
                             EstudianteId = matriculaExist.EstudianteId,
                             IsActive = true,
@@ -905,6 +906,7 @@ namespace CapernovaAPI.Controllers
                         {
                             CursoId = curso.Id,
                             EstudianteId = userStudent.Id,
+                            FechaInscripcion = ventaDto.Emision,
                             IsActive = true,
                             Estado = "En progreso"
                         };
