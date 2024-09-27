@@ -579,6 +579,8 @@ namespace CapernovaAPI.Controllers
                         //}
 
                         await GenerarMatricula(cursos, clienteDto,ventaExist);
+
+                        NotificarMatricula(cursos, clienteDto, ventaExist);
                     }
 
                 }
@@ -918,6 +920,59 @@ namespace CapernovaAPI.Controllers
 
             }
         }
+
+
+        //NotificarMatricula
+        private void NotificarMatricula(List<ShoppingCartDto> cursos, ClienteDto userStudent, Venta ventaDto)
+        {
+            string textMessage = "";
+            if (cursos.Count > 0)
+            {
+                //textMessage += $""; 
+                textMessage += $"<div>";
+                textMessage += $"<div style='display:flex; justify-content:center;'>";
+                textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
+                textMessage += $"</div>";
+                textMessage += $"<h1 style='text-align:center'><b>Se ha realizado la matriculación de:</b></h1>";
+                textMessage += $"<h4><b>Correo:</b> <span style='font-weight: normal;'>{ventaDto.Email}</span></h4>";
+                textMessage += $"<h4><b>Nombre:</b> <span style='font-weight: normal;'>{ventaDto.Name}</span></h4>";
+                textMessage += $"<h4><b>Apellido:</b> <span style='font-weight: normal;'>{ventaDto.LastName}</span></h4>";
+                textMessage += $"<h4><b>Teléfono:</b> <span style='font-weight: normal;'>{ventaDto.Phone}</span></h4>";
+                //textMessage += $"<h4><b>Dirección Principal:</b> <span style='font-weight: normal;'>{cliente.DirectionMain}</span></h4>";
+                //textMessage += $"<h4><b>Dirección Secundaria:</b> <span style='font-weight: normal;'>{cliente.DirectionSec}</span></h4>";
+                textMessage += $"<h4><b>Cursos Registrados:</b></h4>";
+                textMessage += $"<br />";
+                textMessage += $"<table style='width:100%;border:1px solid #000;  border-collapse: collapse; text-align:center'>";
+                textMessage += $"<thead>";
+                textMessage += $"<tr>";
+                textMessage += $"<th style='border: 1px solid #000;border-spacing: 0;' >Curso</th>";
+                //textMessage += $"<th style='border: 1px solid #000;border-spacing: 0;'>Cantidad</th>";
+                textMessage += $"</tr>";
+                textMessage += $"</thead>";
+                textMessage += $"<tbody>";
+                foreach (var itemCurso in cursos)
+                {
+                    textMessage += $"<tr>";
+                    textMessage += $"<td style='border: 1px solid #000;border-spacing: 0;'>{itemCurso.Titulo}</td>";
+                    textMessage += $"</tr>";
+                }
+                textMessage += $"</tbody>";
+                textMessage += $"</table>";
+                textMessage += $"<br />";
+                textMessage += $"<p>La matriculación de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial e" +
+                    $" iniciar sesión para acceder a todos los recursos de los cursos que adquiriste.</p>";
+                textMessage += $"<p>Para mayor información no dudes en comunicarte al 0987203469, o nuestro whatsapp y te ayudaremos con todas tus inquietudes.</p>";
+                textMessage += $"<br />";
+                textMessage += $"<p>Muchas Gracias por preferirnos, tenga un excelente día</p>";
+                textMessage += $"<br />";
+                textMessage += $"<p>Atentamente, Capernova</p>";
+                textMessage += $"</div>";
+            }
+
+            var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email }, $"Matriculación de {ventaDto.Name} {ventaDto.LastName}", textMessage);
+            _emailRepository.SendEmail(message);
+        }
+
 
         private async Task ActualizarStockProductos(List<ShoppingCartDto> cartList)
         {

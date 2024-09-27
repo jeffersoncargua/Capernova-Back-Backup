@@ -43,7 +43,7 @@ namespace CapernovaAPI.Controllers
         public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, IConfiguration configuration)
         {
             _db = db;
-            _dbCourse = dbCourse;    
+            _dbCourse = dbCourse;
             _dbMatricula = dbMatricula;
             //_hostEnvironment = hostEnvironment;
             //_googleDriveService = googleDriveService;
@@ -60,7 +60,7 @@ namespace CapernovaAPI.Controllers
             try
             {
                 var teacherlist = await _db.TeacherTbl.ToListAsync();
-                if(teacherlist == null)
+                if (teacherlist == null)
                 {
                     _response.isSuccess = false;
                     _response.Message = "No se obtuvieron resultados";
@@ -86,13 +86,13 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpGet("getAllCourse")]
-        public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery]string id, [FromQuery] string? search)
+        public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery] string id, [FromQuery] string? search)
         {
             try
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.TeacherId == id,includeProperties:"Teacher");
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.TeacherId == id, includeProperties: "Teacher");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Cursos";
@@ -100,7 +100,7 @@ namespace CapernovaAPI.Controllers
                     return Ok(_response);
                 }
 
-                var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id,includeProperties:"Teacher");
+                var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id, includeProperties: "Teacher");
                 if (teacherCourse == null)
                 {
                     _response.isSuccess = false;
@@ -128,7 +128,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpPut("updateTeacher", Name = "updateTeacher")]
-        public async Task<ActionResult<ApiResponse>> UpdateTeacher([FromQuery]string id, [FromBody] TeacherDto teacherDto)
+        public async Task<ActionResult<ApiResponse>> UpdateTeacher([FromQuery] string id, [FromBody] TeacherDto teacherDto)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-               
+
 
                 Teacher model = new()
                 {
@@ -181,14 +181,14 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
-        [HttpPut("updateImageTeacher",Name = "updateImageTeacher")]
+        [HttpPut("updateImageTeacher", Name = "updateImageTeacher")]
         //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
         public async Task<ActionResult<ApiResponse>> UpdateImageTeacher([FromQuery] string id, IFormFile? file)
         {
             try
             {
                 var teacherDto = await _db.TeacherTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if(teacherDto == null || teacherDto.Id != id)
+                if (teacherDto == null || teacherDto.Id != id)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
@@ -203,7 +203,7 @@ namespace CapernovaAPI.Controllers
                     //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
                     if (teacherDto.PhotoURL != null)
                     {
-                        DeleteFile(service, teacherDto.PhotoURL); 
+                        DeleteFile(service, teacherDto.PhotoURL);
                     }
 
                     //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion
@@ -269,8 +269,8 @@ namespace CapernovaAPI.Controllers
         }
 
 
-        [HttpGet("getStudents",Name = "getStudents")]
-        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId,[FromQuery] string? search)
+        [HttpGet("getStudents", Name = "getStudents")]
+        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId, [FromQuery] string? search)
         {
             try
             {
@@ -280,10 +280,10 @@ namespace CapernovaAPI.Controllers
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "No se ha podido obtener la lista de estudiantes. Elija un curso!";
                     return BadRequest(_response);
-                }else if (!string.IsNullOrEmpty(search))
+                } else if (!string.IsNullOrEmpty(search))
                 {
                     var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante.LastName.Contains(search) || u.Estudiante.Name.Contains(search) || u.Estudiante.Email.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
-                    if (studentList != null) 
+                    if (studentList != null)
                     {
                         _response.isSuccess = true;
                         _response.StatusCode = HttpStatusCode.OK;
@@ -314,8 +314,8 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "No se ha podido obtener la lista de estudiantes!";
                     return BadRequest(_response);
                 }
-                
-                
+
+
 
             }
             catch (Exception ex)
@@ -343,7 +343,7 @@ namespace CapernovaAPI.Controllers
                         Calificacion = Convert.ToDouble(calificacion),
                         DeberId = notaDeberExist.DeberId,
                         StudentId = notaDeberExist.StudentId,
-                        FileUrl= notaDeberExist.FileUrl
+                        FileUrl = notaDeberExist.FileUrl
                     };
 
                     _db.NotaDeberTbl.Update(model);
@@ -398,7 +398,7 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "Se ha actualizado la calificación de la prueba con exito!!";
                     return Ok(_response);
                 }
-                else if(!string.IsNullOrEmpty(calificacion))
+                else if (!string.IsNullOrEmpty(calificacion))
                 {
                     NotaPrueba model = new()
                     {
@@ -439,7 +439,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateMatriculaNota/{id:int}", Name = "updateMatriculaNota")]
-        public async Task<ActionResult<ApiResponse>> UpdateMatriculaNota(int id ,[FromBody] string notaFinal)
+        public async Task<ActionResult<ApiResponse>> UpdateMatriculaNota(int id, [FromBody] string notaFinal)
         {
             try
             {
@@ -449,6 +449,7 @@ namespace CapernovaAPI.Controllers
                     Matricula model = new()
                     {
                         Id = matriculaExist.Id,
+                        FechaInscripcion=matriculaExist.FechaInscripcion,
                         CursoId = matriculaExist.CursoId,
                         EstudianteId = matriculaExist.EstudianteId,
                         IsActive = matriculaExist.IsActive,
@@ -481,7 +482,76 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
+        [HttpPut("updateMatriculaEstado/{id:int}/{studentId}", Name = "updateMatriculaEstado")]
+        public async Task<ActionResult<ApiResponse>> UpdateMatriculaEstado(int id, string studentId, [FromBody] bool isActive = false)
+        {
+            try
+            {
+                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.EstudianteId == studentId);
+                if (matriculaExist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido deshabilitar al matricula del estudiante!!";
+                    return BadRequest(_response);
 
+                }
+                else if (isActive)
+                {
+                    Matricula model = new()
+                    {
+                        Id = matriculaExist.Id,
+                        CursoId = matriculaExist.CursoId,
+                        FechaInscripcion = matriculaExist.FechaInscripcion,
+                        EstudianteId = matriculaExist.EstudianteId,
+                        IsActive = false,
+                        Estado = matriculaExist.Estado,
+                        NotaFinal = matriculaExist.NotaFinal,
+                        CertificadoId = matriculaExist.CertificadoId
+                    };
+
+                    _db.MatriculaTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha deshabilitado la matricula del estudiante!!";
+                    return Ok(_response);
+
+                }
+                else
+                {
+                    Matricula model = new()
+                    {
+                        Id = matriculaExist.Id,
+                        CursoId = matriculaExist.CursoId,
+                        FechaInscripcion = matriculaExist.FechaInscripcion,
+                        EstudianteId = matriculaExist.EstudianteId,
+                        IsActive = true,
+                        Estado = matriculaExist.Estado,
+                        NotaFinal = matriculaExist.NotaFinal,
+                        CertificadoId = matriculaExist.CertificadoId
+                    };
+
+                    _db.MatriculaTbl.Update(model);
+                    await _db.SaveChangesAsync();
+
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha habilitado la matricula del estudiante!!";
+                    return Ok(_response);
+                }
+                
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
+            }
+
+            return _response;
+        }
 
         /// <summary>
         /// Esta funcion permite sincronizar las credenciales obtenidas para enlazar el proyecto .net con google drive
