@@ -25,7 +25,7 @@ var configuration = proveedor.GetRequiredService<IConfiguration>();
 //Se agrega la configuracion del servcio de CORS
 builder.Services.AddCors(options =>
 {
-    var frontEndURL = configuration.GetValue<string>("frontend_url");
+    var frontEndURL = configuration.GetValue<string>("frontEnd:Url");
 
     options.AddDefaultPolicy(builder =>
     {
@@ -90,6 +90,14 @@ builder.Services.AddAuthentication(options =>
 var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
+//Se agrega la configuracion de Paypal que se agrego en la appSettings.json
+var paypalConfig = builder.Configuration.GetSection("Paypal").Get<PaypalSettings>();
+builder.Services.AddSingleton(paypalConfig);
+
+//Se agrega la configuracion de GoogleDrive que se agrego en la appSettings.json
+var googleDriveConfig = builder.Configuration.GetSection("GoogleDrive").Get<GoogleDriveSettings>();
+builder.Services.AddSingleton(googleDriveConfig);
+
 
 //Se agrega el repositorio Email para utilizarlo en el proyecto
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
@@ -102,7 +110,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //se agrega el APIkey para generar las solicitudes para el pago con tarjeta
-StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+//StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
+//se agrega la url del front-end para poder emplearlo con las api que la necesiten
+var frontUrl = builder.Configuration.GetSection("frontEnd").Get<FrontSettings>();
+builder.Services.AddSingleton(frontUrl);
+
 
 
 //Servicio de autenticacion para utilizar google drive

@@ -1,4 +1,5 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using Capernova.Utility;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Drive.v3;
@@ -27,24 +28,26 @@ namespace CapernovaAPI.Controllers
     public class StudentController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-        private readonly IConfiguration _configuration;
+        //private readonly IConfiguration _configuration;
         private readonly ICourseRepositoty _dbCourse;
         private readonly IMatriculaRepository _dbMatricula;
         private readonly IDeberRepository _dbDeber;
+        private readonly GoogleDriveSettings _googleDriveConfig;
         protected ApiResponse _response;
-        protected string clientSecret;
-        protected string clientId;
-        protected string authUri;
-        public StudentController(ApplicationDbContext db, IConfiguration configuration, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, IDeberRepository dbDeber)
+        //protected string clientSecret;
+        //protected string clientId;
+        //protected string authUri;
+        public StudentController(ApplicationDbContext db, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, IDeberRepository dbDeber, GoogleDriveSettings googleDriveConfig)
         {
             _db=db;
             _dbCourse = dbCourse;
             _dbMatricula = dbMatricula;
             _dbDeber = dbDeber;
-            _configuration = configuration;
-            this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
-            this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
-            this.authUri = _configuration["GoogleDrive:RedirectUri"]; //permite obtener del archivo appsettings.json el redirectUri de ggolge drive
+            //_configuration = configuration;
+            _googleDriveConfig = googleDriveConfig;
+            //this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
+            //this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
+            //this.authUri = _configuration["GoogleDrive:RedirectUri"]; //permite obtener del archivo appsettings.json el redirectUri de ggolge drive
             this._response = new();
         }
 
@@ -855,23 +858,30 @@ namespace CapernovaAPI.Controllers
         /// Si se necesita informacion de como realizarlo se adjunta el link de instrucciones: https://medium.com/geekculture/upload-files-to-google-drive-with-c-c32d5c8a7abc
         /// </summary>
         /// <returns>Se retorna el inicio de sesion de la aplicacion con google drive</returns>
-        private static DriveService GetService()
+        /// private static DriveService GetService()
+        private DriveService GetService()
         {
             var tokenResponse = new TokenResponse
             {
-                AccessToken = "1//041-_LTKAaU4PCgYIARAAGAQSNwF-L9IryRCk2mn0RPeywH_05aXr0zchT2NJNBE6_nxIzC_gI8QmM0JdNSCSxkvS_jpL7E9gbuM",
-                RefreshToken = "ya29.a0AcM612wrGyzBrEs3nZjSD_8zgjiOad8fRLn-NNOUvHmSRV3G3IrMevYXimxx5CeWDJaNO0ejNwnOWmj_xmh5tPGB1_6chWhpE4lhnM-R_Dv5FDuxQUnZh8CVOe0iQBOYpvAv_Z8RQGb_qxXDRYQ1Ifl5fz57kH6rS0e_BIo_aCgYKAdYSARESFQHGX2MidkiXOlI6xW0MqLuBEHNLYQ0175",
+                //AccessToken = "1//041-_LTKAaU4PCgYIARAAGAQSNwF-L9IryRCk2mn0RPeywH_05aXr0zchT2NJNBE6_nxIzC_gI8QmM0JdNSCSxkvS_jpL7E9gbuM",
+                //RefreshToken = "ya29.a0AcM612wrGyzBrEs3nZjSD_8zgjiOad8fRLn-NNOUvHmSRV3G3IrMevYXimxx5CeWDJaNO0ejNwnOWmj_xmh5tPGB1_6chWhpE4lhnM-R_Dv5FDuxQUnZh8CVOe0iQBOYpvAv_Z8RQGb_qxXDRYQ1Ifl5fz57kH6rS0e_BIo_aCgYKAdYSARESFQHGX2MidkiXOlI6xW0MqLuBEHNLYQ0175",
+                AccessToken = _googleDriveConfig.AccessToken,
+                RefreshToken = _googleDriveConfig.RefreshToken
             };
 
-            var applicationName = "Capernova";
-            var userName = "capernova.edu.ec@gmail.com";
+            //var applicationName = "Capernova";
+            //var userName = "capernova.edu.ec@gmail.com";
+            var applicationName = _googleDriveConfig.ApplicationName;
+            var userName = _googleDriveConfig.UserName;
 
             var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
             {
                 ClientSecrets = new ClientSecrets
                 {
-                    ClientId = "63608082167-e4ju7bra09p6hhr5dr44b5kg54ov25is.apps.googleusercontent.com",
-                    ClientSecret = "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"
+                    //ClientId = "63608082167-e4ju7bra09p6hhr5dr44b5kg54ov25is.apps.googleusercontent.com",
+                    //ClientSecret = "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"
+                    ClientId = _googleDriveConfig.ClientId,
+                    ClientSecret = _googleDriveConfig.ClientSecret
                 },
                 Scopes = new[] { Scope.Drive },
                 DataStore = new FileDataStore(applicationName),

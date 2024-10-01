@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Capernova.Utility;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,14 +32,18 @@ namespace CapernovaAPI.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailRepository _emailRepository;
+        private readonly PaypalSettings _paypalConfig;
+        private readonly FrontSettings _frontUrl;
         
-        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IEmailRepository emailRepository)
+        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IEmailRepository emailRepository, PaypalSettings paypalConfig, FrontSettings frontUrl)
         {
             _db = db;
             _roleManager = roleManager;
             _userManager = userManager;
             //_dbProduc = dbProduc;
             _emailRepository = emailRepository;
+            _paypalConfig = paypalConfig;
+            _frontUrl = frontUrl;
             this._response = new();
         }
 
@@ -169,7 +174,11 @@ namespace CapernovaAPI.Controllers
             
         //}
 
-
+        /// <summary>
+        /// Esta funcion permite recibir la peticion para poder empezar con el proceso de pago y compra a traves de Paypal
+        /// </summary>
+        /// <param name="model">Son los parametros que contienen la información para empezar con la solictud de pago con paypal</param>
+        /// <returns>Si todo sale correctamente, se envia el id de transacción para continuar con el proceso de pago con paypal</returns>
         [HttpPost]
         [Route("paypalCard")]
         public async Task<ActionResult<ApiResponse>> PaypalCard([FromBody] Order model)
@@ -199,13 +208,16 @@ namespace CapernovaAPI.Controllers
                 using (var client = new HttpClient())
                 {
                     //Es el Client ID donde se va a recibir el pago con Paypal
-                    var userName = "AZiCGcfCQdlpvwPzJGoyLURcKroZ-zSI8B-HX-2Gu7LZVcoiTCADxSMY8h7-SY1EnGwaYJ3b--4kpfGP";
+                    //var userName = "AZiCGcfCQdlpvwPzJGoyLURcKroZ-zSI8B-HX-2Gu7LZVcoiTCADxSMY8h7-SY1EnGwaYJ3b--4kpfGP";
+                    var userName = _paypalConfig.ClientId;
                     //Es la contraseña del Client que va a recibir el pago con Paypal
-                    var secret = "EJjnPCRIkeP_orIjGkToI9v9NU5AjdoXqNP5lOgzE9T8ttn_IC3StJu_ef1JeKxF47P7DxhgTDk_n0a1";
+                    //var secret = "EJjnPCRIkeP_orIjGkToI9v9NU5AjdoXqNP5lOgzE9T8ttn_IC3StJu_ef1JeKxF47P7DxhgTDk_n0a1";
+                    var secret = _paypalConfig.Secret;
 
 
                     //Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
-                    client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
+                    //client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
+                    client.BaseAddress = new Uri(_paypalConfig.Mode); //Esta solo es la url de prueba luego se cambia por una real
 
                     //Se debe codificar el username y el secrte para enviarlo a la url de PAYPAL
                     var authToken = Encoding.ASCII.GetBytes($"{userName}:{secret}");
@@ -284,8 +296,10 @@ namespace CapernovaAPI.Controllers
                             //landing_page = "BILLING", //muestra la pagina para ingresar los datos de la tarjeta si no se tiene una cuenta paypal
                             user_action = "PAY_NOW", //Accion para que paypal muestre el monto
                             //user_action = "COMMIT", //Accion para que paypal muestre el monto
-                            return_url = "https://localhost:3000/confirmPay", //pagina para confirmar el pago                            
-                            cancel_url = "https://localhost:3000/cancelPay", //pagina para cancelar el pago
+                            //return_url = "https://localhost:3000/confirmPay", //pagina para confirmar el pago                            
+                            //cancel_url = "https://localhost:3000/cancelPay", //pagina para cancelar el pago
+                            return_url = $"{_frontUrl.Url}/confirmPay", //pagina para confirmar el pago                            
+                            cancel_url = $"{_frontUrl.Url}/cancelPay", //pagina para cancelar el pago
                         }
                     };
 
@@ -333,13 +347,20 @@ namespace CapernovaAPI.Controllers
             {
                 using (var client = new HttpClient())
                 {
-                    //Es el Client ID donde se va a recibir el pago con Paypal
-                    var userName = "AZiCGcfCQdlpvwPzJGoyLURcKroZ-zSI8B-HX-2Gu7LZVcoiTCADxSMY8h7-SY1EnGwaYJ3b--4kpfGP";
-                    //Es la contraseña del Client que va a recibir el pago con Paypal
-                    var secret = "EJjnPCRIkeP_orIjGkToI9v9NU5AjdoXqNP5lOgzE9T8ttn_IC3StJu_ef1JeKxF47P7DxhgTDk_n0a1";
+                    ////Es el Client ID donde se va a recibir el pago con Paypal
+                    //var userName = "AZiCGcfCQdlpvwPzJGoyLURcKroZ-zSI8B-HX-2Gu7LZVcoiTCADxSMY8h7-SY1EnGwaYJ3b--4kpfGP";
+                    ////Es la contraseña del Client que va a recibir el pago con Paypal
+                    //var secret = "EJjnPCRIkeP_orIjGkToI9v9NU5AjdoXqNP5lOgzE9T8ttn_IC3StJu_ef1JeKxF47P7DxhgTDk_n0a1";
 
+                    //Es el Client ID donde se va a recibir el pago con Paypal
+                    var userName = _paypalConfig.ClientId;
+                    //Es la contraseña del Client que va a recibir el pago con Paypal
+                    var secret = _paypalConfig.Secret;
+
+                    ////Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
+                    //client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
                     //Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
-                    client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
+                    client.BaseAddress = new Uri(_paypalConfig.Mode); //Esta solo es la url de prueba luego se cambia por una real
 
                     //Se debe codificar el username y el secrte para enviarlo a la url de PAYPAL
                     var authToken = Encoding.ASCII.GetBytes($"{userName}:{secret}");
