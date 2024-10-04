@@ -176,11 +176,28 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createProducto")]
+        //[ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateProducto([FromBody] ProductoDto productoDto)
         {
             try
             {
-                if (await _dbProducto.GetAsync(u => u.Titulo == productoDto.Titulo || u.Codigo == productoDto.Codigo) != null)
+                if (productoDto.Cantidad < 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error al intentar agregar un producto con un stock menor a cero";
+                    return BadRequest(_response);
+                }
+
+                if (productoDto.CategoriaId == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Debe seleccionar una categoria para el producto";
+                    return BadRequest(_response);
+                }
+
+                if (await _dbProducto.GetAsync(u => u.Titulo.ToLower() == productoDto.Titulo.ToLower() || u.Codigo == productoDto.Codigo) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
@@ -206,7 +223,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.Created;
-                _response.Message = "El producto ha sido registrado con exito";
+                _response.Message = "El producto ha sido registrado con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -220,16 +237,34 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpPut("updateProducto/{id:int}", Name = "UpdateProducto")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateProducto(int id, [FromBody] ProductoDto productoDto)
         {
             try
             {
+
                 var productoFromDb = await _dbProducto.GetAsync(u => u.Id == productoDto.Id, tracked: false);
                 if (productoFromDb == null || productoDto == null || id != productoDto.Id)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "El registro no existe";
+                    return BadRequest(_response);
+                }
+
+                if (productoDto.Cantidad < 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error al intentar agregar un producto con un stock menor a cero";
+                    return BadRequest(_response);
+                }
+
+                if (productoDto.CategoriaId == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Debe seleccionar una categoria para el producto";
                     return BadRequest(_response);
                 }
 
@@ -251,7 +286,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El producto ha sido actualizado con exito";
+                _response.Message = "El producto ha sido actualizado con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -264,6 +299,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpDelete("deleteProducto/{id:int}", Name = "deleteProducto")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteProducto(int id)
         {
             try
@@ -282,7 +318,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El producto ha sido eliminado con exito";
+                _response.Message = "El producto ha sido eliminado con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -355,16 +391,25 @@ namespace CapernovaAPI.Controllers
        
         [HttpPost]
         [Route("createCategoria")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateCategoria([FromBody] CategoriaDto categoriaDto)
         {
             try
             {
-                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Name == categoriaDto.Name);
+                if(categoriaDto == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ha courrido un error inesperado en el servidor. Inténtelo más tarde!!";
+                    return BadRequest(_response);
+                }
+
+                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Name.ToLower() == categoriaDto.Name.ToLower() );
                 if (categoriaExist != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "EL registro ya existe";
+                    _response.Message = "El registro ya existe";
                     return BadRequest(_response);
                 }
 
@@ -393,6 +438,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPut]
         [Route("updateCategoria/{id:int}", Name = "updateCategoria")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateCategoria(int id, [FromBody] CategoriaDto categoriaDto)
         {
             try
@@ -412,7 +458,7 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "La categoría ha sido actualizado con exito";
+                    _response.Message = "La categoría ha sido actualizado con éxito";
                     return Ok(_response);
 
                 }
@@ -434,6 +480,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpDelete("deleteCategoria/{id:int}", Name = "deleteCategoria")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteCategoria(int id)
         {
             try

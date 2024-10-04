@@ -28,6 +28,6 @@ namespace User.Managment.Data.Models.Course.DTO
         public string? BibliotecaUrl { get; set; }
         public string? ClaseUrl { get; set; }
 
-        public int CategoriaId { get; set; }
+        public int? CategoriaId { get; set; }
     }
 }

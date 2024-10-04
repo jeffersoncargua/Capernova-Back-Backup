@@ -16,12 +16,12 @@ namespace CapernovaAPI.Controllers
     {
         private readonly ICourseRepositoty _dbCourse;
         private readonly IProductoRepositoy _dbProducto;
-        protected ApiResponse _respose;
+        protected ApiResponse _response;
         public CourseController(ICourseRepositoty dbCourse, IProductoRepositoy dbProducto)
         {
             _dbCourse = dbCourse;
             _dbProducto = dbProducto;
-            this._respose = new();
+            this._response = new();
         }
         
         /// <summary>
@@ -38,29 +38,29 @@ namespace CapernovaAPI.Controllers
                 if (!string.IsNullOrEmpty(search))
                 {
                     var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search));
-                    _respose.isSuccess = true;
-                    _respose.StatusCode = HttpStatusCode.OK;
-                    _respose.Message = "Se ha obtenido la lista de Cursos";
-                    _respose.Result = coursesQuery;
-                    return Ok(_respose);
+                    _response.isSuccess = true;
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.Message = "Se ha obtenido la lista de Cursos";
+                    _response.Result = coursesQuery;
+                    return Ok(_response);
                 }
 
                 var courses = await _dbCourse.GetAllAsync(); //devuelve una lista con los cursos 
                 //var courses = await _db.CourseTbl.ToListAsync(); //si funciona la linea anterior se elimina esta linea
                 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.OK;
-                _respose.Message = "Se ha obtenido la lista de Cursos";
-                _respose.Result = courses;
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de Cursos";
+                _response.Result = courses;
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() }; 
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() }; 
             }
 
-            return _respose;
+            return _response;
   
         }
 
@@ -77,24 +77,24 @@ namespace CapernovaAPI.Controllers
                 var course = await _dbCourse.GetAsync(u => u.Id == id);// devuelve el curso cuyo id sea igual al Id del curso
                 if (course == null)
                 {
-                    _respose.isSuccess = false;
-                    _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "El registro no existe!";
-                    return BadRequest(_respose);
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro no existe!";
+                    return BadRequest(_response);
                 }
 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.OK;
-                _respose.Message = "Se ha obtenido el curso con exito!";
-                _respose.Result = course;
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido el curso con éxito!";
+                _response.Result = course;
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() };
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
             }
-            return _respose;
+            return _response;
         }
 
         /// <summary>
@@ -110,41 +110,50 @@ namespace CapernovaAPI.Controllers
                 var course = await _dbCourse.GetAsync(u => u.Codigo == codigo);// devuelve el curso cuyo id sea igual al Id del curso
                 if (course == null)
                 {
-                    _respose.isSuccess = false;
-                    _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "El registro no existe!";
-                    return BadRequest(_respose);
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro no existe!";
+                    return BadRequest(_response);
                 }
 
 
 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.OK;
-                _respose.Message = "Se ha obtenido el curso con exito!";
-                _respose.Result = course;
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido el curso con éxito!";
+                _response.Result = course;
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() };
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
             }
-            return _respose;
+            return _response;
         }
 
 
         [HttpPost]
         [Route("createCourse")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateCourse([FromBody] CourseDto course)
         {
             try
             {
+                if (course.CategoriaId == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Debe seleccionar una categoria para el curso";
+                    return BadRequest(_response);
+                }
+
                 if (await _dbCourse.GetAsync(u => u.Titulo == course.Titulo) != null)
                 {
-                    _respose.isSuccess = false;
-                    _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "El curso ya esta registrado";
-                    return BadRequest(_respose);
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El curso ya esta registrado";
+                    return BadRequest(_response);
                 }
 
                 //Se genera el modelo del curso que se va a enviar a almacenar en la base de datos
@@ -180,35 +189,43 @@ namespace CapernovaAPI.Controllers
 
 
 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.Created;
-                _respose.Message = "El curso ha sido registrado con exito";
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.Message = "El curso ha sido registrado con éxito";
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() };
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
             }
-            return _respose;
+            return _response;
 
         }
 
 
         [HttpPut("updateCourse/{id:int}", Name ="UpdateCourse")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateCourse(int id, [FromBody] CourseDto course)
         {
             try
             {
+                if (course.CategoriaId == 0)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Debe seleccionar una categoria para el curso";
+                    return BadRequest(_response);
+                }
                 //var courseFromDb =await _db.CourseTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == course.Id);
                 var courseFromDb = await _dbCourse.GetAsync(u => u.Id == course.Id, tracked: false);
                 var productoFromDb = await _dbProducto.GetAsync(u => u.Codigo == courseFromDb.Codigo, tracked: false);
                 if (courseFromDb == null || course == null || id != course.Id || productoFromDb == null)
                 {
-                    _respose.isSuccess = false;
-                    _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "Error, ha ocurrido un error y no se pudo actualizar el registro";
-                    return BadRequest(_respose);
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error, ha ocurrido un error y no se pudo actualizar el registro";
+                    return BadRequest(_response);
                 }
 
                 Course model = new()
@@ -267,21 +284,22 @@ namespace CapernovaAPI.Controllers
 
                 }
 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.OK;
-                _respose.Message = "El curso ha sido actualizado con exito";
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "El curso ha sido actualizado con éxito";
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() };
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
             }
-            return _respose;
+            return _response;
    
         }
 
         [HttpDelete("deleteCourse/{id:int}", Name = "deleteCourse")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteCourse(int id)
         {
             try
@@ -290,10 +308,10 @@ namespace CapernovaAPI.Controllers
                 var producto = await _dbProducto.GetAsync(u => u.Codigo == course.Codigo, tracked: false);
                 if (course == null || producto == null)
                 {
-                    _respose.isSuccess = false;
-                    _respose.StatusCode = HttpStatusCode.BadRequest;
-                    _respose.Message = "Ha ocurrido un error inesperado al eliminar el registro";
-                    return BadRequest(_respose);
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ha ocurrido un error inesperado al eliminar el registro";
+                    return BadRequest(_response);
                 }
 
                 await _dbCourse.RemoveAsync(course);
@@ -303,17 +321,17 @@ namespace CapernovaAPI.Controllers
                 await _dbProducto.SaveAsync();
 
 
-                _respose.isSuccess = true;
-                _respose.StatusCode = HttpStatusCode.OK;
-                _respose.Message = "El curso ha sido eliminado con exito";
-                return Ok(_respose);
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "El curso ha sido eliminado con éxito";
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-                _respose.isSuccess = false;
-                _respose.Errors = new List<string>() { ex.ToString() };
+                _response.isSuccess = false;
+                _response.Errors = new List<string>() { ex.ToString() };
             }
-            return _respose;
+            return _response;
 
         }
 

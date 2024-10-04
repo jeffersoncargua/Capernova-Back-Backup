@@ -5,6 +5,7 @@ using Capernova.Utility;
 //using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using User.Managment.Data.Data;
@@ -40,6 +41,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
 );
+
+//Se agrega el almacenamiento en cache de las peticiones a las API
+builder.Services.AddResponseCaching();
 
 //Se agrega los repositorios de las entidades que se van a ocupar en el proyecto
 builder.Services.AddScoped<ICourseRepositoty, CourseRepository>();
@@ -104,7 +108,16 @@ builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
 //builder.Services.AddControllers();
 //Se agrega para que funcione la serializacion y deserializacion json
-builder.Services.AddControllers();
+builder.Services.AddControllers( option =>
+{
+    option.CacheProfiles.Add("Default30",
+        new CacheProfile
+        {
+            Duration = 30
+        });
+});
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

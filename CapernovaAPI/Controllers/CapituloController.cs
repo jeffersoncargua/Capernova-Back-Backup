@@ -83,6 +83,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPost("createCapitulo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateCapitulo([FromBody] CapituloDto capituloDto)
         {
             try
@@ -92,6 +93,15 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error. No se pudo generar el registro";
+                    return BadRequest(_response);
+                }
+
+                var capituloExist = await _db.CapituloTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == capituloDto.Titulo.ToLower());
+                if (capituloExist != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro ya existe";
                     return BadRequest(_response);
                 }
 
@@ -123,6 +133,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateCapitulo/{id:int}", Name = "updateCapitulo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateCapitulo(int? id, [FromBody] CapituloDto capituloDto)
         {
             try
@@ -131,9 +142,9 @@ namespace CapernovaAPI.Controllers
                 if (capituloDto == null || id != capituloDto.Id || capitulo == null)
                 {
                     _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "No se ha encontrado registros de este capitulo";
-                    return NotFound(_response);
+                    return BadRequest(_response);
                 }
 
                 Capitulo model = new()
@@ -165,6 +176,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpDelete("deleteCapitulo/{id:int}",Name = "deleteCapitulo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteCapitulo(int? id)
         {
             try
@@ -177,7 +189,7 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "Ha ocurrido un error. No se pudo eliminar el registro";
                 }
 
-                _db.CapituloTbl.Remove(capitulo);
+                _db.CapituloTbl.Remove(capitulo!);
                 await _db.SaveChangesAsync();
 
                 _response.isSuccess = true;

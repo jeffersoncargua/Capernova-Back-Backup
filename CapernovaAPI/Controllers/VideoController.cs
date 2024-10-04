@@ -84,6 +84,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPost("createVideo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateVideo([FromBody] VideoDto videoDto)
         {
             try
@@ -93,6 +94,15 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error. No se pudo generar el registro";
+                    return BadRequest(_response);
+                }
+
+                var videoExist = await _db.VideoTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == videoDto.Titulo.ToLower());
+                if (videoExist != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "El registro ya existe";
                     return BadRequest(_response);
                 }
 
@@ -127,6 +137,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateVideo/{id:int}",Name = "updateVideo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateVideo(int id, [FromBody] VideoDto videoDto)
         {
             try
@@ -173,6 +184,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpDelete("deleteVideo/{id:int}", Name = "deleteVideo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteVideo(int? id)
         {
             try

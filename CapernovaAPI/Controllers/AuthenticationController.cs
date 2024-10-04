@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Capernova.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -24,17 +25,19 @@ namespace CapernovaAPI.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager; //Permite controlar el envio del codigo OTP
         private readonly IEmailRepository _emailRepository;
         private readonly IConfiguration _configuration;
+        private readonly FrontSettings _frontConfig;
         protected ApiResponse _response;
         private string secretKey;
 
         public AuthenticationController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager
-            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager)
+            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, FrontSettings frontConfig)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailRepository = emailRepository;
             _configuration = configuration;
             _signInManager = signInManager;
+            _frontConfig = frontConfig;
             this._response = new();
             secretKey = configuration.GetValue<string>("JWT:Secret");
         }
@@ -102,7 +105,8 @@ namespace CapernovaAPI.Controllers
                     //var tokenEncode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(tokenEmail));
                     //Se genera el link para enviar el token y el usuario
                     //var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}"; //se debe cambiar la url cuando se suba a produccion
+                    //var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}"; //se debe cambiar la url cuando se suba a produccion
+                    var confirmationLink = $"{_frontConfig.Url}/confirmEmail?token={tokenEmail}&email={user.Email}"; //se debe cambiar la url cuando se suba a produccion
 
 
 
@@ -166,7 +170,7 @@ namespace CapernovaAPI.Controllers
             //        new Response { Status = "Error", Message = "El usuario no ha confirmado su correo" });
             _response.StatusCode = HttpStatusCode.InternalServerError;
             _response.isSuccess = false;
-            _response.Message = "El usuario no ha confirmado su correo";
+            _response.Message = "Ha ocurrido un error en nuestro servidor";
             return NotFound(_response);
 
         }
@@ -204,8 +208,8 @@ namespace CapernovaAPI.Controllers
                                  new Claim(ClaimTypes.Name, user.UserName),
                                  new Claim(ClaimTypes.Role, userRoles.First()),
                                  new Claim(ClaimTypes.NameIdentifier, user.Id),
-                                 new Claim(ClaimTypes.Actor, user.Name),
-                                 new Claim(ClaimTypes.GivenName, user.LastName),
+                                 new Claim(ClaimTypes.Actor, user.Name!),
+                                 new Claim(ClaimTypes.GivenName, user.LastName!),
                                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
                                 }),
@@ -391,8 +395,9 @@ namespace CapernovaAPI.Controllers
                 //Se obtiene el token para poder cambiar de contraseña
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 //var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
-
+                //var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
+                var forgotPasswordLink = $"{_frontConfig.Url}/changePassword?token={token}&email={user.Email}";
+                
                 var message = new Message(new string[] { user.Email }, "Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
                 _emailRepository.SendEmail(message);
 
@@ -405,10 +410,10 @@ namespace CapernovaAPI.Controllers
             }
             //return StatusCode(StatusCodes.Status404NotFound,
             //            new Response { Status = "Error", Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña" });
-            _response.StatusCode = HttpStatusCode.NotFound;
+            _response.StatusCode = HttpStatusCode.BadRequest;
             _response.isSuccess = false;
             _response.Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña";
-            return NotFound(_response);
+            return BadRequest(_response);
         }
 
         [HttpGet("reset-password")]
@@ -452,10 +457,10 @@ namespace CapernovaAPI.Controllers
                     }
 
                     //return Ok(ModelState);
-                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.isSuccess = false;
                     _response.Message = "No se pudo realizar el cambio de contraseña. Intentelo nuevamente";
-                    return NotFound(_response);
+                    return BadRequest(_response);
                 }
                 //return StatusCode(StatusCodes.Status200OK,
                 //        new Response { Status = "Success", Message = "Su contraseña ha sido cambiada" });
