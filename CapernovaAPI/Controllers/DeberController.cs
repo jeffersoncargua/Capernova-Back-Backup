@@ -37,7 +37,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el/los deberes de este curso";
+                _response.Message = "Se ha obtenido el/los deber/es de este curso";
                 _response.Result = deberes;
                 return Ok(_response);
             }
@@ -62,7 +62,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se han encontrado el deber!!";
+                    _response.Message = "No se ha encontrado el deber!!";
                     return BadRequest(_response);
                 }
 
@@ -76,7 +76,7 @@ namespace CapernovaAPI.Controllers
             {
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se han encontrado el deber!!";
+                _response.Message = "No se ha encontrado el deber!!";
                 _response.Errors = new List<string> { ex.ToString() };
             }
 
@@ -84,6 +84,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPost("createDeber")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateDeber([FromBody] DeberDto deberDto)
         {
             try
@@ -93,6 +94,14 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error. No se pudo generar el registro del deber!";
+                    return BadRequest(_response);
+                }
+
+                if (await _db.DeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == deberDto.Titulo.ToLower()) != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ya se ha registrado un deber con un titulo similar!!";
                     return BadRequest(_response);
                 }
 
@@ -125,6 +134,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateDeber/{id:int}", Name = "updateDeber")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateDeber(int id, [FromBody] DeberDto deberDto)
         {
             try
@@ -170,6 +180,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpDelete("deleteDeber/{id:int}", Name = "deleteDeber")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteDeber(int? id)
         {
             try
@@ -182,7 +193,7 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "Ha ocurrido un error. No se pudo eliminar el registro";
                 }
 
-                _db.DeberTbl.Remove(deber);
+                _db.DeberTbl.Remove(deber!);
                 await _db.SaveChangesAsync();
 
                 _response.isSuccess = true;

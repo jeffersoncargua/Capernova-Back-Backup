@@ -129,7 +129,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el producto con exito!";
+                _response.Message = "Se ha obtenido el producto con éxito!";
                 _response.Result = producto;
                 return Ok(_response);
             }
@@ -176,7 +176,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createProducto")]
-        //[ResponseCache(CacheProfileName = "Default30")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateProducto([FromBody] ProductoDto productoDto)
         {
             try
@@ -193,7 +193,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoria para el producto";
+                    _response.Message = "Debe seleccionar una categoría para el producto";
                     return BadRequest(_response);
                 }
 
@@ -264,7 +264,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoria para el producto";
+                    _response.Message = "Debe seleccionar una categoría para el producto";
                     return BadRequest(_response);
                 }
 
@@ -346,7 +346,7 @@ namespace CapernovaAPI.Controllers
                     var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search) && u.Tipo == tipo).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Message = "Se ha obtenido la lista de categorías";
                     _response.Result = categotyQuery;
                     return Ok(_response);
                 }
@@ -355,7 +355,7 @@ namespace CapernovaAPI.Controllers
                     var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Tipo == tipo).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Message = "Se ha obtenido la lista de categorías";
                     _response.Result = categotyQuery;
                     return Ok(_response);
                 }
@@ -364,7 +364,7 @@ namespace CapernovaAPI.Controllers
                     var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search)).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de categorias";
+                    _response.Message = "Se ha obtenido la lista de categorías";
                     _response.Result = categotyQuery;
                     return Ok(_response);
                 }
@@ -396,11 +396,19 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                if(categoriaDto == null)
+                if (string.IsNullOrEmpty(categoriaDto.Tipo))
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha courrido un error inesperado en el servidor. Inténtelo más tarde!!";
+                    _response.Message = "Asegúrate de seleccionar el tipo de categoría.";
+                    return BadRequest(_response);
+                }
+
+                if(categoriaDto == null || string.IsNullOrEmpty(categoriaDto.Name))
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Asegúrate de rellenar los campos.";
                     return BadRequest(_response);
                 }
 
@@ -443,6 +451,22 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(categoriaDto.Tipo))
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Asegúrate de seleccionar el tipo de categoría.";
+                    return BadRequest(_response);
+                }
+
+                if (categoriaDto == null || string.IsNullOrEmpty(categoriaDto.Name))
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Asegúrate de rellenar los campos.";
+                    return BadRequest(_response);
+                }
+
                 var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
                 if (categoriaExist != null && categoriaDto != null && categoriaDto.Id == id)
                 {

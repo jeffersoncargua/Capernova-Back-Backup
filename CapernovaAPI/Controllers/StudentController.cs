@@ -68,7 +68,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha la información del estudiante";
+                _response.Message = "Se ha obtenido la información del estudiante";
                 _response.Result = estudiante;
                 return Ok(_response);
             }
@@ -82,6 +82,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateStudent", Name = "updateStudent")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateStudent([FromQuery] string id, [FromBody] StudentDto studentDto)
         {
             try
@@ -90,7 +91,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error en el sistema, intentelo nuevamente!";
+                    _response.Message = "Ha ocurrido un error en el sistema, inténtelo nuevamente!";
                     return BadRequest(_response);
                 }
 
@@ -136,6 +137,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPut("updateImageStudent", Name = "updateImageStudent")]
         //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateImageStudent([FromQuery] string id, IFormFile? file)
         {
             try
@@ -145,7 +147,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido realizar su solicitud!";
+                    _response.Message = "No se ha podido completar tu solicitud!";
                     return BadRequest(_response);
                 }
 
@@ -207,7 +209,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido actualizar su fotografía!";
+                _response.Message = "No se ha podido actualizar tu fotografía!";
                 return BadRequest(_response);
 
             }
@@ -299,7 +301,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el/los capitulos de este curso";
+                _response.Message = "Se ha obtenido el/los capitulo/s de este curso";
                 _response.Result = capitulos;
                 return Ok(_response);
             }
@@ -324,13 +326,13 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se han encontrado los videos asignados a este capitulo!!";
+                    _response.Message = "No se han encontrado los videos asignados a este capítulo!!";
                     return BadRequest(_response);
                 }
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el/los videos de este capitulo";
+                _response.Message = "Se ha obtenido el/los video/s de este capítulo";
                 _response.Result = videos;
                 return Ok(_response);
             }
@@ -345,6 +347,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createViewVideo")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateViewVideo([FromBody] EstudianteVideoDto estudianteVideoDto) // permite crear la visualuzacion del video por el estudiante
         {
             try
@@ -377,8 +380,8 @@ namespace CapernovaAPI.Controllers
                     return Ok(_response);
                 }
                 _response.isSuccess = false;
-                _response.StatusCode = HttpStatusCode.NotFound;
-                _response.Message = "No se pudo registrar la visualización del video por el estudiante!!";
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Message = "El video ya ha sido visto por el estudiante!!";
                 return BadRequest(_response);
 
             }
@@ -425,6 +428,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateMatricula/{id:int}", Name = "updateMatricula")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateMatricula(int id, [FromBody] MatriculaDto matriculaDto)
         {
             try
@@ -448,14 +452,14 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha actualizado el estado de la matricula del estudiante!!";   
+                    _response.Message = "Se ha actualizado el estado de la matrícula del estudiante!!";   
                     _response.Result = model;
                     return Ok(_response);
                 }
 
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido actualizar el estado de la matricula del estudiante!!";
+                _response.Message = "No se ha podido actualizar el estado de la matrícula del estudiante!!";
                 return BadRequest(_response);
             }
             catch (Exception ex)
@@ -532,6 +536,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPut("upsertNotaDeber", Name = "upsertNotaDeber")]
         //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpsertNotaDeber([FromQuery] int id, [FromQuery] string studentId, IFormFile? file)
         {
             try
@@ -662,7 +667,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido las pruebas de este curso";
+                _response.Message = "Se ha obtenido la/s prueba/s de este curso";
                 _response.Result = deberes;
                 return Ok(_response);
             }
@@ -712,6 +717,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createComentario")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateComentario([FromBody] ComentarioDto comentarioDto)
         {
             try
@@ -738,7 +744,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha registrado su comentario. Muchas Gracias!!";
+                _response.Message = "Se ha registrado tu comentario. Muchas Gracias!!";
                 _response.Result = model;
                 return Ok(_response);
             }

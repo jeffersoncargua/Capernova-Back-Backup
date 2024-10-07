@@ -35,7 +35,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el/los pruebas de este curso";
+                _response.Message = "Se ha obtenido el/los prueba/s de este curso";
                 _response.Result = pruebas;
                 return Ok(_response);
             }
@@ -60,7 +60,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se han encontrado el prueba!!";
+                    _response.Message = "No se ha encontrado el prueba!!";
                     return BadRequest(_response);
                 }
 
@@ -74,7 +74,7 @@ namespace CapernovaAPI.Controllers
             {
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se han encontrado el prueba!!";
+                _response.Message = "No se ha encontrado el prueba!!";
                 _response.Errors = new List<string> { ex.ToString() };
             }
 
@@ -82,6 +82,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPost("createPrueba")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreatePrueba([FromBody] PruebaDto pruebaDto)
         {
             try
@@ -91,6 +92,14 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error. No se pudo generar el registro";
+                    return BadRequest(_response);
+                }
+
+                if (await _db.PruebaTbl.AsNoTracking().FirstOrDefaultAsync(u =>  u.Titulo.ToLower() == pruebaDto.Titulo.ToLower()) != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Ya se ha registrado una prueba con un titulo similar!!";
                     return BadRequest(_response);
                 }
 
@@ -124,6 +133,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updatePrueba/{id:int}",Name = "updatePrueba")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdatePrueba(int id, [FromBody] PruebaDto pruebaDto)
         {
             try
@@ -170,6 +180,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpDelete("deletePrueba/{id:int}", Name = "deletePrueba")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeletePrueba(int? id)
         {
             try
@@ -182,7 +193,7 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "Ha ocurrido un error. No se pudo eliminar el registro";
                 }
 
-                _db.PruebaTbl.Remove(prueba);
+                _db.PruebaTbl.Remove(prueba!);
                 await _db.SaveChangesAsync();
 
                 _response.isSuccess = true;

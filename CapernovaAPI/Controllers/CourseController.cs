@@ -144,7 +144,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoria para el curso";
+                    _response.Message = "Debe seleccionar una categoría para el curso";
                     return BadRequest(_response);
                 }
 
@@ -152,7 +152,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El curso ya esta registrado";
+                    _response.Message = "El curso ya está registrado";
                     return BadRequest(_response);
                 }
 
@@ -214,7 +214,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoria para el curso";
+                    _response.Message = "Debe seleccionar una categoría para el curso";
                     return BadRequest(_response);
                 }
                 //var courseFromDb =await _db.CourseTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == course.Id);

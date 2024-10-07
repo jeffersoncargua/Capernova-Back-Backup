@@ -46,7 +46,7 @@ namespace CapernovaAPI.Controllers
                     && u.Emision >= startDate  && u.Emision <= endDate).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de las ventas";
+                    _response.Message = "Se ha obtenido la lista de las Ventas";
                     _response.Result = ventasQuery;
                     return Ok(_response);
                 }
@@ -57,7 +57,7 @@ namespace CapernovaAPI.Controllers
                     var ventasQuery = await _db.VentaTbl.Where(u => u.Emision >= startDate && u.Emision <= endDate).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de las ventas";
+                    _response.Message = "Se ha obtenido la lista de las Ventas";
                     _response.Result = ventasQuery;
                     return Ok(_response);
                 }else if (!string.IsNullOrEmpty(search))
@@ -68,7 +68,7 @@ namespace CapernovaAPI.Controllers
                     || u.TransaccionId.ToLower().Contains(search)).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de las ventas";
+                    _response.Message = "Se ha obtenido la lista de las Ventas";
                     _response.Result = ventasQuery;
                     return Ok(_response);
                 }
@@ -78,7 +78,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido la lista de las ventas";
+                _response.Message = "Se ha obtenido la lista de las Ventas";
                 _response.Result = ventas;
                 return Ok(_response);
             }
@@ -123,6 +123,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpDelete("deleteVenta/{id:int}", Name = "deleteVenta")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteVenta(int id)
         {
             try
@@ -141,7 +142,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "La venta ha sido eliminada con exito";
+                _response.Message = "La venta ha sido eliminada con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -218,6 +219,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("updateVenta/{id:int}", Name = "updateVenta")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateVenta(int id)
         {
             try
@@ -279,8 +281,8 @@ namespace CapernovaAPI.Controllers
                                 }
                             }
 
-                            _db.ShoppingCartTbl.Remove(itemCart);
-                            await _db.SaveChangesAsync();
+                            //_db.ShoppingCartTbl.Remove(itemCart);
+                            //await _db.SaveChangesAsync();
                         }
                     }
 
@@ -310,7 +312,7 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha efectuado el reembolso con exito";
+                    _response.Message = "Se ha efectuado el reembolso con éxito";
                     return Ok(_response);
                 }
 
@@ -326,6 +328,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpPut("updatePedido/{id:int}", Name = "updatePedido")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdatePedido(int id, [FromBody] PedidoDto pedidoDto)
         {
             try
@@ -355,7 +358,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El pedido ha sido actualizado con exito";
+                _response.Message = "El pedido ha sido actualizado con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -368,6 +371,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpDelete("deletePedido/{id:int}", Name = "deletePedido")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeletePedido(int id)
         {
             try
@@ -386,7 +390,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El pedido ha sido eliminado con exito";
+                _response.Message = "El pedido ha sido eliminado con éxito";
                 return Ok(_response);
             }
             catch (Exception ex)

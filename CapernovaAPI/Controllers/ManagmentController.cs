@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Routing;
+﻿using Capernova.Utility;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using User.Managment.Data.Models.Authentication.SignUp;
 using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Data.Models.PaypalOrder;
 //using User.Managment.Data.Models.Managment;
 //using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Models;
@@ -30,11 +32,13 @@ namespace CapernovaAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _db;
         private readonly ICourseRepositoty _dbCourse;
+        private readonly FrontSettings _frontURL;
         protected ApiResponse _response;
         private string secretKey;
 
         public ManagmentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager
-            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db, ICourseRepositoty dbCourse)
+            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db, ICourseRepositoty dbCourse,
+            FrontSettings frontURL)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -42,6 +46,7 @@ namespace CapernovaAPI.Controllers
             _configuration = configuration;
             _signInManager = signInManager;
             _db = db;
+            _frontURL = frontURL;
             _dbCourse = dbCourse;
             this._response = new();
             secretKey = configuration.GetValue<string>("JWT:Secret");
@@ -54,17 +59,19 @@ namespace CapernovaAPI.Controllers
         /// <returns>Retorna la respuesta del registro que puede ser satisfactoria o no</returns>
         [HttpPost]
         [Route("registration")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterUser registerUser)
         {
             try
             {
+                string textMessage = "";
                 //Se chequea si el usuario existe
                 var userExist = await _userManager.FindByEmailAsync(registerUser.Email);
                 if (userExist != null)
                 {
                    
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El usuario ya esta registrado";
+                    _response.Message = "El usuario ya está registrado";
                     _response.isSuccess = false;
                     return BadRequest(_response);
                 }
@@ -108,12 +115,39 @@ namespace CapernovaAPI.Controllers
                     await _userManager.AddToRoleAsync(user, registerUser.Role);
 
                     //Se agrega el token para verificar el email       
-                    var tokenEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);                 
+                    var tokenEmail = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //Se genera el link para enviar el token y el usuario
-                    var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
+                    //var confirmationLink = $"https://localhost:3000/confirmEmail?token={tokenEmail}&email={user.Email}";
+                    var confirmationLink = $"{_frontURL.Url}/confirmEmail?token={tokenEmail}&email={user.Email}";
+
+                    //Se arma el mensaje que se le va a enviar el talento humano de Capernova
+                    //textHtml += $"";
+                    textMessage += $"<div style='display:flex; justify-content:center;'>";
+                    textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
+                    textMessage += $"</div>";
+                    textMessage += $"<h1 style='text-align:center'><b>Bienvenido a Capernova!!</b></h1>";
+                    textMessage += $"<h4><b>Nombre:</b> <span style='font-weight: normal;'>{registerUser.Name}</span></h4>";
+                    textMessage += $"<h4><b>Apellido:</b> <span style='font-weight: normal;'>{registerUser.LastName}</span></h4>";
+                    textMessage += $"<h4><b>Teléfono:</b> <span style='font-weight: normal;'>{registerUser.Phone}</span></h4>";
+                    textMessage += $"<h4><b>Tus credenciales son:</b></h4>";
+                    textMessage += $"<br />";
+                    textMessage += $"<h4><b>Correo:</b> <span style='font-weight: normal;'>{registerUser.Email}</span></h4>";
+                    textMessage += $"<h4><b>Password:</b> <span style='font-weight: normal;'>{registerUser.Password}</span></h4>";
+                    textMessage += $"<br />";
+                    textMessage += $"<br />";
+                    textMessage += $"<div>";
+                    textMessage += $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>";
+                    textMessage += $"</div>";
+                    textMessage += $"<p>Para mayor información comunicate al 0987203469, o envíanos un mensaje por nuestro whatsapp.</p>";
+                    textMessage += $"<br />";
+                    textMessage += $"<p>Ten un excelente día</p>";
+                    textMessage += $"<br />";
+                    textMessage += $"<p>Atentamente, Administración de Capernova</p>";
+                    
+
 
                     //Se arma el mensaje con el email del usuario registrado y el enlace de confirmacion del correo
-                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
+                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación del talento humuno de capernova ", textMessage);
                     //Se envia el mensaje que se va a remitir por correo electrónico
                     _emailRepository.SendEmail(message);
 
@@ -304,13 +338,14 @@ namespace CapernovaAPI.Controllers
 
         [HttpDelete]
         [Route("deleteUser/{id}",Name ="deleteUser")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteUser(string id)
         {
             try
             {
                 var course = await _dbCourse.GetAllAsync(u => u.TeacherId == id, tracked:false);
 
-                if (course != null)
+                if (course.Count > 0 && course != null)
                 {
                     foreach (var item in course)
                     {
@@ -328,17 +363,19 @@ namespace CapernovaAPI.Controllers
                             //NotaFinal = item.NotaFinal,
                             //Capitulos = item.Capitulos,
                             ImagenUrl = item.ImagenUrl,
+                            BibliotecaUrl = item.BibliotecaUrl,
+                            ClaseUrl = item.ClaseUrl,
                             //IsActive = item.IsActive,
                             //State = item.State,
                             //Teacher = null
                         };
                         await _dbCourse.UpdateAsync(model);
-                        //await _dbCourse.SaveAsync();
+                        await _dbCourse.SaveAsync();
 
                     }
                 }
 
-                //Esta seccion permitira eliminar el usuario si existe en otra tabla
+                //Esta seccion permitira eliminar el usuario si existe en la tabla de Teacher
                 var teacher = await _db.TeacherTbl.FirstOrDefaultAsync(u => u.Id == id);
                 if (teacher != null)
                 {
@@ -347,14 +384,22 @@ namespace CapernovaAPI.Controllers
 
                 }
 
+                //Esta seccion permitira eliminar el usuario si existe en la tabla de Student
+                var student = await _db.StudentTbl.FirstOrDefaultAsync(u => u.Id == id);
+                if (student != null)
+                {
+                    _db.StudentTbl.Remove(student);
+                    await _db.SaveChangesAsync();
+
+                }
+
 
                 var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
-
                 if (user == null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido realizar esta accion";
+                    _response.Message = "No se ha podido realizar esta acción";
                     return BadRequest(_response);
                 }
 
@@ -371,7 +416,6 @@ namespace CapernovaAPI.Controllers
             {
                 _response.isSuccess = false;
                 _response.Errors = new List<string> { ex.ToString() };
-
             }
 
             return _response;
@@ -448,6 +492,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("assigmentCourse/{id:int}", Name ="AssigmentCourse")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> AssigmentCourse(int id,[FromBody] string teacherId)
         {
             try
@@ -488,6 +533,8 @@ namespace CapernovaAPI.Controllers
                     ImagenUrl = course.ImagenUrl,
                     //IsActive = course.IsActive,
                     //State = course.State
+                    BibliotecaUrl = course.BibliotecaUrl,
+                    ClaseUrl = course.ClaseUrl,
                 };
 
                 await _dbCourse.UpdateAsync(model);
@@ -495,7 +542,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha añadido el curso";
+                _response.Message = $"Se ha asigando al profesor al curso de {course.Titulo}";
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -509,6 +556,7 @@ namespace CapernovaAPI.Controllers
         }
 
         [HttpPut("deleteAssigmentCourse/{id:int}", Name = "DeleteAssigmentCourse")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteAssigmentCourse(int id, [FromBody] string teacherId)
         {
             try
@@ -548,7 +596,9 @@ namespace CapernovaAPI.Controllers
                     ImagenUrl = course.ImagenUrl,
                     //IsActive = course.IsActive,
                     //State = course.State
-                    FolderId = course.FolderId
+                    FolderId = course.FolderId,
+                    BibliotecaUrl = course.BibliotecaUrl,
+                    ClaseUrl = course.ClaseUrl,
                 };
 
                 await _dbCourse.UpdateAsync(model);
@@ -556,7 +606,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha eliminado el curso asignado";
+                _response.Message = $"Se ha eliminado al profesor del curso de {course.Titulo}";
                 return Ok(_response);
             }
             catch (Exception ex)
