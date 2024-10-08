@@ -150,7 +150,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error en el sistema, inténtelo nuevamente!";
+                    _response.Message = "Ha ocurrido un error en el sistema. Inténtelo nuevamente!";
                     return BadRequest(_response);
                 }
 
@@ -179,7 +179,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Su información se ha actualizado correctamente!";
+                _response.Message = "Tu información se ha actualizado correctamente!";
                 return Ok(_response);
 
 
@@ -204,7 +204,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido realizar su solicitud!";
+                    _response.Message = "No se ha podido completar con la actualización de tu fotografía!";
                     return BadRequest(_response);
                 }
 
@@ -241,7 +241,7 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Su fotografía se ha actualizado correctamente!";
+                    _response.Message = "Tu fotografía se ha actualizado correctamente!";
                     return Ok(_response);
 
                 }
@@ -267,7 +267,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido actualizar su fotografía!";
+                _response.Message = "No se ha podido actualizar tu fotografía!";
                 return BadRequest(_response);
 
             }
@@ -433,7 +433,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido calificar la prueba!!";
+                _response.Message = "No se ha podido calificar la prueba. Revise la prueba antes de calificar y coloca la nota correspondiente";
                 return BadRequest(_response);
 
                 //_response.isSuccess = false;
@@ -458,7 +458,7 @@ namespace CapernovaAPI.Controllers
             try
             {
                 var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if (matriculaExist != null && notaFinal != null)
+                if (matriculaExist != null && !string.IsNullOrEmpty(notaFinal))
                 {
                     Matricula model = new()
                     {
@@ -484,7 +484,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = false;
                 _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido colocar la nota final en la matrícula del estudiante!!";
+                _response.Message = "No se ha podido colocar la nota final en la matrícula del estudiante. Asegúrate de colocar la nota";
                 return BadRequest(_response);
             }
             catch (Exception ex)

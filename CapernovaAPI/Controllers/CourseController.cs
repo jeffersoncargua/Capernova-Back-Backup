@@ -224,7 +224,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Error, ha ocurrido un error y no se pudo actualizar el registro";
+                    _response.Message = "Ha ocurrido un error y no se pudo actualizar el registro";
                     return BadRequest(_response);
                 }
 

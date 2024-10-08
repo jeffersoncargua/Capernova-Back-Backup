@@ -91,7 +91,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error en el sistema, inténtelo nuevamente!";
+                    _response.Message = "Ha ocurrido un error en el sistema. Inténtelo nuevamente!";
                     return BadRequest(_response);
                 }
 
@@ -101,7 +101,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El usuario no esta registrado!";
+                    _response.Message = "El usuario no está registrado!";
                     return BadRequest(_response);
                 }
 
@@ -122,7 +122,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Su información se ha actualizado correctamente!";
+                _response.Message = "Tu información se ha actualizado correctamente!";
                 return Ok(_response);
 
 
@@ -147,7 +147,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido completar tu solicitud!";
+                    _response.Message = "No se ha podido completar la actualización de tu fotografía!";
                     return BadRequest(_response);
                 }
 
@@ -183,7 +183,7 @@ namespace CapernovaAPI.Controllers
 
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Su fotografía se ha actualizado correctamente!";
+                    _response.Message = "Tu fotografía se ha actualizado correctamente!";
                     return Ok(_response);
 
                 }
@@ -412,7 +412,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha enviado el registrado de la visualización del video por el estudiante!!";
+                _response.Message = "Se ha enviado los registros de la visualización de los video por el estudiante!!";
                 _response.Result = viewExist;
                 return Ok(_response);
 
@@ -555,7 +555,7 @@ namespace CapernovaAPI.Controllers
                         {
                             _response.isSuccess = false;
                             _response.StatusCode = HttpStatusCode.BadRequest;
-                            _response.Message = "Se presento un erro al cargar el deber, inténtalo más tarde!";
+                            _response.Message = "Se presentó un error al cargar el deber, inténtalo más tarde!";
                             return BadRequest(_response);
                         }
 
@@ -722,11 +722,11 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                if(comentarioDto == null)
+                if(comentarioDto == null || string.IsNullOrEmpty(comentarioDto.FeedBack))
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido registar su comentario";
+                    _response.Message = "Ha ocurrido un error. Recuerda enviarnos tus comentarios y sugerencias";
                     return BadRequest(_response);
                 }
 

@@ -162,7 +162,7 @@ namespace CapernovaAPI.Controllers
 
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el producto con exito!";
+                _response.Message = "Se ha obtenido el producto con éxito!";
                 _response.Result = producto;
                 return Ok(_response);
             }

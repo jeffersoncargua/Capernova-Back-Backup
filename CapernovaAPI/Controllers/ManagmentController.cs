@@ -175,10 +175,10 @@ namespace CapernovaAPI.Controllers
                 }
                 else
                 {
-                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.isSuccess = false;
-                    _response.Message = "El rol no existe";
-                    return NotFound(_response);
+                    _response.Message = "Debe seleccionar un rol de usuario!!";
+                    return BadRequest(_response);
                 }
             }
             catch (Exception ex)

@@ -181,6 +181,7 @@ namespace CapernovaAPI.Controllers
         /// <returns>Si todo sale correctamente, se envia el id de transacción para continuar con el proceso de pago con paypal</returns>
         [HttpPost]
         [Route("paypalCard")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> PaypalCard([FromBody] Order model)
         {
             try
@@ -409,6 +410,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createOrder")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateOrder([FromBody] ConfirmOrder confirmOrder)
         {
             try
@@ -419,7 +421,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Error!! No se pudo generar su pedido. ";
+                    _response.Message = "Error!! No se pudo generar su compra. ";
                     return BadRequest(_response);
                 }
 
@@ -430,7 +432,7 @@ namespace CapernovaAPI.Controllers
                     {
                         _response.isSuccess = false;
                         _response.StatusCode = HttpStatusCode.BadRequest;
-                        _response.Message = "Error!! No se pudo generar su pedido. El usuario no existe ";
+                        _response.Message = "Error!! No se pudo generar compra. El usuario no existe ";
                         return BadRequest(_response);
                     }
 
@@ -465,7 +467,7 @@ namespace CapernovaAPI.Controllers
                     {
                         _response.isSuccess = false;
                         _response.StatusCode = HttpStatusCode.BadRequest;
-                        _response.Message = "Error!! No se pudo generar su pedido. No existe registro de la venta ";
+                        _response.Message = "Error!! No se pudo generar su compra. No existe registro de la venta ";
                         return BadRequest(_response);
                     }
 
@@ -639,7 +641,7 @@ namespace CapernovaAPI.Controllers
                     {
                         _response.isSuccess = false;
                         _response.StatusCode = HttpStatusCode.BadRequest;
-                        _response.Message = "Error!! No se pudo generar su pedido. No existe registro de la venta ";
+                        _response.Message = "Error!! No se pudo generar su compra. No existe registro de la venta ";
                         return BadRequest(_response);
                     }
 

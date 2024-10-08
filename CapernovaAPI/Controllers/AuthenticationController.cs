@@ -44,6 +44,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("register")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> Register([FromBody] RegisterUser registerUser)
         {
             try
@@ -55,7 +56,7 @@ namespace CapernovaAPI.Controllers
                     //return StatusCode(StatusCodes.Status403Forbidden,
                     //    new Response { Status = "Error", Message = "El usuario ya esta registrado" });
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El usuario ya esta registrado";
+                    _response.Message = "El usuario ya está registrado";
                     _response.isSuccess = false;
                     return BadRequest(_response);
                 }
@@ -125,10 +126,10 @@ namespace CapernovaAPI.Controllers
                 {
                     //return StatusCode(StatusCodes.Status500InternalServerError,
                     //    new Response { Status = "Error", Message = "El rol no existe!" });
-                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.isSuccess = false;
                     _response.Message = "El rol no existe";
-                    return NotFound(_response);
+                    return BadRequest(_response);
                 }
 
 
@@ -148,8 +149,6 @@ namespace CapernovaAPI.Controllers
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
-            //Se debe reemplazar los espacion en blanco con un +
-            //var decodeToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             token = token.Replace(" ", "+");
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
@@ -162,7 +161,7 @@ namespace CapernovaAPI.Controllers
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.isSuccess = true;
                     _response.Message = "Correo verificado correctamente";
-                    return NotFound(_response);
+                    return Ok(_response);
                 }
             }
 
@@ -173,11 +172,16 @@ namespace CapernovaAPI.Controllers
             _response.Message = "Ha ocurrido un error en nuestro servidor";
             return NotFound(_response);
 
+
+            //Se debe reemplazar los espacion en blanco con un +
+            //var decodeToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
         }
 
 
         [HttpPost]
         [Route("login")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginModel loginModel)
         {
             try 
@@ -273,7 +277,7 @@ namespace CapernovaAPI.Controllers
 
                             _response.StatusCode = HttpStatusCode.OK;
                             _response.isSuccess = true;
-                            _response.Message = "Login exitoso";
+                            _response.Message = "Inicio de Sesión exitoso!!";
                             _response.Result = new
                             {
                                 Token = tokenHandler.WriteToken(token),
@@ -298,7 +302,7 @@ namespace CapernovaAPI.Controllers
                         //    new Response { Status = "Error", Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!" });
                         _response.StatusCode = HttpStatusCode.BadRequest;
                         _response.isSuccess = false;
-                        _response.Message = "El usuario o la contraseña no es válido. Intentelo nuevamente!";
+                        _response.Message = "El usuario o la contraseña no es válido. Inténtelo nuevamente!";
                         return BadRequest(_response);
                     }
                 }
@@ -307,7 +311,7 @@ namespace CapernovaAPI.Controllers
                 //            new Response { Status = "Error", Message = "Usuario no registrado!" });
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.isSuccess = false;
-                _response.Message = "Usuario no registrado!";
+                _response.Message = "El usuario no está registrado!";
                 return BadRequest(_response);
             }
             catch (Exception ex)
@@ -326,6 +330,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("login-2FA")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> LoginWithOTP([FromBody] LoginOTP loginOTP)
         {
             var user = await _userManager.FindByEmailAsync(loginOTP.Email);
@@ -363,7 +368,7 @@ namespace CapernovaAPI.Controllers
 
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.isSuccess = true;
-                    _response.Message = "Login exitoso";
+                    _response.Message = "Inicio de sesión exitoso";
                     _response.Result = new
                     {
                         //Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
@@ -377,7 +382,7 @@ namespace CapernovaAPI.Controllers
 
             _response.StatusCode = HttpStatusCode.BadRequest;
             _response.isSuccess = false;
-            _response.Message = "El código ingresado es incorrecto";            
+            _response.Message = "El código ingresado está incorrecto";            
             return BadRequest(_response);
         }
 
@@ -385,41 +390,72 @@ namespace CapernovaAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("forgot-Password")]
+        [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> ForgotPassword([FromBody] ForgotPassword forgotPassword)
         {
-            //Se busca al usuario
-            var user = await _userManager.FindByEmailAsync(forgotPassword.Email);
-            //Se verifica el resultado de la busqueda de usuario
-            if ( user != null)
+            try
             {
-                //Se obtiene el token para poder cambiar de contraseña
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                //var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Authentication", new { token, email = user.Email }, Request.Scheme);
-                //var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
-                var forgotPasswordLink = $"{_frontConfig.Url}/changePassword?token={token}&email={user.Email}";
-                
-                var message = new Message(new string[] { user.Email }, "Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
-                _emailRepository.SendEmail(message);
+                //Se busca al usuario
+                var user = await _userManager.FindByEmailAsync(forgotPassword.Email);
+                //Se verifica el resultado de la busqueda de usuario
+                if (user != null)
+                {
+                    //Se obtiene el token para poder cambiar de contraseña
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    //var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Authentication", new { token, email = user.Email }, Request.Scheme);
+                    //var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
+                    var forgotPasswordLink = $"{_frontConfig.Url}/changePassword?token={token}&email={user.Email}";
 
-                //return StatusCode(StatusCodes.Status200OK,
-                //        new Response { Status = "Success", Message = $"Solicitud de cambio de contraseña ha sido enviada al correo {user.Email}. Por favor, revise su correo" });
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.isSuccess = true;
-                _response.Message = $"La solicitud de cambio de contraseña ha sido enviada al correo {user.Email}. Por favor, revise su correo";
-                return Ok(_response);
+                    var message = new Message(new string[] { user.Email }, "Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
+                    _emailRepository.SendEmail(message);
+
+                    //return StatusCode(StatusCodes.Status200OK,
+                    //        new Response { Status = "Success", Message = $"Solicitud de cambio de contraseña ha sido enviada al correo {user.Email}. Por favor, revise su correo" });
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.isSuccess = true;
+                    _response.Message = $"La solicitud de cambio de contraseña ha sido enviada al correo {user.Email}. Por favor, revise su correo";
+                    return Ok(_response);
+                }
+                //return StatusCode(StatusCodes.Status404NotFound,
+                //            new Response { Status = "Error", Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña" });
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.isSuccess = false;
+                _response.Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña";
+                return BadRequest(_response);
             }
-            //return StatusCode(StatusCodes.Status404NotFound,
-            //            new Response { Status = "Error", Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña" });
-            _response.StatusCode = HttpStatusCode.BadRequest;
-            _response.isSuccess = false;
-            _response.Message = "El usuario no existe. No se pudo realizar la solicitud de cambio de contraseña";
-            return BadRequest(_response);
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+
+            return _response;
+           
         }
 
+        //[HttpGet("reset-password")]
+        //public async Task<IActionResult> ResetPassword(string token, string email)
+        //{
+        //    var model =  new ResetPassword { Token = token, Email = email };
+        //    //return Ok(new
+        //    //{
+        //    //    model
+
+        //    //});
+        //    _response.StatusCode = HttpStatusCode.OK;
+        //    _response.isSuccess = true;
+        //    _response.Message = "";
+        //    _response.Result = new
+        //    {
+        //        model
+        //    };
+        //    return Ok(_response);
+        //}
+
         [HttpGet("reset-password")]
-        public async Task<IActionResult> ResetPassword(string token, string email)
+        public IActionResult ResetPassword(string token, string email)
         {
-            var model =  new ResetPassword { Token = token, Email = email };
+            var model = new ResetPassword { Token = token, Email = email };
             //return Ok(new
             //{
             //    model
@@ -434,6 +470,7 @@ namespace CapernovaAPI.Controllers
             };
             return Ok(_response);
         }
+
 
         [HttpPost]
         [AllowAnonymous]
@@ -459,7 +496,7 @@ namespace CapernovaAPI.Controllers
                     //return Ok(ModelState);
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.isSuccess = false;
-                    _response.Message = "No se pudo realizar el cambio de contraseña. Intentelo nuevamente";
+                    _response.Message = "No se pudo realizar el cambio de contraseña. Inténtelo nuevamente";
                     return BadRequest(_response);
                 }
                 //return StatusCode(StatusCodes.Status200OK,

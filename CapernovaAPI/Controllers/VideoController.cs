@@ -195,6 +195,7 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error. No se pudo eliminar el registro";
+                    return BadRequest(_response);
                 }
 
                 _db.VideoTbl.Remove(video);
