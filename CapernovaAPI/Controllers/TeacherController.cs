@@ -95,7 +95,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.TeacherId == id, includeProperties: "Teacher");
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower().Contains(search) && u.TeacherId == id, includeProperties: "Teacher");
                     if (coursesQuery !=null && coursesQuery.Count > 0)
                     {
                         _response.isSuccess = true;
@@ -294,7 +294,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 } else if (!string.IsNullOrEmpty(search))
                 {
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante.LastName.Contains(search) || u.Estudiante.Name.Contains(search) || u.Estudiante.Email.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante!.LastName!.Contains(search) || u.Estudiante.Name!.Contains(search) || u.Estudiante.Email!.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
                     if (studentList != null)
                     {
                         _response.isSuccess = true;

@@ -18,14 +18,14 @@ namespace User.Managment.Data.Models.PaypalOrder
 
     public class OrderDto
     {
-        public string Id { get; set; }
-        public string Codigo { get; set; }
-        public string Titulo { get; set; }
-        public string Cantidad { get; set; }
+        public string? Id { get; set; }
+        public string? Codigo { get; set; }
+        public string? Titulo { get; set; }
+        public string? Cantidad { get; set; }
         //public string Imagen { get; set; }
         public string? Detalle { get; set; }
         public double Precio { get; set; }
-        public string Tipo { get; set; }
+        public string? Tipo { get; set; }
 
     }
 

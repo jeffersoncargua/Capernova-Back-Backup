@@ -13,7 +13,7 @@ namespace User.Managment.Data.Models.PaypalOrder.Dto
         [Required]
         public int CursoId { get; set; }
         [Required]
-        public string EstudianteId { get; set; }
+        public string? EstudianteId { get; set; }
         public DateTime? FechaInscripcion { get; set; }
         public bool? IsActive { get; set; }
         public string? Estado { get; set; }

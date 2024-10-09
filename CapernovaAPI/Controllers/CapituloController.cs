@@ -96,7 +96,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                var capituloExist = await _db.CapituloTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == capituloDto.Titulo.ToLower());
+                var capituloExist = await _db.CapituloTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo!.ToLower() == capituloDto.Titulo!.ToLower());
                 if (capituloExist != null)
                 {
                     _response.isSuccess = false;

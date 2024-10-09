@@ -11,9 +11,9 @@ namespace User.Managment.Data.Models.ProductosServicios.Dto
     {
         public int Id { get; set; }
         [Required]
-        public string Codigo { get; set; }
+        public string? Codigo { get; set; }
         [Required]
-        public string Titulo { get; set; }
+        public string? Titulo { get; set; }
         [Required]
         public int Cantidad { get; set; }
         public int? CategoriaId { get; set; }

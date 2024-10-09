@@ -218,7 +218,7 @@ namespace CapernovaAPI.Controllers
 
                     //Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
                     //client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
-                    client.BaseAddress = new Uri(_paypalConfig.Mode); //Esta solo es la url de prueba luego se cambia por una real
+                    client.BaseAddress = new Uri(_paypalConfig.Mode!); //Esta solo es la url de prueba luego se cambia por una real
 
                     //Se debe codificar el username y el secrte para enviarlo a la url de PAYPAL
                     var authToken = Encoding.ASCII.GetBytes($"{userName}:{secret}");
@@ -361,7 +361,7 @@ namespace CapernovaAPI.Controllers
                     ////Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
                     //client.BaseAddress = new Uri("https://api-m.sandbox.paypal.com"); //Esta solo es la url de prueba luego se cambia por una real
                     //Es la direccion URL basica que vamos a emplear para poder efectuar los pagos con Paypal
-                    client.BaseAddress = new Uri(_paypalConfig.Mode); //Esta solo es la url de prueba luego se cambia por una real
+                    client.BaseAddress = new Uri(_paypalConfig.Mode!); //Esta solo es la url de prueba luego se cambia por una real
 
                     //Se debe codificar el username y el secrte para enviarlo a la url de PAYPAL
                     var authToken = Encoding.ASCII.GetBytes($"{userName}:{secret}");
@@ -387,7 +387,7 @@ namespace CapernovaAPI.Controllers
                         PaypalTransaction objeto = JsonConvert.DeserializeObject<PaypalTransaction>(jsonResponse)!;
                         _response.Message = "La transacción se ha realizado correctamente";
                         //Se envia el id de la transaccion que se realizo
-                        _response.Result = objeto!.purchase_units[0].payments.captures[0].id;
+                        _response.Result = objeto!.purchase_units![0].payments!.captures![0].id;
                         return Ok(_response);
                     }
 
@@ -896,7 +896,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"<p>Atentamente, Capernova</p>";
             }
 
-            var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);
+            var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email!}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);
             _emailRepository.SendEmail(message);
 
         }
@@ -992,7 +992,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"</div>";
             }
 
-            var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email }, $"Matriculación de {ventaDto.Name} {ventaDto.LastName}", textMessage);
+            var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email! }, $"Matriculación de {ventaDto.Name} {ventaDto.LastName}", textMessage);
             _emailRepository.SendEmail(message);
         }
 

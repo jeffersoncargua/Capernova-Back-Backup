@@ -11,10 +11,10 @@ namespace User.Managment.Data.Models.Authentication.Login
     {
         [Required(ErrorMessage ="El correo de usuario es requerido")]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required(ErrorMessage ="La constraseña es requerida")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
     }
 }

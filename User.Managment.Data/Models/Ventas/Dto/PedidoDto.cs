@@ -12,8 +12,8 @@ namespace User.Managment.Data.Models.Ventas.Dto
         public DateTime Emision { get; set; }
         public string? Productos { get; set; }
         public int VentaId { get; set; }
-        public string DirectionMain { get; set; }
-        public string DirectionSec { get; set; }
+        public string? DirectionMain { get; set; }
+        public string? DirectionSec { get; set; }
         public string? Estado { get; set; }
     }
 }

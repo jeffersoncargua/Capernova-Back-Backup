@@ -29,7 +29,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    var resultQuery = await _db.PublicidadTbl.Where(u => u.Titulo.ToLower().Contains(search)).ToListAsync();
+                    var resultQuery = await _db.PublicidadTbl.Where(u => u.Titulo!.ToLower().Contains(search)).ToListAsync();
                     _response.Result = resultQuery;
                     _response.isSuccess = true;
                     _response.Message = "Se ha obtenido una lista con la publicidad";
@@ -61,7 +61,7 @@ namespace CapernovaAPI.Controllers
         {
             try
             {
-                if (_db.PublicidadTbl.FirstOrDefault(u => u.Titulo.ToLower() == model.Titulo.ToLower()) != null)
+                if (_db.PublicidadTbl.FirstOrDefault(u => u.Titulo!.ToLower() == model.Titulo!.ToLower()) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;

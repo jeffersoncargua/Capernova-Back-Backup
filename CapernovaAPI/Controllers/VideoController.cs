@@ -97,7 +97,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                var videoExist = await _db.VideoTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == videoDto.Titulo.ToLower());
+                var videoExist = await _db.VideoTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo!.ToLower() == videoDto.Titulo!.ToLower());
                 if (videoExist != null)
                 {
                     _response.isSuccess = false;

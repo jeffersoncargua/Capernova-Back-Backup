@@ -37,7 +37,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search));
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower().Contains(search));
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Cursos";
@@ -173,9 +173,9 @@ namespace CapernovaAPI.Controllers
 
                 Producto producto = new()
                 {
-                    Codigo = course.Codigo,
+                    Codigo = course.Codigo!,
                     ImagenUrl = course.ImagenUrl,
-                    Titulo = course.Titulo,
+                    Titulo = course.Titulo!,
                     Detalle = course.Detalle,
                     Precio = course.Precio,
                     Tipo = "curso",

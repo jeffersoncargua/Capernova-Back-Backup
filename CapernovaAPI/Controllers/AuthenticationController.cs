@@ -111,7 +111,7 @@ namespace CapernovaAPI.Controllers
 
 
 
-                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
+                    var message = new Message(new string[] { user.Email! }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
                     //var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el enlace<a href='http://localhost:3000/confirmEmail'>{confirmationLink!}</a>");
                     _emailRepository.SendEmail(message);
 

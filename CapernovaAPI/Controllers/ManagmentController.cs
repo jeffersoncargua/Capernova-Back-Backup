@@ -147,7 +147,7 @@ namespace CapernovaAPI.Controllers
 
 
                     //Se arma el mensaje con el email del usuario registrado y el enlace de confirmacion del correo
-                    var message = new Message(new string[] { user.Email }, "Enlace de confirmación del talento humuno de capernova ", textMessage);
+                    var message = new Message(new string[] { user.Email! }, "Enlace de confirmación del talento humuno de capernova ", textMessage);
                     //Se envia el mensaje que se va a remitir por correo electrónico
                     _emailRepository.SendEmail(message);
 
@@ -633,7 +633,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo.ToLower().Contains(search),includeProperties:"Teacher");
+                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower().Contains(search),includeProperties:"Teacher");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Cursos";

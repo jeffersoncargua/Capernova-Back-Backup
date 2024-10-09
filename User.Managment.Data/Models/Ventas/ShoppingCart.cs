@@ -15,11 +15,11 @@ namespace User.Managment.Data.Models.Ventas
         [Key]
         public int Id { get; set; }
         [Required]
-        public string ProductoCode { get; set; }
+        public string? ProductoCode { get; set; }
         [Required]
-        public string ProductoName { get; set; }
+        public string? ProductoName { get; set; }
         [Required]
-        public string ProductoImagen { get; set; }
+        public string? ProductoImagen { get; set; }
         [Required]
         public int Cantidad { get; set; }
         [Required]
@@ -28,7 +28,7 @@ namespace User.Managment.Data.Models.Ventas
         public int VentaId { get; set; }
 
         [ForeignKey("VentaId")]
-        public Venta Venta { get; set; }
+        public Venta? Venta { get; set; }
 
     }
 }

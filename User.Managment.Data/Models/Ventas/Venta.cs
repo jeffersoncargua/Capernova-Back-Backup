@@ -19,14 +19,14 @@ namespace User.Managment.Data.Models.Ventas
         public int Id { get; set; }
         [Required]
 
-        public string TransaccionId { get; set; }
+        public string? TransaccionId { get; set; }
         public DateTime Emision { get; set; }
         public double Total { get; set; }
-        public string UserId { get; set; }
-        public string Name { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
+        public string? UserId { get; set; }
+        public string? Name { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
         public string? Estado { get; set; }
 
     }

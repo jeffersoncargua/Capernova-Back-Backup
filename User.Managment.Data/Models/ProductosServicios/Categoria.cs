@@ -12,7 +12,7 @@ namespace User.Managment.Data.Models.ProductosServicios
         [Key]
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public string? Tipo { get; set; }
 

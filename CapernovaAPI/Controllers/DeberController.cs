@@ -97,7 +97,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                if (await _db.DeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo.ToLower() == deberDto.Titulo.ToLower()) != null)
+                if (await _db.DeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo!.ToLower() == deberDto.Titulo!.ToLower()) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;

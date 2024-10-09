@@ -16,7 +16,7 @@ namespace User.Managment.Data.Models.Course.DTO
         public string? FileUrl { get; set; }
         public double? Calificacion { get; set; }
         [Required]
-        public string StudentId { get; set; }
+        public string? StudentId { get; set; }
         [Required]
         public int DeberId { get; set; }
 

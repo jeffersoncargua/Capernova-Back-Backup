@@ -11,9 +11,9 @@ namespace User.Managment.Data.Models.Authentication.Login
     {
         [Required(ErrorMessage ="El Email es requerido")]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required(ErrorMessage ="El codigo es requerido")]
-        public string OTP { get; set; }
+        public string? OTP { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo) && categoriaId != 0)
                 {
-                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.Tipo == tipo && u.CategoriaId == categoriaId);
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo!.ToLower().Contains(search) && u.Tipo == tipo && u.CategoriaId == categoriaId);
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Productos";
@@ -54,7 +54,7 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search) && categoriaId != 0)
                 {
-                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.CategoriaId == categoriaId);
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo!.ToLower().Contains(search) && u.CategoriaId == categoriaId);
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Productos";
@@ -63,7 +63,7 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo))
                 {
-                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search) && u.Tipo == tipo);
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo!.ToLower().Contains(search) && u.Tipo == tipo);
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Productos";
@@ -81,7 +81,7 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search))
                 {
-                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo.ToLower().Contains(search));
+                    var productoQuery = await _dbProducto.GetAllAsync(u => u.Titulo!.ToLower().Contains(search));
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de Productos";
@@ -197,7 +197,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                if (await _dbProducto.GetAsync(u => u.Titulo.ToLower() == productoDto.Titulo.ToLower() || u.Codigo == productoDto.Codigo) != null)
+                if (await _dbProducto.GetAsync(u => u.Titulo!.ToLower() == productoDto.Titulo!.ToLower() || u.Codigo == productoDto.Codigo) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
@@ -343,7 +343,7 @@ namespace CapernovaAPI.Controllers
             {
                 if (!string.IsNullOrEmpty(search) && !string.IsNullOrEmpty(tipo))
                 {
-                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search) && u.Tipo == tipo).ToListAsync();
+                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name!.ToLower().Contains(search) && u.Tipo == tipo).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de categorías";
@@ -361,7 +361,7 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search))
                 {
-                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name.ToLower().Contains(search)).ToListAsync();
+                    var categotyQuery = await _db.CategoriaTbl.AsNoTracking().Where(u => u.Name!.ToLower().Contains(search)).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de categorías";
@@ -412,7 +412,7 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Name.ToLower() == categoriaDto.Name.ToLower() );
+                var categoriaExist = await _db.CategoriaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Name!.ToLower() == categoriaDto.Name.ToLower() );
                 if (categoriaExist != null)
                 {
                     _response.isSuccess = false;

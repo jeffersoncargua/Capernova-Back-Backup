@@ -67,7 +67,9 @@ namespace User.Managment.Repository.Repository
                     query = query.Include(includeProp);
                 }
             }
-            return await query.FirstOrDefaultAsync();
+            //return await query.FirstOrDefaultAsync();
+            T? t = await query.FirstOrDefaultAsync();
+            return t!;
 
         }
 

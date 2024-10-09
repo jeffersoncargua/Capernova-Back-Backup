@@ -39,10 +39,10 @@ namespace CapernovaAPI.Controllers
                 {
                     var startDate = JsonConvert.DeserializeObject<DateTime>(start);
                     var endDate = JsonConvert.DeserializeObject<DateTime>(end);
-                    var ventasQuery = await _db.VentaTbl.Where(u => (u.UserId.Contains(search) 
-                    || u.LastName.ToLower().Contains(search) 
-                    || u.Email.ToLower().Contains(search)
-                    || u.TransaccionId.ToLower().Contains(search))
+                    var ventasQuery = await _db.VentaTbl.Where(u => (u.UserId!.Contains(search) 
+                    || u.LastName!.ToLower().Contains(search) 
+                    || u.Email!.ToLower().Contains(search)
+                    || u.TransaccionId!.ToLower().Contains(search))
                     && u.Emision >= startDate  && u.Emision <= endDate).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
@@ -62,10 +62,10 @@ namespace CapernovaAPI.Controllers
                     return Ok(_response);
                 }else if (!string.IsNullOrEmpty(search))
                 {
-                    var ventasQuery = await _db.VentaTbl.Where(u => u.UserId.Contains(search) 
-                    || u.LastName.ToLower().Contains(search)
-                    || u.Email.ToLower().Contains(search)
-                    || u.TransaccionId.ToLower().Contains(search)).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
+                    var ventasQuery = await _db.VentaTbl.Where(u => u.UserId!.Contains(search) 
+                    || u.LastName!.ToLower().Contains(search)
+                    || u.Email!.ToLower().Contains(search)
+                    || u.TransaccionId!.ToLower().Contains(search)).AsNoTracking().OrderByDescending(x => x.Emision).ToListAsync();
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de las Ventas";
@@ -166,9 +166,9 @@ namespace CapernovaAPI.Controllers
                 {
                     var startDate = JsonConvert.DeserializeObject<DateTime>(start);
                     var endDate = JsonConvert.DeserializeObject<DateTime>(end);
-                    var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName.Contains(search)
-                    || u.Venta!.UserId.Contains(search)
-                    || u.Venta.TransaccionId.ToLower().Contains(search)) 
+                    var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName!.Contains(search)
+                    || u.Venta.UserId!.Contains(search)
+                    || u.Venta.TransaccionId!.ToLower().Contains(search)) 
                     && u.Emision >= startDate && u.Emision <= endDate),tracked:false,includeProperties:"Venta");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
@@ -189,9 +189,9 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search))
                 {
-                    var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName.Contains(search)
-                    || u.Venta!.UserId.Contains(search)
-                    || u.Venta.TransaccionId.ToLower().Contains(search))), tracked: false, includeProperties: "Venta");
+                    var pedidosQuery = await _dbPedido.GetAllAsync((u => (u.Venta!.LastName!.Contains(search)
+                    || u.Venta.UserId!.Contains(search)
+                    || u.Venta.TransaccionId!.ToLower().Contains(search))), tracked: false, includeProperties: "Venta");
                     _response.isSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha obtenido la lista de los pedidos";

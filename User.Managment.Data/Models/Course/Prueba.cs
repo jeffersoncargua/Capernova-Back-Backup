@@ -13,9 +13,9 @@ namespace User.Managment.Data.Models.Course
         [Key]
         public int Id { get; set; }
         [Required]
-        public string Titulo { get; set; }
+        public string? Titulo { get; set; }
         [Required]
-        public string Detalle { get; set; }
+        public string? Detalle { get; set; }
         public string? Test { get; set; }
         [Required]
         public int CourseId { get; set; }

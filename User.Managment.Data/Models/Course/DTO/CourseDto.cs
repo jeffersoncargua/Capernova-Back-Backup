@@ -13,13 +13,13 @@ namespace User.Managment.Data.Models.Course.DTO
     {
         public int Id { get; set; }
         [Required]
-        public string Codigo { get; set; }
+        public string? Codigo { get; set; }
         [Required]
-        public string Titulo { get; set; }
+        public string? Titulo { get; set; }
         [Required]
-        public string Detalle { get; set; }
+        public string? Detalle { get; set; }
         [Required]
-        public string ImagenUrl { get; set; }
+        public string? ImagenUrl { get; set; }
         [Required]
         public double Precio { get; set; }
         public string? TeacherId { get; set; }

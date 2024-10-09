@@ -18,6 +18,6 @@ namespace User.Managment.Data.Models.Course.DTO
         [Required]
         public int CursoId { get; set; }
         [Required]
-        public string StudentId { get; set; }
+        public string? StudentId { get; set; }
     }
 }

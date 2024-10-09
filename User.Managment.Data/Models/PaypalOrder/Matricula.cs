@@ -17,11 +17,11 @@ namespace User.Managment.Data.Models.PaypalOrder
         [Required]
         public int CursoId { get; set; }
         [ForeignKey("CursoId")]
-        public Course.Course Curso{ get; set; }
+        public Course.Course? Curso{ get; set; }
         [Required]
-        public string EstudianteId { get; set; }
+        public string? EstudianteId { get; set; }
         [ForeignKey("EstudianteId")]
-        public Student.Student Estudiante { get; set; }
+        public Student.Student? Estudiante { get; set; }
 
         public DateTime? FechaInscripcion { get; set; }
         public bool? IsActive { get; set; }

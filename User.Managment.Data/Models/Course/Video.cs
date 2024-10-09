@@ -13,7 +13,7 @@ namespace User.Managment.Data.Models.Course
         [Key]
         public int Id { get; set; }
         [Required]
-        public string Titulo { get; set; }
+        public string? Titulo { get; set; }
         public string? VideoUrl { get; set; }
         public int? OrdenReproduccion { get; set; }
         [Required]
