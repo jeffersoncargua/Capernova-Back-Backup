@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
 
 //Se agregue el servicio de conexion a la base de datos
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"))
+   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 //Se agrega el almacenamiento en cache de las peticiones a las API
@@ -154,9 +154,18 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //Descomentar cuando se quiera realizar pruebas solo en modo local
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
+
+//Descomentar esta seccion para poder probarlo en la red
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("../swagger/v1/swagger.json", "CapernovaAPI");
+    options.RoutePrefix = String.Empty;
+});
 
 app.UseHttpsRedirection();
 

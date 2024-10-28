@@ -40,7 +40,7 @@ namespace User.Managment.Repository.Repository
             var emailMessage = new MimeMessage();
 
             //Se agrega la informacion que se va a enviar al correo destino
-            emailMessage.From.Add(new MailboxAddress("email", _emailConfiguration.From));
+            emailMessage.From.Add(new MailboxAddress("NOTIFICACIONES CAPERNOVA", _emailConfiguration.From));
             emailMessage.To.AddRange(message.To);
             emailMessage.Subject = message.Subject;
             emailMessage.Body = new TextPart(TextFormat.Html) { Text = message.Content };

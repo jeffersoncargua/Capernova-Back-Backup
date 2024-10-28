@@ -111,7 +111,7 @@ namespace CapernovaAPI.Controllers
 
 
 
-                    var message = new Message(new string[] { user.Email! }, "Enlace de confirmación de correo", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
+                    var message = new Message(new string[] { user.Email! }, "Capernova: Enlace de confirmación de correo electrónico", $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>");
                     //var message = new Message(new string[] { user.Email }, "Enlace de confirmación de correo", $"Para confirmar presiona el enlace<a href='http://localhost:3000/confirmEmail'>{confirmationLink!}</a>");
                     _emailRepository.SendEmail(message);
 
@@ -406,7 +406,7 @@ namespace CapernovaAPI.Controllers
                     //var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
                     var forgotPasswordLink = $"{_frontConfig.Url}/changePassword?token={token}&email={user.Email}";
 
-                    var message = new Message(new string[] { user.Email }, "Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
+                    var message = new Message(new string[] { user.Email }, "Capernova: Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
                     _emailRepository.SendEmail(message);
 
                     //return StatusCode(StatusCodes.Status200OK,

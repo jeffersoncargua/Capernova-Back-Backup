@@ -859,6 +859,8 @@ namespace CapernovaAPI.Controllers
             if (productosPedido.Count > 0)
             {
                 //textMessage += $""; 
+                textMessage += $"<html>";
+                textMessage += $"<body>";
                 textMessage += $"<div style='display:flex; justify-content:center;'>";
                 textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
                 textMessage += $"</div>";
@@ -893,7 +895,9 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"<br />";
                 textMessage += $"<p>Muchas Gracias por preferirnos, tenga un excelente día</p>";
                 textMessage += $"<br />";
-                textMessage += $"<p>Atentamente, Capernova</p>";
+                textMessage += $"<p>Atentamente, Capernova</p>";                
+                textMessage += $"</body>";
+                textMessage += $"</html>";
             }
 
             var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email!}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);
@@ -952,7 +956,8 @@ namespace CapernovaAPI.Controllers
             if (cursos.Count > 0)
             {
                 //textMessage += $""; 
-                textMessage += $"<div>";
+                textMessage += $"<html>";
+                textMessage += $"<body>";
                 textMessage += $"<div style='display:flex; justify-content:center;'>";
                 textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
                 textMessage += $"</div>";
@@ -982,14 +987,15 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"</tbody>";
                 textMessage += $"</table>";
                 textMessage += $"<br />";
-                textMessage += $"<p>La matriculación de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial e" +
+                textMessage += $"<p>La matriculación de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial <a href='https://capernova.netlify.app/'>www.capernova.com/</a> e" +
                     $" iniciar sesión para acceder a todos los recursos de los cursos que adquiriste.</p>";
                 textMessage += $"<p>Para mayor información no dudes en comunicarte al 0987203469, o nuestro whatsapp y te ayudaremos con todas tus inquietudes.</p>";
                 textMessage += $"<br />";
                 textMessage += $"<p>Muchas Gracias por preferirnos, tenga un excelente día</p>";
                 textMessage += $"<br />";
-                textMessage += $"<p>Atentamente, Capernova</p>";
-                textMessage += $"</div>";
+                textMessage += $"<p>Atentamente, Capernova</p>";                
+                textMessage += $"</body>";
+                textMessage += $"</html>";
             }
 
             var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email! }, $"Matriculación de {ventaDto.Name} {ventaDto.LastName}", textMessage);

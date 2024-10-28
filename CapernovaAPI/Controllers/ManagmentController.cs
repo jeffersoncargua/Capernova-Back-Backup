@@ -121,7 +121,9 @@ namespace CapernovaAPI.Controllers
                     var confirmationLink = $"{_frontURL.Url}/confirmEmail?token={tokenEmail}&email={user.Email}";
 
                     //Se arma el mensaje que se le va a enviar el talento humano de Capernova
-                    //textHtml += $"";
+                    //textMessage += $"";
+                    textMessage += $"<html>";
+                    textMessage += $"<body>";
                     textMessage += $"<div style='display:flex; justify-content:center;'>";
                     textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
                     textMessage += $"</div>";
@@ -130,10 +132,8 @@ namespace CapernovaAPI.Controllers
                     textMessage += $"<h4><b>Apellido:</b> <span style='font-weight: normal;'>{registerUser.LastName}</span></h4>";
                     textMessage += $"<h4><b>Teléfono:</b> <span style='font-weight: normal;'>{registerUser.Phone}</span></h4>";
                     textMessage += $"<h4><b>Tus credenciales son:</b></h4>";
-                    textMessage += $"<br />";
                     textMessage += $"<h4><b>Correo:</b> <span style='font-weight: normal;'>{registerUser.Email}</span></h4>";
                     textMessage += $"<h4><b>Password:</b> <span style='font-weight: normal;'>{registerUser.Password}</span></h4>";
-                    textMessage += $"<br />";
                     textMessage += $"<br />";
                     textMessage += $"<div>";
                     textMessage += $"Para confirmar presiona el <a href='{confirmationLink!}'>enlace</a>";
@@ -143,7 +143,9 @@ namespace CapernovaAPI.Controllers
                     textMessage += $"<p>Ten un excelente día</p>";
                     textMessage += $"<br />";
                     textMessage += $"<p>Atentamente, Administración de Capernova</p>";
-                    
+                    textMessage += $"</body>";
+                    textMessage += $"</html>";
+
 
 
                     //Se arma el mensaje con el email del usuario registrado y el enlace de confirmacion del correo

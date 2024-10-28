@@ -23,6 +23,7 @@ using User.Managment.Data.Models.PaypalOrder;
 using User.Managment.Repository.Repository.IRepository;
 using static Google.Apis.Drive.v3.DriveService;
 using Capernova.Utility;
+using Newtonsoft.Json;
 
 namespace CapernovaAPI.Controllers
 {
@@ -282,7 +283,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpGet("getStudents", Name = "getStudents")]
-        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId, [FromQuery] string? search)
+        public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId, [FromQuery] string? search, [FromQuery] string start, [FromQuery] string end)
         {
             try
             {
@@ -292,15 +293,65 @@ namespace CapernovaAPI.Controllers
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "No se ha podido obtener la lista de estudiantes. Elija un curso!";
                     return BadRequest(_response);
-                } else if (!string.IsNullOrEmpty(search))
+                } else if (!string.IsNullOrEmpty(search) && start != "null" && end != "null")
                 {
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId && (u.Estudiante!.LastName!.Contains(search) || u.Estudiante.Name!.Contains(search) || u.Estudiante.Email!.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
+                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
+                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId 
+                    && (u.Estudiante!.LastName!.Contains(search) 
+                    || u.Estudiante.Name!.Contains(search) 
+                    || u.Estudiante.Email!.Contains(search))
+                    && u.FechaInscripcion >= startDate && u.FechaInscripcion <= endDate, tracked: false, includeProperties: "Curso,Estudiante");
                     if (studentList != null)
                     {
                         _response.isSuccess = true;
                         _response.StatusCode = HttpStatusCode.OK;
                         _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList;
+                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
+                        return Ok(_response);
+                    }
+
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
+
+                    return BadRequest(_response);
+                }
+                else if ( start != "null" && end != "null")
+                {
+                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
+                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId
+                    && u.FechaInscripcion >= startDate && u.FechaInscripcion <= endDate, tracked: false, includeProperties: "Curso,Estudiante");
+                    if (studentList != null)
+                    {
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Se ha podido obtener el estudiante en específico";
+                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
+                        return Ok(_response);
+                    }
+
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
+
+                    return BadRequest(_response);
+                }
+                else if (!string.IsNullOrEmpty(search))
+                {
+                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
+                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
+                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId
+                    && (u.Estudiante!.LastName!.Contains(search)
+                    || u.Estudiante.Name!.Contains(search)
+                    || u.Estudiante.Email!.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
+                    if (studentList != null)
+                    {
+                        _response.isSuccess = true;
+                        _response.StatusCode = HttpStatusCode.OK;
+                        _response.Message = "Se ha podido obtener el estudiante en específico";
+                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
                         return Ok(_response);
                     }
 
@@ -318,7 +369,7 @@ namespace CapernovaAPI.Controllers
                         _response.isSuccess = true;
                         _response.StatusCode = HttpStatusCode.OK;
                         _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList;
+                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
                         return Ok(_response);
                     }
                     _response.isSuccess = false;
