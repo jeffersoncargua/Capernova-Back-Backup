@@ -961,7 +961,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"<div style='display:flex; justify-content:center;'>";
                 textMessage += $"<img src=\"https://drive.google.com/thumbnail?id=1Io3SAYU468d_ekK2k7_Ic7u6UXoXj9eV\" alt=\"Aqui va una imagen\" />";
                 textMessage += $"</div>";
-                textMessage += $"<h1 style='text-align:center'><b>Se ha realizado la matriculación de:</b></h1>";
+                textMessage += $"<h1 style='text-align:center'><b>Se ha realizado la matrícula de:</b></h1>";
                 textMessage += $"<h4><b>Correo:</b> <span style='font-weight: normal;'>{ventaDto.Email}</span></h4>";
                 textMessage += $"<h4><b>Nombre:</b> <span style='font-weight: normal;'>{ventaDto.Name}</span></h4>";
                 textMessage += $"<h4><b>Apellido:</b> <span style='font-weight: normal;'>{ventaDto.LastName}</span></h4>";
@@ -987,7 +987,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"</tbody>";
                 textMessage += $"</table>";
                 textMessage += $"<br />";
-                textMessage += $"<p>La matriculación de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial <a href='https://capernova.netlify.app/'>www.capernova.com/</a> e" +
+                textMessage += $"<p>La matrícula de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial <a href='https://capernova.netlify.app/'>www.capernova.com/</a> e" +
                     $" iniciar sesión para acceder a todos los recursos de los cursos que adquiriste.</p>";
                 textMessage += $"<p>Para mayor información no dudes en comunicarte al 0987203469, o nuestro whatsapp y te ayudaremos con todas tus inquietudes.</p>";
                 textMessage += $"<br />";
@@ -998,7 +998,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"</html>";
             }
 
-            var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email! }, $"Matriculación de {ventaDto.Name} {ventaDto.LastName}", textMessage);
+            var message = new Message(new string[] { "capernova.edu.ec@gmail.com", userStudent.Email! }, $"Matrícula de {ventaDto.Name} {ventaDto.LastName}", textMessage);
             _emailRepository.SendEmail(message);
         }
 

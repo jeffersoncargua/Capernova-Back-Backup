@@ -176,7 +176,7 @@ namespace CapernovaAPI.Controllers
 
         [HttpPost]
         [Route("createProducto")]
-        [ResponseCache(CacheProfileName = "Default30")]
+        //[ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateProducto([FromBody] ProductoDto productoDto)
         {
             try
@@ -201,7 +201,7 @@ namespace CapernovaAPI.Controllers
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El producto ya esta registrado con un código o titulo similar";
+                    _response.Message = "El producto ya está registrado con un código o titulo similar";
                     return BadRequest(_response);
                 }
 
@@ -237,7 +237,7 @@ namespace CapernovaAPI.Controllers
 
 
         [HttpPut("updateProducto/{id:int}", Name = "UpdateProducto")]
-        [ResponseCache(CacheProfileName = "Default30")]
+        //[ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateProducto(int id, [FromBody] ProductoDto productoDto)
         {
             try
@@ -250,6 +250,31 @@ namespace CapernovaAPI.Controllers
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "El registro no existe";
                     return BadRequest(_response);
+                }
+
+
+                //var productoCode = await _dbProducto.GetAsync(u => u.Titulo!.ToLower() == productoDto.Titulo!.ToLower() || u.Codigo!.ToLower() == productoDto.Codigo!.ToLower(), tracked:false);
+                //if (productoCode.Id != productoFromDb.Id)
+                //{
+                //    _response.isSuccess = false;
+                //    _response.StatusCode = HttpStatusCode.BadRequest;
+                //    _response.Message = "Error. No se puede actualizar el producto con un código o titulo que ya existe!";
+                //    return BadRequest(_response);
+                //}
+
+                if (productoFromDb.Codigo!.ToLower() != productoDto.Codigo!.ToLower() || productoFromDb.Titulo!.ToLower() != productoDto.Titulo!.ToLower())
+                {
+                    var productosCode = await _dbProducto.GetAllAsync(u => u.Titulo!.ToLower() == productoDto.Titulo!.ToLower() || u.Codigo!.ToLower() == productoDto.Codigo!.ToLower(), tracked: false);
+                    foreach (var item in productosCode)
+                    {
+                        if (item.Id != id)
+                        {
+                            _response.isSuccess = false;
+                            _response.StatusCode = HttpStatusCode.BadRequest;
+                            _response.Message = "Error. No se puede actualizar el producto con un código o titulo que ya existe!";
+                            return BadRequest(_response);
+                        }
+                    }
                 }
 
                 if (productoDto.Cantidad < 0)
@@ -267,6 +292,8 @@ namespace CapernovaAPI.Controllers
                     _response.Message = "Debe seleccionar una categoría para el producto";
                     return BadRequest(_response);
                 }
+
+               
 
                 Producto model = new()
                 {
@@ -515,6 +542,15 @@ namespace CapernovaAPI.Controllers
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error inesperado al eliminar el registro";
+                    return BadRequest(_response);
+                }
+
+                var producto = await _db.ProductoTbl.FirstOrDefaultAsync(u => u.CategoriaId == id);
+                if (producto !=null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No se puede eliminar una categoría que ya está asignada!!";
                     return BadRequest(_response);
                 }
 

@@ -21,7 +21,7 @@
     },
     "resourceName": {
       "type": "string",
-      "defaultValue": "CapernovaAPI20241016164851",
+      "defaultValue": "CapernovaAPI20241030132501",
       "metadata": {
         "description": "Name of the main resource to be created by this template."
       }

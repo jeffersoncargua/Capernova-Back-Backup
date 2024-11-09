@@ -96,14 +96,14 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                var capituloExist = await _db.CapituloTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo!.ToLower() == capituloDto.Titulo!.ToLower());
-                if (capituloExist != null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El registro ya existe";
-                    return BadRequest(_response);
-                }
+                //var capituloExist = await _db.CapituloTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Titulo!.ToLower() == capituloDto.Titulo!.ToLower());
+                //if (capituloExist != null)
+                //{
+                //    _response.isSuccess = false;
+                //    _response.StatusCode = HttpStatusCode.BadRequest;
+                //    _response.Message = "El registro ya existe";
+                //    return BadRequest(_response);
+                //}
 
                 Capitulo model = new()
                 {

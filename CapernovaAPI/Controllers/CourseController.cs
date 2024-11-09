@@ -148,11 +148,11 @@ namespace CapernovaAPI.Controllers
                     return BadRequest(_response);
                 }
 
-                if (await _dbCourse.GetAsync(u => u.Titulo == course.Titulo) != null)
+                if (await _dbCourse.GetAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower()) != null)
                 {
                     _response.isSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El curso ya está registrado";
+                    _response.Message = "El curso ya está registrado con un titulo o código similar!!";
                     return BadRequest(_response);
                 }
 
@@ -226,6 +226,30 @@ namespace CapernovaAPI.Controllers
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.Message = "Ha ocurrido un error y no se pudo actualizar el registro";
                     return BadRequest(_response);
+                }
+
+                //var courseCode = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower(), tracked:false);
+                //if (courseCode.Id != courseFromDb.Id)
+                //{
+                //    _response.isSuccess = false;
+                //    _response.StatusCode = HttpStatusCode.BadRequest;
+                //    _response.Message = "Error. No se puede actualizar el curso con un código o titulo que ya existe!";
+                //    return BadRequest(_response);
+                //}
+
+                if ((courseFromDb.Codigo!.ToLower() != course.Codigo!.ToLower() && productoFromDb.Codigo!.ToLower() != course.Codigo!.ToLower() ) || (courseFromDb.Titulo!.ToLower() != course.Titulo!.ToLower() && productoFromDb.Titulo!.ToLower() != course.Titulo.ToLower()))
+                {
+                    var coursesCode = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower(), tracked: false);
+                    foreach (var item in coursesCode)
+                    {
+                        if (item.Id != id)
+                        {
+                            _response.isSuccess = false;
+                            _response.StatusCode = HttpStatusCode.BadRequest;
+                            _response.Message = "Error. No se puede actualizar el curso con un código o titulo que ya existe!";
+                            return BadRequest(_response);
+                        }
+                    }
                 }
 
                 Course model = new()

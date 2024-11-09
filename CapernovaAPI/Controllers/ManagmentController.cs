@@ -149,7 +149,7 @@ namespace CapernovaAPI.Controllers
 
 
                     //Se arma el mensaje con el email del usuario registrado y el enlace de confirmacion del correo
-                    var message = new Message(new string[] { user.Email! }, "Enlace de confirmación del talento humuno de capernova ", textMessage);
+                    var message = new Message(new string[] { user.Email! }, "Enlace de confirmación de Talento Humano de Capernova ", textMessage);
                     //Se envia el mensaje que se va a remitir por correo electrónico
                     _emailRepository.SendEmail(message);
 
