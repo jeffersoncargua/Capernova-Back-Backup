@@ -102,6 +102,10 @@ builder.Services.AddSingleton(paypalConfig);
 var googleDriveConfig = builder.Configuration.GetSection("GoogleDrive").Get<GoogleDriveSettings>();
 builder.Services.AddSingleton(googleDriveConfig);
 
+//Se agrega la configuracion de Whatsapp API  que se agrego en la appSettings.json
+var WhatsappConfig = builder.Configuration.GetSection("WhatsappConfig").Get<WhatsappSettings>();
+builder.Services.AddSingleton(WhatsappConfig);
+
 
 //Se agrega el repositorio Email para utilizarlo en el proyecto
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
@@ -155,17 +159,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     //Descomentar cuando se quiera realizar pruebas solo en modo local
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 //Descomentar esta seccion para poder probarlo en la red
-app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("../swagger/v1/swagger.json", "CapernovaAPI");
-    options.RoutePrefix = String.Empty;
-});
+//app.UseSwagger();
+//app.UseSwaggerUI(options =>
+//{
+//    options.SwaggerEndpoint("../swagger/v1/swagger.json", "CapernovaAPI");
+//    options.RoutePrefix = String.Empty;
+//});
 
 app.UseHttpsRedirection();
 

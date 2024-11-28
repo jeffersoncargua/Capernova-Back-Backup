@@ -34,8 +34,9 @@ namespace CapernovaAPI.Controllers
         private readonly IEmailRepository _emailRepository;
         private readonly PaypalSettings _paypalConfig;
         private readonly FrontSettings _frontUrl;
+        private readonly WhatsappSettings _whatsappSettings;
         
-        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IEmailRepository emailRepository, PaypalSettings paypalConfig, FrontSettings frontUrl)
+        public PaymentController(ApplicationDbContext db, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IEmailRepository emailRepository, PaypalSettings paypalConfig, FrontSettings frontUrl, WhatsappSettings whatsappSettings)
         {
             _db = db;
             _roleManager = roleManager;
@@ -44,6 +45,7 @@ namespace CapernovaAPI.Controllers
             _emailRepository = emailRepository;
             _paypalConfig = paypalConfig;
             _frontUrl = frontUrl;
+            _whatsappSettings = whatsappSettings;
             this._response = new();
         }
 
@@ -471,6 +473,15 @@ namespace CapernovaAPI.Controllers
                         return BadRequest(_response);
                     }
 
+
+                    //Aqui se va a enviar los mensajes de whatsapp de la venta
+                    await WhatsappNotificacion(ventaExist);
+
+                    await WhatsappNotificacionCapernova(ventaExist);
+
+
+
+
                     //var cartList = JsonConvert.DeserializeObject<List<ShoppingCartDto>>(confirmOrder.Productos);
 
                     //foreach (var itemProd in cartList)
@@ -515,8 +526,12 @@ namespace CapernovaAPI.Controllers
 
                     await GenerarPedido(productosPedido, ventaExist, clienteDto);
 
-                    //Aqui se va a enviar el mensaje por whatsapp al capernova para gestionar el envío
+                    //Aqui se va a enviar el mensaje por correo electronico de capernova para gestionar el envío de los productos del pedido solicitado
                     EnviarPedido(productosPedido, ventaExist, clienteDto);
+
+                    //Aqui se va a enviar los mensajes de whatsapp de los productos
+                    //await WhatsappPedido(productosPedido, ventaExist, clienteDto);
+
 
                     var cursos = cartList!.Where(u => u.Tipo == "curso").ToList(); //permite obtener solo los cursos del carrito de compras
 
@@ -603,7 +618,11 @@ namespace CapernovaAPI.Controllers
 
                         await GenerarMatricula(cursos, clienteDto,ventaExist);
 
+                        //Aqui se envía un correo electrónico a los nuevos estudiantes de capernova
                         NotificarMatricula(cursos, clienteDto, ventaExist);
+
+                        //Aqui se va a notificar por mensaje de whatsapp las matriculas
+                        //await WhatsappMatricula(cursos, clienteDto, ventaExist);
                     }
 
                 }
@@ -645,6 +664,11 @@ namespace CapernovaAPI.Controllers
                         return BadRequest(_response);
                     }
 
+                    //Aqui se va a enviar los mensajes de whatsapp de la venta
+                    await WhatsappNotificacion(ventaExist);
+
+                    await WhatsappNotificacionCapernova(ventaExist);
+
                     //var cartList = JsonConvert.DeserializeObject<List<ShoppingCartDto>>(confirmOrder.Productos);
 
                     //foreach (var itemProd in cartList)
@@ -685,12 +709,16 @@ namespace CapernovaAPI.Controllers
                     //}
                     await GenerarPedido(productosPedido, ventaExist, clienteDto);
 
-                    //Aqui se va a enviar el mensaje por whatsapp al capernova para gestionar el envío
+                    //Aqui se va a enviar el mensaje por correo electronico de capernova para gestionar el envío con los clientes
                     EnviarPedido(productosPedido, ventaExist, clienteDto);
+
+                    //Aqui se va a enviar el mensaje de whatsapp de los pedidos de los clientes
+                    //await WhatsappPedido(productosPedido, ventaExist, clienteDto);
 
                 }
 
 
+                //await WhatsappNotificacion(productosPedido, ventaExist, clienteDto);
                 _response.isSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.Message = "Transacción generada con éxito";
@@ -898,10 +926,13 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"<p>Atentamente, Capernova</p>";                
                 textMessage += $"</body>";
                 textMessage += $"</html>";
+
+
+                var message = new Message(new string[] { "capernova.edu.ec@gmail.com", cliente.Email! }, $"Entregar Pedido a {venta.Name} {venta.LastName}", textMessage);
+                _emailRepository.SendEmail(message);
             }
 
-            var message = new Message(new string[] { "capernova.edu.ec@gmail.com" , cliente.Email!}, $"Entregar Pedido a {venta.Name} {venta.LastName}" , textMessage);
-            _emailRepository.SendEmail(message);
+            
 
         }
 
@@ -987,7 +1018,7 @@ namespace CapernovaAPI.Controllers
                 textMessage += $"</tbody>";
                 textMessage += $"</table>";
                 textMessage += $"<br />";
-                textMessage += $"<p>La matrícula de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial <a href='https://capernova.netlify.app/'>www.capernova.com/</a> e" +
+                textMessage += $"<p>La matrícula de tus cursos serán atendidos por uno de nuestros agentes para informarte del debido proceso. No te olvídes de regresar a nuestra página oficial <a href='"+_frontUrl.Url+"'>www.capernova.com/</a> e" +
                     $" iniciar sesión para acceder a todos los recursos de los cursos que adquiriste.</p>";
                 textMessage += $"<p>Para mayor información no dudes en comunicarte al 0987203469, o nuestro whatsapp y te ayudaremos con todas tus inquietudes.</p>";
                 textMessage += $"<br />";
@@ -1028,9 +1059,134 @@ namespace CapernovaAPI.Controllers
                     
                 }
             }
+
             
+        }
+
+        //Enviar mensaje de Whatsapp de los pedidos
+        //private async Task WhatsappPedido(List<ShoppingCartDto> productosPedido, Venta venta, ClienteDto cliente)
+        //{
+        //    if (productosPedido.Count > 0)
+        //    {
+        //        string token = "EAAH5n2o29egBOz1ogK9L734iHxbUgwj5esEDc8AuTegm100cZAiB2NdKwASRZADPR4cr1K9uLlXC68S8GB0qve4UhRdiY090uXEU03xvxqXeBgIetvia927JZCHaM5C9VZA2bZAmZCbgKUzzZBXBIZCdNiixuAS1ANKzFpTFTkgrKrypRbzwZCO7g3nEJgvRNwzwIuOtMGcAR8Ss3cA2wL1vZCxffPsq0x";
+        //        //Identificador de número de teléfono
+        //        string idTelefono = "364743193399584";
+        //        //Nuestro telefono
+        //        string telefono = "593992782154";
+        //        HttpClient client = new HttpClient();
+        //        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+        //        request.Headers.Add("Authorization", "Bearer " + token);
+        //        request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"saludo_capernova\", \"language\": { \"code\": \"es_MX\" } } }");
+        //        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        //        HttpResponseMessage response = await client.SendAsync(request);
+        //        //response.EnsureSuccessStatusCode();
+        //        string responseBody = await response.Content.ReadAsStringAsync();
+        //    }
+            
+        //}
+
+
+        //Enviar mensaje de whatsapp de las matriculas
+        //private async Task WhatsappMatricula(List<ShoppingCartDto> cursos, ClienteDto userStudent, Venta ventaDto)
+        //{
+        //    if (cursos.Count > 0)
+        //    {
+        //        string token = "EAAH5n2o29egBOz1ogK9L734iHxbUgwj5esEDc8AuTegm100cZAiB2NdKwASRZADPR4cr1K9uLlXC68S8GB0qve4UhRdiY090uXEU03xvxqXeBgIetvia927JZCHaM5C9VZA2bZAmZCbgKUzzZBXBIZCdNiixuAS1ANKzFpTFTkgrKrypRbzwZCO7g3nEJgvRNwzwIuOtMGcAR8Ss3cA2wL1vZCxffPsq0x";
+        //        //Identificador de número de teléfono
+        //        string idTelefono = "364743193399584";
+        //        //Nuestro telefono
+        //        string telefono = "593992782154";
+        //        HttpClient client = new HttpClient();
+        //        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+        //        request.Headers.Add("Authorization", "Bearer " + token);
+        //        request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"saludo_capernova\", \"language\": { \"code\": \"es_MX\" } } }");
+        //        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        //        HttpResponseMessage response = await client.SendAsync(request);
+        //        //response.EnsureSuccessStatusCode();
+        //        string responseBody = await response.Content.ReadAsStringAsync();
+        //    }
+            
+        //}
+
+        //Notificaciones Whatsapp
+        private async Task WhatsappNotificacion(Venta ventaDto)
+        {
+            string token = _whatsappSettings.Token!;
+            //Identificador de número de teléfono
+            string idTelefono = _whatsappSettings.IdTelefono!;
+            //Nuestro telefono
+            //string telefono = "593"+ventaDto.Phone!.Remove(0,1);
+            string telefono = "593992649161";
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+            request.Headers.Add("Authorization", "Bearer " + token);
+            request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"" + _whatsappSettings.Templete + "\", \"language\": { \"code\": \"es_MX\" } } }");
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
+            //response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            //string token = "EAAH5n2o29egBOwQQIjJBxpTeCchLS7gFGQohxezoDeZAWLWnlsqu5TZBvM2CVEv5o5GGQFaZBkQBN8BoGEMjESEIolQiUVHOVH16Eh8JOOtaUxEyriL8ZA41r2ZA7C6W0dgEyYe9EglsR3CsCCAZCgOOkJPASQs7lZBynqKNgpVIYFCZBKZBZCA90TWRpPz0b0iSRuEO5HaZCEtpzztCkPaXJD0NbsNnwcZD";
+            ////Identificador de número de teléfono
+            //string idTelefono = "364743193399584";
+            ////Nuestro telefono
+            //string telefono = "593" + ventaDto.Phone!.Remove(0, 1);
+            //HttpClient client = new HttpClient();
+            //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+            //request.Headers.Add("Authorization", "Bearer " + token);
+            //request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"saludo_capernova\", \"language\": { \"code\": \"es_MX\" } } }");
+            //request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            //HttpResponseMessage response = await client.SendAsync(request);
+            ////response.EnsureSuccessStatusCode();
+            //string responseBody = await response.Content.ReadAsStringAsync();
 
         }
+
+        private async Task WhatsappNotificacionCapernova(Venta ventaDto)
+        {
+            string token = _whatsappSettings.Token!;
+            //Identificador de número de teléfono
+            string idTelefono = _whatsappSettings.IdTelefono!;
+            //Nuestro telefono
+            //string telefono = _whatsappSettings.Telefono!;
+            string telefono = "593992649161";
+            string message = $"Se ha realizado una matrícula y/o compra en Capernova \n\n " +
+                $"Por favor revisa el correo electrónico de Capernova para validar la matrícula y/o compra de: \n" +
+                $"Nombre: {ventaDto.Name}" +
+                $"\nApellido: {ventaDto.LastName}" +
+                $"\nCorreo: {ventaDto.Email}" +
+                $"\nTeléfono: {ventaDto.Phone}";
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+            request.Headers.Add("Authorization", "Bearer " + token);
+            //request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"" + _whatsappSettings.Templete + "\", \"language\": { \"code\": \"es_MX\" } } }");
+            request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"text\",\"text\": {\"preview_url\": false,\"body\": \""+ message +"\"}}");
+           
+
+            
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
+            //response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            //string token = "EAAH5n2o29egBOwQQIjJBxpTeCchLS7gFGQohxezoDeZAWLWnlsqu5TZBvM2CVEv5o5GGQFaZBkQBN8BoGEMjESEIolQiUVHOVH16Eh8JOOtaUxEyriL8ZA41r2ZA7C6W0dgEyYe9EglsR3CsCCAZCgOOkJPASQs7lZBynqKNgpVIYFCZBKZBZCA90TWRpPz0b0iSRuEO5HaZCEtpzztCkPaXJD0NbsNnwcZD";
+            ////Identificador de número de teléfono
+            //string idTelefono = "364743193399584";
+            ////Nuestro telefono
+            //string telefono = "593" + ventaDto.Phone!.Remove(0, 1);
+            //HttpClient client = new HttpClient();
+            //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/v21.0/" + idTelefono + "/messages");
+            //request.Headers.Add("Authorization", "Bearer " + token);
+            //request.Content = new StringContent("{\"messaging_product\": \"whatsapp\",\"recipient_type\": \"individual\",\"to\": \"" + telefono + "\",\"type\": \"template\", \"template\": { \"name\": \"saludo_capernova\", \"language\": { \"code\": \"es_MX\" } } }");
+            //request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            //HttpResponseMessage response = await client.SendAsync(request);
+            ////response.EnsureSuccessStatusCode();
+            //string responseBody = await response.Content.ReadAsStringAsync();
+
+        }
+
+
+
 
         #endregion
 
