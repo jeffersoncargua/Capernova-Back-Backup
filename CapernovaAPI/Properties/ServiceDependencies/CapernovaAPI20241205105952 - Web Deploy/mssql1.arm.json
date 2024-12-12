@@ -4,7 +4,7 @@
   "parameters": {
     "resourceGroupName": {
       "type": "string",
-      "defaultValue": "Capernova",
+      "defaultValue": "Capernovatest",
       "metadata": {
         "_parameterType": "resourceGroup",
         "description": "Nombre del grupo de recursos del recurso. Se recomienda poner los recursos en el mismo grupo de recursos para mejorar el seguimiento."
@@ -57,11 +57,12 @@
             },
             {
               "sku": {
-                "name": "Basic",
-                "tier": "Basic",
-                "capacity": 5
+                "name": "GP_S_Gen5",
+                "tier": "GeneralPurpose",
+                "family": "Gen5",
+                "capacity": 1
               },
-              "kind": "v12.0,user",
+              "kind": "v12.0,user,vcore,serverless",
               "location": "[parameters('resourceLocation')]",
               "name": "capernova/CapernovaDb",
               "type": "Microsoft.Sql/servers/databases",

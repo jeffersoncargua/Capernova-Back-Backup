@@ -14,6 +14,9 @@ using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Data.Models.PaypalOrder;
+using User.Managment.Data.Models.PaypalOrder.Dto;
+using User.Managment.Data.Models.Student;
+using User.Managment.Data.Models.Ventas.Dto;
 //using User.Managment.Data.Models.Managment;
 //using User.Managment.Data.Models.Managment.DTO;
 using User.Managment.Repository.Models;
@@ -31,13 +34,14 @@ namespace CapernovaAPI.Controllers
         private readonly IEmailRepository _emailRepository;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _db;
+        private readonly IMatriculaRepository _dbMatricula;
         private readonly ICourseRepositoty _dbCourse;
         private readonly FrontSettings _frontURL;
         protected ApiResponse _response;
         private string secretKey;
 
         public ManagmentController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager
-            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db, ICourseRepositoty dbCourse,
+            , IConfiguration configuration, IEmailRepository emailRepository, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db, IMatriculaRepository dbMatricula, ICourseRepositoty dbCourse,
             FrontSettings frontURL)
         {
             _userManager = userManager;
@@ -47,6 +51,7 @@ namespace CapernovaAPI.Controllers
             _signInManager = signInManager;
             _db = db;
             _frontURL = frontURL;
+            _dbMatricula = dbMatricula;
             _dbCourse = dbCourse;
             this._response = new();
             secretKey = configuration.GetValue<string>("JWT:Secret");
@@ -692,6 +697,201 @@ namespace CapernovaAPI.Controllers
             return _response;
 
         }
+
+        [HttpGet]
+        [Route("getUser")]
+        public async Task<ActionResult<ApiResponse>> GetUser([FromQuery] string search)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(search))
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No se pudo buscar el registro!!";
+                    return BadRequest(_response);
+                }
+
+                var userExist = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == search);
+                if (userExist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "No existen registros de tu búsqueda!!";
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha localizado el usuario";
+                _response.Result = userExist;
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+                
+            }
+            return _response;
+        }
+
+        [HttpGet]
+        [Route("getMatricula")]
+        public async Task<ActionResult<ApiResponse>> GetMatricula([FromQuery] string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No se pudo buscar el registro!!";
+                    return BadRequest(_response);
+                }
+
+                var matriculaList = await _dbMatricula.GetAllAsync(u => u.EstudianteId == userId,tracked:false,includeProperties:"Curso");
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha obtenido la lista de matriculas del estudiante";
+                _response.Result = matriculaList;
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+            return _response;
+        }
+
+        [HttpPost]
+        [Route("createMatricula")]
+        public async Task<ActionResult<ApiResponse>> CreateMatricula([FromBody] MatriculaDto matriculaDto)
+        {
+            try
+            {
+                if (matriculaDto == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No se pudo resgistrar la matrícula";
+                    return BadRequest(_response);
+                }
+
+                var userSystem = await _db.Users.FirstOrDefaultAsync(u => u.Id == matriculaDto.EstudianteId);
+                if (userSystem == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No se pudo resgistrar la matrícula del estudiante";
+                    return BadRequest(_response);
+                }
+
+                var userStudentExist = await _db.StudentTbl.FirstOrDefaultAsync(u => u.Id == matriculaDto.EstudianteId);
+                if (userStudentExist == null)
+                {
+                    await _userManager.RemoveFromRoleAsync(userSystem , "User");
+
+                    if (await _roleManager.RoleExistsAsync("Student"))
+                    {
+                        await _userManager.AddToRoleAsync(userSystem, "Student");
+                        Student student = new()
+                        {
+                            Id = userSystem.Id,
+                            Name = userSystem.Name!,
+                            LastName = userSystem.LastName!,
+                            Email = userSystem.Email,
+                            Phone = userSystem.PhoneNumber
+                        };
+
+                        await _db.StudentTbl.AddAsync(student);
+                        await _db.SaveChangesAsync();
+                    }
+
+                }
+
+                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.EstudianteId == matriculaDto.EstudianteId && u.CursoId == matriculaDto.CursoId);
+                if (matriculaExist != null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. Ya tiene registrado la matrícula";
+                    return BadRequest(_response);
+                }
+
+                var cursoExist = await _db.CourseTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == matriculaDto.CursoId);
+                if (cursoExist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No existe el curso ha registrar!!!";
+                    return BadRequest(_response);
+                }
+
+
+                Matricula matricula = new()
+                {
+                    CursoId = cursoExist.Id,
+                    EstudianteId = matriculaDto.EstudianteId,
+                    FechaInscripcion = DateTime.Now,
+                    IsActive = true,
+                    Estado = "En progreso"
+                };
+                await _db.MatriculaTbl.AddAsync(matricula);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se ha registrado la matrícula con éxito!!!";
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+            return _response;
+        }
+
+        [HttpDelete]
+        [Route("deleteMatricula/{id:int}")]
+        public async Task<ActionResult<ApiResponse>> DeleteMatricula(int id)
+        {
+            try
+            {
+                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+                if (matriculaExist == null)
+                {
+                    _response.isSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Message = "Error. No pudo eliminar el registro!!!";
+                    return BadRequest(_response);
+                }
+
+                _db.MatriculaTbl.Remove(matriculaExist);
+                await _db.SaveChangesAsync();
+
+                _response.isSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Message = "Se eliminó el registro con éxito!!!";
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+
+            }
+            return _response;
+        }
+
 
     }
 }
