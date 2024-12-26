@@ -773,18 +773,34 @@ namespace CapernovaAPI.Controllers
 
             //string htmlContent = @"<html>";
             //htmlContent += "<body>";
-            string htmlContent = "<div style='background-image: url(\"https://i.postimg.cc/SK55dgbd/certificado-Capernova.jpg\"); max-width: 1024px;'>";
-            htmlContent += "<div style='display: flex;flex-direction: column;justify-content: center; align-items: center;'>";
-            htmlContent += "<h1 style='margin-top: 160px; margin-buttom : 0px ;padding: 0;font-size: 48px;font-weight: 600;font-family:'Lato';'>CERTIFICADO DE CAPACITACIÓN</h1>";
-            htmlContent += "<h2 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 30px;font-weight: 400;'>POR APROBACIÓN</h2>";
-            htmlContent += "<h3 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 20px;font-weight: 400'>ESTE CERTIFICADO SE OTORGA A:</h3>";
-            htmlContent += $"<h1 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px; padding: 0px; font-size: 48px;font-weight: 500;'>{estudianteExist.Estudiante!.Name +" "+estudianteExist.Estudiante.LastName}</h1>";
-            htmlContent += $"<p style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 18px;font-weight: 400;text-align: justify;max-width: 800px;line-height: 1.5;'>Por haber cursado todos los niveles de manera satisfactoria y con los más altos estándares de educación brindados por el Centro de Capacitación para Profesionales, Emprendedores e Innovación \"Capernova\", el curso de Experto en {estudianteExist.Curso!.Titulo} con 120 horas de estudio.</p>";
-            htmlContent += "<br><br><br><br><br><br><br><br>";
-            htmlContent += "</div>";
-            htmlContent += "</div>";
+            //string htmlContent = "<div style='background-image: url(\"https://i.postimg.cc/SK55dgbd/certificado-Capernova.jpg\"); max-width: 1024px;'>";
+            //htmlContent += "<div style='display: flex;flex-direction: column;justify-content: center; align-items: center;'>";
+            //htmlContent += "<h1 style='margin-top: 160px; margin-buttom : 0px ;padding: 0;font-size: 48px;font-weight: 600;font-family:'Lato';'>CERTIFICADO DE CAPACITACIÓN</h1>";
+            //htmlContent += "<h2 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 30px;font-weight: 400;'>POR APROBACIÓN</h2>";
+            //htmlContent += "<h3 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 20px;font-weight: 400'>ESTE CERTIFICADO SE OTORGA A:</h3>";
+            //htmlContent += $"<h1 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px; padding: 0px; font-size: 48px;font-weight: 500;'>{estudianteExist.Estudiante!.Name +" "+estudianteExist.Estudiante.LastName}</h1>";
+            //htmlContent += $"<p style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 18px;font-weight: 400;text-align: justify;max-width: 800px;line-height: 1.5;'>Por haber cursado todos los niveles de manera satisfactoria y con los más altos estándares de educación brindados por el Centro de Capacitación para Profesionales, Emprendedores e Innovación \"Capernova\", el curso de Experto en {estudianteExist.Curso!.Titulo} con 120 horas de estudio.</p>";
+            //htmlContent += "<br><br><br><br><br><br><br><br>";
+            //htmlContent += "</div>";
+            //htmlContent += "</div>";
             //htmlContent += "</body>";
             //htmlContent += "</html>";
+
+
+            string htmlContent = @"<html>";
+            htmlContent += "<body>";
+            htmlContent = "<div style=\"background-image: url('https://lh3.googleusercontent.com/d/1gJz900z5Q8wVUboF4rOe14Q4TwiONGxk'); max-width: 1024px;\">";
+            htmlContent += "<div style='display: flex;flex-direction: column;justify-content: center; align-items: center;'>";
+            htmlContent += "<h1 style='margin-top: 164px; margin-buttom : 0px ;padding: 0;font-size: 48px;font-weight: 600;font-family:'Lato';'>CERTIFICADO DE CAPACITACIÓN</h1>";
+            htmlContent += "<h2 style='margin-top: 1px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 30px;font-weight: 400;'>POR APROBACIÓN</h2>";
+            htmlContent += "<h3 style='margin-top: 8px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 20px;font-weight: 400'>ESTE CERTIFICADO SE OTORGA A:</h3>";
+            htmlContent += $"<h1 style='margin-top: 8px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px; padding: 0px; font-size: 48px;font-weight: 500;'>{estudianteExist.Estudiante!.Name + " " + estudianteExist.Estudiante.LastName}</h1>";
+            htmlContent += $"<p style='margin-top: 10px;margin-rigth: 0px;margin-left: 0px;margin-buttom: 0px;padding: 0px;font-size: 18px;font-weight: 400;text-align: justify;max-width: 800px;line-height: 1.5;'>Por haber cursado todos los niveles de manera satisfactoria y con los más altos estándares de educación brindados por el Centro de Capacitación para Profesionales, Emprendedores e Innovación \"Capernova\", el curso de Experto en {estudianteExist.Curso!.Titulo} con 120 horas de estudio.</p>";
+            htmlContent += "<br><br><br><br><br><br><br>";
+            htmlContent += "</div>";
+            htmlContent += "</div>";
+            htmlContent += "</body>";
+            htmlContent += "</html>";
 
 
             //Margenes del documento
