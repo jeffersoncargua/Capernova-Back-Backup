@@ -88,6 +88,35 @@ namespace CapernovaAPI.Controllers
             return _response;
         }
 
+        [HttpGet("getTeacher")]
+        public async Task<ActionResult<ApiResponse>> GetTeacher([FromQuery] string id)
+        {
+            try
+            {
+                var teacher = await _db.TeacherTbl.FirstOrDefaultAsync(u => u.Id == id);
+                if (teacher == null)
+                {
+                    _response.isSuccess = false;
+                    _response.Message = "No se encontraron registros de este usuario!!!";
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                _response.isSuccess = true;
+                _response.Message = "Se obtuvo el registro del usuario";
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Result = teacher;
+                return Ok(_response);
+
+            }
+            catch (Exception ex)
+            {
+                _response.isSuccess = false;
+                _response.Errors = new List<string> { ex.ToString() };
+            }
+            return _response;
+        }
+
 
         [HttpGet("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery] string id, [FromQuery] string? search)
@@ -340,8 +369,8 @@ namespace CapernovaAPI.Controllers
                 }
                 else if (!string.IsNullOrEmpty(search))
                 {
-                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
-                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
+                    //var startDate = JsonConvert.DeserializeObject<DateTime>(start);
+                    //var endDate = JsonConvert.DeserializeObject<DateTime>(end);
                     var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId
                     && (u.Estudiante!.LastName!.Contains(search)
                     || u.Estudiante.Name!.Contains(search)
