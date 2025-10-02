@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240919220753_AddAreaAndCategoriaTblAndAlterProductoTblAddEspecificacionColumn.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,8 +12,6 @@ namespace User.Managment.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            
-
             migrationBuilder.AddColumn<string>(
                 name: "Especificacion",
                 table: "ProductoTbl",
@@ -22,7 +24,7 @@ namespace User.Managment.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -35,13 +37,12 @@ namespace User.Managment.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CategoriaTbl", x => x.Id);
                 });
-
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoTbl_Especificacion",
@@ -64,7 +65,6 @@ namespace User.Managment.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "Especificacion",
                 table: "ProductoTbl");
-
         }
     }
 }

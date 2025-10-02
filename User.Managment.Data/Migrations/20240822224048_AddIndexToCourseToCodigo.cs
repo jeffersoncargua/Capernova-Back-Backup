@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240822224048_AddIndexToCourseToCodigo.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -50,7 +54,7 @@ namespace User.Managment.Data.Migrations
                     { "85093123-61ee-4ba3-b4c1-da9cc7ef9d86", "2", "User", "USER" },
                     { "d280250d-77c0-4efe-977e-364f14de445f", "3", "Student", "STUDENT" },
                     { "e9468390-25a1-4115-a182-6e4fc789289a", "4", "Teacher", "TEACHER" },
-                    { "fb5f07f1-06d3-45d2-ab96-6cbcb0da117e", "1", "Admin", "ADMIN" }
+                    { "fb5f07f1-06d3-45d2-ab96-6cbcb0da117e", "1", "Admin", "ADMIN" },
                 });
 
             migrationBuilder.CreateIndex(
@@ -107,7 +111,7 @@ namespace User.Managment.Data.Migrations
                     { "380a255f-8abe-49c3-9530-6992d8d2f78e", "5", "Secretary", "SECRETARY" },
                     { "b22d7c21-0f95-4e9d-91ee-c9285fbe2429", "1", "Admin", "ADMIN" },
                     { "c949d71e-71a4-45e5-9df1-a1edab0e45cc", "3", "Student", "STUDENT" },
-                    { "ed50890c-5c9c-41d3-9fd9-204e6e01b973", "2", "User", "USER" }
+                    { "ed50890c-5c9c-41d3-9fd9-204e6e01b973", "2", "User", "USER" },
                 });
         }
     }

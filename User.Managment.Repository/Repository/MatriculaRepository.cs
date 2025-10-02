@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="MatriculaRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using User.Managment.Data.Data;
 using User.Managment.Data.Models.PaypalOrder;
-using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Repository.Repository.IRepository;
 
 namespace User.Managment.Repository.Repository
@@ -14,10 +12,12 @@ namespace User.Managment.Repository.Repository
     {
         private readonly ApplicationDbContext _db;
 
-        public MatriculaRepository(ApplicationDbContext db) : base(db)
+        public MatriculaRepository(ApplicationDbContext db)
+            : base(db)
         {
             _db = db;
         }
+
         public async Task<Matricula> UpdateAsync(Matricula entity)
         {
             _db.MatriculaTbl.Update(entity);

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// <copyright file="20240820154057_AddMatriculacionAndShoppingCartAndProductoAndFacturacionTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -42,7 +45,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FechaVenta = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Total = table.Column<double>(type: "float", nullable: false)
+                    Total = table.Column<double>(type: "float", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -65,7 +68,7 @@ namespace User.Managment.Data.Migrations
                     EstudianteId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: true),
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NotaFinal = table.Column<double>(type: "float", nullable: true)
+                    NotaFinal = table.Column<double>(type: "float", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -96,7 +99,7 @@ namespace User.Managment.Data.Migrations
                     Imagen = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Detalle = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Precio = table.Column<double>(type: "float", nullable: false),
-                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -111,7 +114,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductoId = table.Column<int>(type: "int", nullable: false),
                     FacturaId = table.Column<int>(type: "int", nullable: false),
-                    Cantidad = table.Column<double>(type: "float", nullable: false)
+                    Cantidad = table.Column<double>(type: "float", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -139,7 +142,7 @@ namespace User.Managment.Data.Migrations
                     { "7e0812a6-feee-4585-8b64-9fe181d67d45", "5", "Secretary", "SECRETARY" },
                     { "9f68fefa-94ab-4bd1-9770-736d1eca66f4", "4", "Teacher", "TEACHER" },
                     { "b3b33d82-ffdc-4ec8-af14-b5aa79406fef", "2", "User", "USER" },
-                    { "cbb2734f-d32b-4b77-9b22-fab36e758b18", "3", "Student", "STUDENT" }
+                    { "cbb2734f-d32b-4b77-9b22-fab36e758b18", "3", "Student", "STUDENT" },
                 });
 
             migrationBuilder.CreateIndex(
@@ -222,7 +225,7 @@ namespace User.Managment.Data.Migrations
                     { "2ac1e30f-e6bf-44bd-a4c3-5d22d0e26b9d", "5", "Secretary", "SECRETARY" },
                     { "65189451-c8c2-46bc-8b1d-5aba0490223e", "4", "Teacher", "TEACHER" },
                     { "7b2e14c0-f5f2-44c9-bde5-953cbbc9dbbb", "1", "Admin", "ADMIN" },
-                    { "f8a78efa-cc5b-4a62-8d21-bcfbc63367c4", "2", "User", "USER" }
+                    { "f8a78efa-cc5b-4a62-8d21-bcfbc63367c4", "2", "User", "USER" },
                 });
         }
     }

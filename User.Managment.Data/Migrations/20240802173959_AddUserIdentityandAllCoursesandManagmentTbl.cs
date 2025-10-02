@@ -1,4 +1,7 @@
-﻿using System;
+﻿// <copyright file="20240802173959_AddUserIdentityandAllCoursesandManagmentTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -16,7 +19,7 @@ namespace User.Managment.Data.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -44,7 +47,7 @@ namespace User.Managment.Data.Migrations
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -58,7 +61,7 @@ namespace User.Managment.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     imageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Titulo = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false)
+                    Titulo = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -74,7 +77,7 @@ namespace User.Managment.Data.Migrations
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -91,7 +94,7 @@ namespace User.Managment.Data.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Biografy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhotoURL = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    PhotoURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -106,7 +109,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -127,7 +130,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -147,7 +150,7 @@ namespace User.Managment.Data.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -165,7 +168,7 @@ namespace User.Managment.Data.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -191,7 +194,7 @@ namespace User.Managment.Data.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -216,7 +219,7 @@ namespace User.Managment.Data.Migrations
                     ImagenUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Precio = table.Column<double>(type: "float", nullable: false),
                     TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FolderId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FolderId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -235,7 +238,7 @@ namespace User.Managment.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CourseId = table.Column<int>(type: "int", nullable: false)
+                    CourseId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -256,7 +259,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Detalle = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CourseId = table.Column<int>(type: "int", nullable: false)
+                    CourseId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -278,7 +281,7 @@ namespace User.Managment.Data.Migrations
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Detalle = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Test = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CourseId = table.Column<int>(type: "int", nullable: false)
+                    CourseId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -300,7 +303,7 @@ namespace User.Managment.Data.Migrations
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VideoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OrdenReproduccion = table.Column<int>(type: "int", nullable: true),
-                    CapituloId = table.Column<int>(type: "int", nullable: false)
+                    CapituloId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -324,7 +327,7 @@ namespace User.Managment.Data.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Calificacion = table.Column<double>(type: "float", nullable: true),
                     StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    DeberId = table.Column<int>(type: "int", nullable: false)
+                    DeberId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -354,7 +357,7 @@ namespace User.Managment.Data.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Calificacion = table.Column<double>(type: "float", nullable: true),
                     StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    DeberId = table.Column<int>(type: "int", nullable: false)
+                    DeberId = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -381,7 +384,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     VideoId = table.Column<int>(type: "int", nullable: false),
-                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -409,7 +412,7 @@ namespace User.Managment.Data.Migrations
                     { "7a08ec44-4b7e-4fc8-bd6f-9324c3730459", "3", "Student", "STUDENT" },
                     { "7a8cea08-3afd-4ee7-9b99-a30108232d05", "4", "Teacher", "TEACHER" },
                     { "ebf49a25-e884-40e9-99c8-a773fbc71d04", "1", "Admin", "ADMIN" },
-                    { "fe9f7ac4-09ac-4803-a12e-b179b270b963", "2", "User", "USER" }
+                    { "fe9f7ac4-09ac-4803-a12e-b179b270b963", "2", "User", "USER" },
                 });
 
             migrationBuilder.CreateIndex(

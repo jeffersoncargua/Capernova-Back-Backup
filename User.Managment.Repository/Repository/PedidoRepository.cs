@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="PedidoRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using User.Managment.Data.Data;
 using User.Managment.Data.Models.Ventas;
 using User.Managment.Repository.Repository.IRepository;
@@ -12,7 +11,9 @@ namespace User.Managment.Repository.Repository
     public class PedidoRepository : Repository<Pedido>, IPedidoRepository
     {
         private readonly ApplicationDbContext _db;
-        public PedidoRepository(ApplicationDbContext db) :base(db)
+
+        public PedidoRepository(ApplicationDbContext db)
+            : base(db)
         {
             _db = db;
         }
@@ -30,6 +31,5 @@ namespace User.Managment.Repository.Repository
             await _db.SaveChangesAsync();
             return entities;
         }
-
     }
 }

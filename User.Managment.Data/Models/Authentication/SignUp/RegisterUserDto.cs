@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System;
-using System.Collections.Generic;
+﻿// <copyright file="RegisterUserDto.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace User.Managment.Data.Models.Authentication.SignUp
 {
-    public class RegisterUser
+    public class RegisterUserDto
     {
         [Required(ErrorMessage = "El nombre de usuario es requerido ")]
         public string? Name { get; set; }
@@ -17,7 +15,7 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         public string? LastName { get; set; }
 
         [EmailAddress(ErrorMessage = "No cumple con el formato de correo electrónico")]
-        [Required(ErrorMessage = "El correo del usuario es requerido ")]        
+        [Required(ErrorMessage = "El correo del usuario es requerido ")]
         public string? Email { get; set; }
 
         [Required(ErrorMessage = "La contraseña de usuario es requerido ")]
@@ -34,12 +32,10 @@ namespace User.Managment.Data.Models.Authentication.SignUp
         [Required(ErrorMessage = "La cuidad de residencia de usuario es requerido")]
         public string? City { get; set; }
 
-        //[Required(ErrorMessage = "La direccion principal de residencia de usuario es requerido")]
-        //public string? DirectionMain { get; set; } //Direccion principal
-        //[Required(ErrorMessage = "La direccion secundaria de residencia de usuario es requerido")]
-        //public string? DirectionSec { get; set; } //Direccion Secundaria
-
-        public string? Role { get; set; } //Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
-
+        // [Required(ErrorMessage = "La direccion principal de residencia de usuario es requerido")]
+        // public string? DirectionMain { get; set; } //Direccion principal
+        // [Required(ErrorMessage = "La direccion secundaria de residencia de usuario es requerido")]
+        // public string? DirectionSec { get; set; } //Direccion Secundaria
+        public string? Role { get; set; } // Se recibe el rol para poder asigarle un rol de los que se tiene en la base de datos
     }
 }

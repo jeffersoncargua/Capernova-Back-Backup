@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices.ObjectiveC;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="ApiResponse.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
-namespace User.Managment.Data.Models
+using System.Net;
+
+namespace Capernova.Utility
 {
     public class ApiResponse
     {
@@ -14,11 +12,15 @@ namespace User.Managment.Data.Models
         {
             Errors = new List<string>();
         }
-        public HttpStatusCode StatusCode { get; set; }
-        public bool isSuccess { get; set; } = true;
-        public object? Result { get; set; }
-        public string? Message { get; set; }
-        public List<string> Errors { get; set; }
 
+        public HttpStatusCode StatusCode { get; set; }
+
+        public bool isSuccess { get; set; } = true;
+
+        public object? Result { get; set; } = null;
+
+        public string? Message { get; set; }
+
+        public List<string> Errors { get; set; }
     }
 }

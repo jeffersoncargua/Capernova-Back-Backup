@@ -1,29 +1,12 @@
-﻿//using Google.Apis.Auth.AspNetCore3;
-//using Google.Apis.Auth.OAuth2;
-//using Google.Apis.Drive.v3;
-//using Google.Apis.Services;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Responses;
-using Google.Apis.Drive.v3;
-using Google.Apis.Services;
-using Google.Apis.Upload;
-using Google.Apis.Util.Store;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-//using Microsoft.OpenApi.Writers;
-using System.Net;
-using User.Managment.Data.Data;
-using User.Managment.Data.Models;
-using User.Managment.Data.Models.Course;
-using User.Managment.Data.Models.Managment;
-using User.Managment.Data.Models.Managment.DTO;
-using User.Managment.Data.Models.PaypalOrder.Dto;
-using User.Managment.Data.Models.PaypalOrder;
-using User.Managment.Repository.Repository.IRepository;
-using static Google.Apis.Drive.v3.DriveService;
+﻿// <copyright file="TeacherController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using AutoMapper;
 using Capernova.Utility;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
+using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
 {
@@ -31,718 +14,101 @@ namespace CapernovaAPI.Controllers
     [ApiController]
     public class TeacherController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
-        private readonly ICourseRepositoty _dbCourse;
-        private readonly IMatriculaRepository _dbMatricula;
-        //private readonly IWebHostEnvironment _hostEnvironment;
-        //private readonly GoogleDriveService _googleDriveService;
-        //private readonly IConfiguration _configuration;
-        private readonly GoogleDriveSettings _googleDriveConfig;
+        private readonly ITeacherRepository _repoTeacher;
+        private readonly IMapper _mapper;
         protected ApiResponse _response;
-        //protected string clientSecret;
-        //protected string clientId;
-        //protected string authUri;
 
-        public TeacherController(ApplicationDbContext db, ICourseRepositoty dbCourse, IMatriculaRepository dbMatricula, GoogleDriveSettings googleDriveConfig)
+        public TeacherController(ITeacherRepository repoTeacher, IMapper mapper)
         {
-            _db = db;
-            _dbCourse = dbCourse;
-            _dbMatricula = dbMatricula;
-            //_hostEnvironment = hostEnvironment;
-            //_googleDriveConfig = googleDriveConfig;
-            //_configuration = configuration;
-            _googleDriveConfig = googleDriveConfig;
-            //this.clientId = _configuration["GoogleDrive:ClientId"]; //permite obtener del archivo appsettings.json el clientId de google drive
-            //this.clientSecret = _configuration["GoogleDrive:ClientSecret"]; //permite obtener del archivo appsettings.json el redirectUri de google drive
-            //this.authUri = _configuration["GoogleDrive:RedirectUri"]; //permite obtener del archivo appsettings.json el redirectUri de ggolge drive
+            _repoTeacher = repoTeacher;
+            _mapper = mapper;
             this._response = new();
         }
 
         [HttpGet("getAllTeacher")]
         public async Task<ActionResult<ApiResponse>> GetAllTeacher()
         {
-            try
-            {
-                var teacherlist = await _db.TeacherTbl.ToListAsync();
-                if (teacherlist == null)
-                {
-                    _response.isSuccess = false;
-                    _response.Message = "No se obtuvieron resultados";
-                    _response.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_response);
-                }
+            var result = await _repoTeacher.GetAllTeacherAsync();
 
-                _response.isSuccess = true;
-                _response.Message = "Se obtuvo la lista de profesores satisfactoriamente";
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Result = teacherlist;
-                return Ok(_response);
-
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         [HttpGet("getTeacher")]
         public async Task<ActionResult<ApiResponse>> GetTeacher([FromQuery] string id)
         {
-            try
-            {
-                var teacher = await _db.TeacherTbl.FirstOrDefaultAsync(u => u.Id == id);
-                if (teacher == null)
-                {
-                    _response.isSuccess = false;
-                    _response.Message = "No se encontraron registros de este usuario!!!";
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    return BadRequest(_response);
-                }
+            var result = await _repoTeacher.GetTeacherAsync(id);
 
-                _response.isSuccess = true;
-                _response.Message = "Se obtuvo el registro del usuario";
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Result = teacher;
-                return Ok(_response);
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
 
         [HttpGet("getAllCourse")]
         public async Task<ActionResult<ApiResponse>> GetAllCourse([FromQuery] string id, [FromQuery] string? search)
         {
-            try
-            {
-                if (!string.IsNullOrEmpty(search))
-                {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower().Contains(search) && u.TeacherId == id, includeProperties: "Teacher");
-                    if (coursesQuery !=null && coursesQuery.Count > 0)
-                    {
-                        _response.isSuccess = true;
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.Message = "Se ha obtenido la lista de Cursos";
-                        _response.Result = coursesQuery;
-                        return Ok(_response);
-                    }
-                    else
-                    {
-                        _response.isSuccess = false;
-                        _response.StatusCode = HttpStatusCode.BadRequest;
-                        _response.Message = "No se ha encontrado coincidencias!!";
-                        return BadRequest(_response);
-                    }
-                }
+            var result = await _repoTeacher.GetAllCourseAsync(id, search);
 
-                var teacherCourse = await _dbCourse.GetAllAsync(u => u.TeacherId == id, includeProperties: "Teacher");
-                if (teacherCourse == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se han encontrado cursos asignados";
-                    return BadRequest(_response);
-                }
-
-                var teacher = await _db.TeacherTbl.FirstOrDefaultAsync(u => u.Id == id);
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = $"Se ha obtenido el/los curso/s asignado/s al profesor";
-                _response.Result = teacherCourse;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
-
 
         [HttpPut("updateTeacher", Name = "updateTeacher")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateTeacher([FromQuery] string id, [FromBody] TeacherDto teacherDto)
         {
-            try
-            {
-                if (teacherDto.Id != id || teacherDto == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error en el sistema. Inténtelo nuevamente!";
-                    return BadRequest(_response);
-                }
+            var result = await _repoTeacher.UpdateTeacherAsync(id, teacherDto);
 
-                var teacher = await _db.TeacherTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if (teacher == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El usuario no está registrado!";
-                    return BadRequest(_response);
-                }
-
-                Teacher model = new()
-                {
-                    Id = teacherDto.Id,
-                    Name = teacherDto.Name,
-                    LastName = teacherDto.LastName,
-                    Phone = teacherDto.Phone,
-                    Biografy = teacherDto.Biografy,
-                    Email = teacherDto.Email,
-                    PhotoURL = teacherDto.PhotoURL
-                };
-
-                _db.TeacherTbl.Update(model);
-                await _db.SaveChangesAsync();
-
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Tu información se ha actualizado correctamente!";
-                return Ok(_response);
-
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         [HttpPut("updateImageTeacher", Name = "updateImageTeacher")]
         [ResponseCache(CacheProfileName = "Default30")]
-        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
         public async Task<ActionResult<ApiResponse>> UpdateImageTeacher([FromQuery] string id, IFormFile? file)
         {
-            try
-            {
-                var teacherDto = await _db.TeacherTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if (teacherDto == null || teacherDto.Id != id)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido completar con la actualización de tu fotografía!";
-                    return BadRequest(_response);
-                }
+            var result = await _repoTeacher.UpdateImageTeacherAsync(id, file);
 
-                if (file != null)
-                {
-                    var service = GetService(); //Se inicia sesion para enviar o eliminar archivos en google drive
-
-                    //En caso de que exista el identificador del archivo se procede a eliminarlo de google drive para poder almacenar otro
-                    if (teacherDto.PhotoURL != null)
-                    {
-                        DeleteFile(service, teacherDto.PhotoURL);
-                    }
-
-                    //Permite almacenar el idFile creado en google drive para almacenarlo y utilizarlo en la aplicacion
-                    //Este link es el identificador de la anterior carpeta para almacenar las fotos de perfil del estudiante : 1PuD7eY7zNN1kVs4v0-bD6t9_XDFJfGFa
-                    //Este link es el identificador de la nueva carpeta para almacenar las fotos de perfil del estudiante : 1gDJvaSjLHmLjEPNAz42uWnSY7P3ltnIS
-                    //Estos links estan vinculados a las carpetas de Drive de google por lo que se debe revisar su forderId en google drive
-                    string idFile = await UploadFile(service, file, "1gDJvaSjLHmLjEPNAz42uWnSY7P3ltnIS");
-
-                    Teacher modelWithPhoto = new()
-                    {
-                        Id = teacherDto.Id,
-                        Name = teacherDto.Name,
-                        LastName = teacherDto.LastName,
-                        Phone = teacherDto.Phone,
-                        Biografy = teacherDto.Biografy,
-                        Email = teacherDto.Email,
-                        PhotoURL = idFile
-                    };
-
-                    _db.TeacherTbl.Update(modelWithPhoto);
-                    //_db.TeacherTbl.Update(teacher);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Tu fotografía se ha actualizado correctamente!";
-                    return Ok(_response);
-
-                }
-
-                //Teacher model = new()
-                //{
-                //    Id = teacherDto.Id,
-                //    Name = teacherDto.Name,
-                //    LastName = teacherDto.LastName,
-                //    Phone = teacherDto.Phone,
-                //    Biografy = teacherDto.Biografy,
-                //    Email = teacherDto.Email,
-                //    PhotoURL = teacherDto.PhotoURL
-                //};
-
-                //_db.TeacherTbl.Update(model);
-                //await _db.SaveChangesAsync();
-
-                //_response.isSuccess = true;
-                //_response.StatusCode = HttpStatusCode.OK;
-                //_response.Message = "Su información se ha actualizado correctamente!";
-                //return Ok(_response);
-
-                _response.isSuccess = false;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido actualizar tu fotografía!";
-                return BadRequest(_response);
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
 
         [HttpGet("getStudents", Name = "getStudents")]
         public async Task<ActionResult<ApiResponse>> GetStudents([FromQuery] int? cursoId, [FromQuery] string? search, [FromQuery] string start, [FromQuery] string end)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(search) && cursoId == 0)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido obtener la lista de estudiantes. Elija un curso!";
-                    return BadRequest(_response);
-                } else if (!string.IsNullOrEmpty(search) && start != "null" && end != "null")
-                {
-                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
-                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId 
-                    && (u.Estudiante!.LastName!.Contains(search) 
-                    || u.Estudiante.Name!.Contains(search) 
-                    || u.Estudiante.Email!.Contains(search))
-                    && u.FechaInscripcion >= startDate && u.FechaInscripcion <= endDate, tracked: false, includeProperties: "Curso,Estudiante");
-                    if (studentList != null)
-                    {
-                        _response.isSuccess = true;
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
-                        return Ok(_response);
-                    }
+            var result = await _repoTeacher.GetAllStudentAsync(cursoId, search, start, end);
 
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
-
-                    return BadRequest(_response);
-                }
-                else if ( start != "null" && end != "null")
-                {
-                    var startDate = JsonConvert.DeserializeObject<DateTime>(start);
-                    var endDate = JsonConvert.DeserializeObject<DateTime>(end);
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId
-                    && u.FechaInscripcion >= startDate && u.FechaInscripcion <= endDate, tracked: false, includeProperties: "Curso,Estudiante");
-                    if (studentList != null)
-                    {
-                        _response.isSuccess = true;
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
-                        return Ok(_response);
-                    }
-
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
-
-                    return BadRequest(_response);
-                }
-                else if (!string.IsNullOrEmpty(search))
-                {
-                    //var startDate = JsonConvert.DeserializeObject<DateTime>(start);
-                    //var endDate = JsonConvert.DeserializeObject<DateTime>(end);
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId
-                    && (u.Estudiante!.LastName!.Contains(search)
-                    || u.Estudiante.Name!.Contains(search)
-                    || u.Estudiante.Email!.Contains(search)), tracked: false, includeProperties: "Curso,Estudiante");
-                    if (studentList != null)
-                    {
-                        _response.isSuccess = true;
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
-                        return Ok(_response);
-                    }
-
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
-
-                    return BadRequest(_response);
-                }
-                else
-                {
-                    var studentList = await _dbMatricula.GetAllAsync(u => u.CursoId == cursoId, tracked: false, includeProperties: "Curso,Estudiante");
-                    if (studentList != null)
-                    {
-                        _response.isSuccess = true;
-                        _response.StatusCode = HttpStatusCode.OK;
-                        _response.Message = "Se ha podido obtener el estudiante en específico";
-                        _response.Result = studentList.OrderByDescending(x => x.FechaInscripcion);
-                        return Ok(_response);
-                    }
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido obtener la lista de estudiantes!";
-                    return BadRequest(_response);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
-
         [HttpPut("updateNotaDeber", Name = "updateNotaDeber")]
-        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateNotaDeber([FromQuery] int? id, [FromQuery] string studentId, [FromBody] string? calificacion)
         {
-            try
-            {
-                var notaDeberExist = await _db.NotaDeberTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.StudentId == studentId);
-                if (notaDeberExist != null && !string.IsNullOrEmpty(calificacion))
-                {
-                    NotaDeber model = new()
-                    {
-                        Id = notaDeberExist.Id,
-                        Observacion = notaDeberExist.Observacion,
-                        Estado = notaDeberExist.Estado,
-                        Calificacion = Convert.ToDouble(calificacion),
-                        DeberId = notaDeberExist.DeberId,
-                        StudentId = notaDeberExist.StudentId,
-                        FileUrl = notaDeberExist.FileUrl
-                    };
+            var result = await _repoTeacher.UpdateGradeTaskAsync(id, studentId, calificacion);
 
-                    _db.NotaDeberTbl.Update(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha calificado el deber con éxito!!";
-                    return Ok(_response);
-                }
-
-                _response.isSuccess = false;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido calificar el deber!!";
-                return BadRequest(_response);
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
-
         [HttpPut("upsertNotaPrueba", Name = "upsertNotaPrueba")]
-        //[GoogleScopedAuthorize(DriveService.ScopeConstants.DriveReadonly)]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpsertNotaPrueba([FromQuery] int id, [FromQuery] string studentId, [FromBody] string? calificacion)
         {
-            try
-            {
-                var notaPruebaDto = await _db.NotaPruebaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.PruebaId == id && u.StudentId == studentId);
-                if (notaPruebaDto != null && !string.IsNullOrEmpty(calificacion))
-                {
-                    NotaPrueba model = new()
-                    {
-                        Id = notaPruebaDto.Id,
-                        Observacion = notaPruebaDto.Observacion,
-                        Estado = notaPruebaDto.Estado,
-                        Calificacion = Convert.ToDouble(calificacion),
-                        PruebaId = notaPruebaDto.PruebaId,
-                        StudentId = notaPruebaDto.StudentId,
-                    };
+            var result = await _repoTeacher.UpsertGradeTestAsync(id, studentId, calificacion);
 
-                    _db.NotaPruebaTbl.Update(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha actualizado la calificación de la prueba con éxito!!";
-                    return Ok(_response);
-                }
-                else if (!string.IsNullOrEmpty(calificacion))
-                {
-                    NotaPrueba model = new()
-                    {
-                        Observacion = "Revisado",
-                        Estado = "Calificado",
-                        Calificacion = Convert.ToDouble(calificacion),
-                        PruebaId = id,
-                        StudentId = studentId
-                    };
-
-                    await _db.NotaPruebaTbl.AddAsync(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha calificado la prueba con éxito!!";
-                    return Ok(_response);
-                }
-
-                _response.isSuccess = false;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido calificar la prueba. Revise la prueba antes de calificar y coloca la nota correspondiente";
-                return BadRequest(_response);
-
-                //_response.isSuccess = false;
-                //_response.StatusCode = HttpStatusCode.BadRequest;
-                //_response.Message = "No se ha podido entregar el deber. Inténtelo nuevamente!";
-                //return BadRequest(_response);
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string> { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         [HttpPut("updateMatriculaNota/{id:int}", Name = "updateMatriculaNota")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateMatriculaNota(int id, [FromBody] string notaFinal)
         {
-            try
-            {
-                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
-                if (matriculaExist != null && !string.IsNullOrEmpty(notaFinal))
-                {
-                    Matricula model = new()
-                    {
-                        Id = matriculaExist.Id,
-                        FechaInscripcion=matriculaExist.FechaInscripcion,
-                        CursoId = matriculaExist.CursoId,
-                        EstudianteId = matriculaExist.EstudianteId,
-                        IsActive = matriculaExist.IsActive,
-                        Estado = "Completado",
-                        NotaFinal = Convert.ToDouble(notaFinal),
-                        CertificadoId = matriculaExist.CertificadoId
-                    };
+            var result = await _repoTeacher.UpdateGradeMatriculaAsync(id, notaFinal);
 
-                    _db.MatriculaTbl.Update(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha colocado la nota final de la matrícula del estudiante!!";
-                    _response.Result = model;
-                    return Ok(_response);
-                }
-
-                _response.isSuccess = false;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Message = "No se ha podido colocar la nota final en la matrícula del estudiante. Asegúrate de colocar la nota";
-                return BadRequest(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         [HttpPut("updateMatriculaEstado/{id:int}/{studentId}", Name = "updateMatriculaEstado")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateMatriculaEstado(int id, string studentId, [FromBody] bool isActive = false)
         {
-            try
-            {
-                var matriculaExist = await _db.MatriculaTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.EstudianteId == studentId);
-                if (matriculaExist == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "No se ha podido deshabilitar al matrícula del estudiante!!";
-                    return BadRequest(_response);
+            var result = await _repoTeacher.UpdateMatriculaStateAsync(id, studentId, isActive);
 
-                }
-                else if (isActive)
-                {
-                    Matricula model = new()
-                    {
-                        Id = matriculaExist.Id,
-                        CursoId = matriculaExist.CursoId,
-                        FechaInscripcion = matriculaExist.FechaInscripcion,
-                        EstudianteId = matriculaExist.EstudianteId,
-                        IsActive = false,
-                        Estado = matriculaExist.Estado,
-                        NotaFinal = matriculaExist.NotaFinal,
-                        CertificadoId = matriculaExist.CertificadoId
-                    };
-
-                    _db.MatriculaTbl.Update(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha deshabilitado la matrícula del estudiante!!";
-                    return Ok(_response);
-
-                }
-                else
-                {
-                    Matricula model = new()
-                    {
-                        Id = matriculaExist.Id,
-                        CursoId = matriculaExist.CursoId,
-                        FechaInscripcion = matriculaExist.FechaInscripcion,
-                        EstudianteId = matriculaExist.EstudianteId,
-                        IsActive = true,
-                        Estado = matriculaExist.Estado,
-                        NotaFinal = matriculaExist.NotaFinal,
-                        CertificadoId = matriculaExist.CertificadoId
-                    };
-
-                    _db.MatriculaTbl.Update(model);
-                    await _db.SaveChangesAsync();
-
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha habilitado la matrícula del estudiante!!";
-                    return Ok(_response);
-                    
-                }
-                
-
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
-        /// <summary>
-        /// Esta funcion permite sincronizar las credenciales obtenidas para enlazar el proyecto .net con google drive
-        /// Si se necesita informacion de como realizarlo se adjunta el link de instrucciones: https://medium.com/geekculture/upload-files-to-google-drive-with-c-c32d5c8a7abc
-        /// </summary>
-        /// <returns>Se retorna el inicio de sesion de la aplicacion con google drive</returns>
-        /// private static DriveService GetService()
-        private DriveService GetService()
-        {
-            var tokenResponse = new TokenResponse
-            {
-                //AccessToken = "1//041-_LTKAaU4PCgYIARAAGAQSNwF-L9IryRCk2mn0RPeywH_05aXr0zchT2NJNBE6_nxIzC_gI8QmM0JdNSCSxkvS_jpL7E9gbuM",
-                //RefreshToken = "ya29.a0AcM612wrGyzBrEs3nZjSD_8zgjiOad8fRLn-NNOUvHmSRV3G3IrMevYXimxx5CeWDJaNO0ejNwnOWmj_xmh5tPGB1_6chWhpE4lhnM-R_Dv5FDuxQUnZh8CVOe0iQBOYpvAv_Z8RQGb_qxXDRYQ1Ifl5fz57kH6rS0e_BIo_aCgYKAdYSARESFQHGX2MidkiXOlI6xW0MqLuBEHNLYQ0175",
-                AccessToken = _googleDriveConfig.AccessToken,
-                RefreshToken = _googleDriveConfig.RefreshToken
-
-            };
-
-            //var applicationName = "Capernova";
-            //var userName = "capernova.edu.ec@gmail.com";
-            var applicationName = _googleDriveConfig.ApplicationName;
-            var userName = _googleDriveConfig.UserName;
-
-            var apiCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
-            {
-                ClientSecrets = new ClientSecrets
-                {
-                    //ClientId = "63608082167-e4ju7bra09p6hhr5dr44b5kg54ov25is.apps.googleusercontent.com",
-                    //ClientSecret = "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"
-                    ClientId = _googleDriveConfig.ClientId,
-                    ClientSecret = _googleDriveConfig.ClientSecret
-                },
-                Scopes = new[] { Scope.Drive },
-                DataStore = new FileDataStore(applicationName),
-
-
-            });
-
-            var credential = new UserCredential(apiCodeFlow, userName, tokenResponse);
-
-            var service = new DriveService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = applicationName,                
-                
-            });
-
-            return service;
-        }
-
-        /// <summary>
-        /// Esta funcion permite cargar un archivo en google drive
-        /// Entre estos archivos que se pueden cargar son documentos, fotos y audios, pero no videos.
-        /// </summary>
-        /// <param name="service">Es la sesion que se abrio para enlazar la aplicacion con google drive</param>
-        /// <param name="file">Es el archivo que se va a subir que puede ser foto, documentos o musica</param>
-        /// <param name="idFolder">Es el identificador de la carpeta donde se va a subir el archivo para este caso es la carpeta PruebaCapernova en Google Drive</param>
-        /// <returns>Retorna el IdFile que se creo en google drive</returns>
-        private async Task<string> UploadFile(DriveService service,IFormFile file,string idFolder)
-        {
-
-            string fileMime = file.ContentType;
-            var driveFile = new Google.Apis.Drive.v3.Data.File();
-            driveFile.Name = file.FileName;
-            driveFile.MimeType = file.ContentType;
-            driveFile.Parents = new string[] { idFolder };            
-
-            var request = service.Files.Create(driveFile, file.OpenReadStream(),fileMime); //OpenReadStream permite abrir el archivo para enviarlo al servicio de Google Drive
-
-            //request.Fields permite que se generen los campos que queremos obtener informacion como el id, webViewLink, etc. Vease os campos que tiene en el ResponseBody.{Fields}
-            request.Fields = "id, webViewLink"; //Se agrego webViewlink para obtener el link de enlace
-
-            
-            var response = await request.UploadAsync();
-
-            if (response.Status != UploadStatus.Completed)
-            {
-                throw response.Exception;
-            }            
-
-            return request.ResponseBody.Id;
-        }
-
-        /// <summary>
-        /// Esta función permite eliminar un archivo con el IdFile que se encuentre en el google drive 
-        /// </summary>
-        /// <param name="service">Es la sesion que se abrio para enlazar la aplicacion con google drive</param>
-        /// <param name="idFile">Es el identificador del archivo a eliminar</param>
-        private async void DeleteFile(DriveService service, string idFile)
-        {
-            var command = service.Files.Delete(idFile);
-            var result = await command.ExecuteAsync();
-        }
-
-
     }
-
 }

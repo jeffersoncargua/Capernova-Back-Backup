@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240917031956_AlterVentaTblAddEstado.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -16,7 +20,7 @@ namespace User.Managment.Data.Migrations
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
-        {          
+        {
             migrationBuilder.DropColumn(
                 name: "Estado",
                 table: "VentaTbl");

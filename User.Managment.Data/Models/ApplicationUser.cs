@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-using User.Managment.Data.Models.Managment;
+﻿// <copyright file="ApplicationUser.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.AspNetCore.Identity;
 
 namespace User.Managment.Data.Models
 {
@@ -14,10 +14,8 @@ namespace User.Managment.Data.Models
 
         public string? Ciudad { get; set; }
 
-        //public string? DirecionPrincipal { get; set; }
+        // public string? DirecionPrincipal { get; set; }
 
-        //public string? DireccionSecundaria { get; set; }
-
-
+        // public string? DireccionSecundaria { get; set; }
     }
 }

@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240828164815_AlterVentaTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -99,7 +103,7 @@ namespace User.Managment.Data.Migrations
                     { "3f45430d-cd35-486a-a23b-2e17ca27967c", "2", "User", "USER" },
                     { "66dc0cb7-827d-4409-8002-fab756f843fd", "1", "Admin", "ADMIN" },
                     { "809f5a24-8575-492b-894e-446f6872ce6e", "5", "Secretary", "SECRETARY" },
-                    { "b0801c74-76f8-4587-aa36-5a644f529670", "3", "Student", "STUDENT" }
+                    { "b0801c74-76f8-4587-aa36-5a644f529670", "3", "Student", "STUDENT" },
                 });
 
             migrationBuilder.CreateIndex(
@@ -188,7 +192,7 @@ namespace User.Managment.Data.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -204,7 +208,7 @@ namespace User.Managment.Data.Migrations
                     { "a6a03fc1-d43c-4781-aeef-d77687a44904", "4", "Teacher", "TEACHER" },
                     { "d90745f7-5c5a-4f9a-baad-833d53802583", "1", "Admin", "ADMIN" },
                     { "f85fc566-f4ea-43b4-a4ca-e8405a01bc8d", "2", "User", "USER" },
-                    { "fe64a82b-8583-42b1-9c24-260f852b60e3", "5", "Secretary", "SECRETARY" }
+                    { "fe64a82b-8583-42b1-9c24-260f852b60e3", "5", "Secretary", "SECRETARY" },
                 });
 
             migrationBuilder.CreateIndex(

@@ -1,18 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="ICourseRepositoty.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using User.Managment.Data.Models.Course;
-//using User.Managment.Data.Models.Managment;
+using User.Managment.Data.Models.Course.DTO;
+using User.Managment.Repository.Models;
 
 namespace User.Managment.Repository.Repository.IRepository
 {
     public interface ICourseRepositoty : IRepository<Course>
     {
-        Task<Course> UpdateAsync(Course entity);
-        Task<List<Course>> UpdateRangesAsync(List<Course> entities);
+        Task<ResponseDto> GetAllCourses(string? search);
 
+        Task<ResponseDto> GetCourse(int id);
+
+        Task<ResponseDto> GetCourseCode(string code);
+
+        Task<ResponseDto> CreateCourse(CourseDto course);
+
+        Task<ResponseDto> UpdateAsync(int id, CourseDto course);
+
+        Task<ResponseDto> DeleteCourse(int id);
+
+        // Task<List<Course>> UpdateRangesAsync(List<Course> entities);
     }
 }

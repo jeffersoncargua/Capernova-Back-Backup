@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240821032323_AlterProductoTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -47,7 +51,7 @@ namespace User.Managment.Data.Migrations
                     { "380a255f-8abe-49c3-9530-6992d8d2f78e", "5", "Secretary", "SECRETARY" },
                     { "b22d7c21-0f95-4e9d-91ee-c9285fbe2429", "1", "Admin", "ADMIN" },
                     { "c949d71e-71a4-45e5-9df1-a1edab0e45cc", "3", "Student", "STUDENT" },
-                    { "ed50890c-5c9c-41d3-9fd9-204e6e01b973", "2", "User", "USER" }
+                    { "ed50890c-5c9c-41d3-9fd9-204e6e01b973", "2", "User", "USER" },
                 });
         }
 
@@ -92,7 +96,7 @@ namespace User.Managment.Data.Migrations
                     { "2a4c397f-a0a7-4429-8863-f7647d52720f", "4", "Teacher", "TEACHER" },
                     { "6670cee8-cbfc-4f0f-97d4-f34c04d9434a", "5", "Secretary", "SECRETARY" },
                     { "6b556c2d-fa8d-4ac2-9934-66b95125fd0b", "2", "User", "USER" },
-                    { "ca645d23-1cbf-475c-b761-ee45ed3d4e63", "3", "Student", "STUDENT" }
+                    { "ca645d23-1cbf-475c-b761-ee45ed3d4e63", "3", "Student", "STUDENT" },
                 });
         }
     }

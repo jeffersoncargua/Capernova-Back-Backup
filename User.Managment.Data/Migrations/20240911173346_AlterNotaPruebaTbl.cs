@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240911173346_AlterNotaPruebaTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,7 +15,6 @@ namespace User.Managment.Data.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_NotaPruebaTbl_PruebaTbl_DeberId",
                 table: "NotaPruebaTbl");
-
 
             migrationBuilder.DropColumn(
                 name: "FileUrl",
@@ -26,7 +29,6 @@ namespace User.Managment.Data.Migrations
                 name: "IX_NotaPruebaTbl_DeberId",
                 table: "NotaPruebaTbl",
                 newName: "IX_NotaPruebaTbl_PruebaId");
-
 
             migrationBuilder.AddForeignKey(
                 name: "FK_NotaPruebaTbl_PruebaTbl_PruebaId",
@@ -58,7 +60,6 @@ namespace User.Managment.Data.Migrations
                 table: "NotaPruebaTbl",
                 type: "nvarchar(max)",
                 nullable: true);
-
 
             migrationBuilder.AddForeignKey(
                 name: "FK_NotaPruebaTbl_PruebaTbl_DeberId",

@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.Net;
-using User.Managment.Data.Models;
-using User.Managment.Data.Models.Course;
+﻿// <copyright file="CourseController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using AutoMapper;
+using Capernova.Utility;
+using Microsoft.AspNetCore.Mvc;
 using User.Managment.Data.Models.Course.DTO;
-using User.Managment.Data.Models.ProductosServicios;
-using User.Managment.Data.Models.ProductosServicios.Dto;
 using User.Managment.Repository.Repository.IRepository;
 
 namespace CapernovaAPI.Controllers
@@ -14,350 +14,84 @@ namespace CapernovaAPI.Controllers
     [ApiController]
     public class CourseController : ControllerBase
     {
-        private readonly ICourseRepositoty _dbCourse;
-        private readonly IProductoRepositoy _dbProducto;
+        private readonly ICourseRepositoty _repoCourse;
+        private readonly IMapper _mapper;
         protected ApiResponse _response;
-        public CourseController(ICourseRepositoty dbCourse, IProductoRepositoy dbProducto)
+
+        public CourseController(ICourseRepositoty repoCourse, IMapper mapper)
         {
-            _dbCourse = dbCourse;
-            _dbProducto = dbProducto;
+            _repoCourse = repoCourse;
+            _mapper = mapper;
             this._response = new();
         }
-        
+
         /// <summary>
-        /// Este controlador permite obtener todos los cursos registrados hasta el momento en la base de datos
+        /// Este controlador permite obtener todos los cursos registrados hasta el momento en la base de datos.
         /// </summary>
-        /// <param name="search">Es el modelo que permite obtener un curso en especifico de acuerdo al titulo del curso</param>
-        /// <returns>Retorna una lista de cursos y en el caso de tener una busqueda especifica retorna un listado con los cursos especificos</returns>
+        /// <param name="search">Es el modelo que permite obtener un curso en especifico de acuerdo al titulo del curso.</param>
+        /// <returns>Retorna una lista de cursos y en el caso de tener una busqueda especifica retorna un listado con los cursos especificos.</returns>
         [HttpGet]
         [Route("getAllCourse")]
-        public async Task<ActionResult<ApiResponse>> GetAll([FromQuery] string? search)
+        public async Task<ActionResult<ApiResponse>> GetAllCourses([FromQuery] string? search = null)
         {
-            try
-            {
-                if (!string.IsNullOrEmpty(search))
-                {
-                    var coursesQuery = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower().Contains(search));
-                    _response.isSuccess = true;
-                    _response.StatusCode = HttpStatusCode.OK;
-                    _response.Message = "Se ha obtenido la lista de Cursos";
-                    _response.Result = coursesQuery;
-                    return Ok(_response);
-                }
+            var result = await _repoCourse.GetAllCourses(search);
 
-                var courses = await _dbCourse.GetAllAsync(); //devuelve una lista con los cursos 
-                //var courses = await _db.CourseTbl.ToListAsync(); //si funciona la linea anterior se elimina esta linea
-                
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido la lista de Cursos";
-                _response.Result = courses;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() }; 
-            }
-
-            return _response;
-  
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         /// <summary>
-        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener
+        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener.
         /// </summary>
-        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso</param>
-        /// <returns></returns>
-        [HttpGet("getCourse/{id:int}", Name ="getCourse")]
+        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso.</param>
+        /// <returns>Retorna un curso en especifico, segun lo requiera el usuario.</returns>
+        [HttpGet("getCourse/{id:int}", Name = "getCourse")]
         public async Task<ActionResult<ApiResponse>> GetCourse(int id)
         {
-            try
-            {
-                var course = await _dbCourse.GetAsync(u => u.Id == id);// devuelve el curso cuyo id sea igual al Id del curso
-                if (course == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El registro no existe!";
-                    return BadRequest(_response);
-                }
+            var result = await _repoCourse.GetCourse(id);
 
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el curso con éxito!";
-                _response.Result = course;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         /// <summary>
-        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener
+        /// Este controlador permite obtener el curso de acuerdo al id del curso que se desea obtener.
         /// </summary>
-        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso</param>
-        /// <returns></returns>
+        /// <param name="id">Es el que contiene el identificador a comparar para obtener el curso.</param>
+        /// <param name="codigo">Es el codigo del producto.</param>
+        /// <returns>Restorna un curso en especifico, segun su codigo.</returns>
         [HttpGet("getCourseCode", Name = "getCourseCode")]
         public async Task<ActionResult<ApiResponse>> GetCourseCode([FromQuery] string codigo)
         {
-            try
-            {
-                var course = await _dbCourse.GetAsync(u => u.Codigo == codigo);// devuelve el curso cuyo id sea igual al Id del curso
-                if (course == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El registro no existe!";
-                    return BadRequest(_response);
-                }
+            var result = await _repoCourse.GetCourseCode(codigo);
 
-
-
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "Se ha obtenido el curso con éxito!";
-                _response.Result = course;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-            return _response;
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
 
         [HttpPost]
         [Route("createCourse")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> CreateCourse([FromBody] CourseDto course)
         {
-            try
-            {
-                if (course.CategoriaId == 0)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoría para el curso";
-                    return BadRequest(_response);
-                }
+            var result = await _repoCourse.CreateCourse(course);
 
-                if (await _dbCourse.GetAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower()) != null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "El curso ya está registrado con un titulo o código similar!!";
-                    return BadRequest(_response);
-                }
-
-                //Se genera el modelo del curso que se va a enviar a almacenar en la base de datos
-                Course model = new()
-                {
-                    Codigo = course.Codigo,
-                    ImagenUrl = course.ImagenUrl,
-                    Titulo = course.Titulo,
-                    Detalle = course.Detalle,
-                    Precio = course.Precio,
-                    BibliotecaUrl = course.BibliotecaUrl,
-                    ClaseUrl = course.ClaseUrl
-                };
-
-                await _dbCourse.CreateAsync(model);
-                await _dbCourse.SaveAsync();
-
-                Producto producto = new()
-                {
-                    Codigo = course.Codigo!,
-                    ImagenUrl = course.ImagenUrl,
-                    Titulo = course.Titulo!,
-                    Detalle = course.Detalle,
-                    Precio = course.Precio,
-                    Tipo = "curso",
-                    Cantidad = 1,
-                    CategoriaId = course.CategoriaId
-
-                };
-
-                await _dbProducto.CreateAsync(producto);
-                await _dbProducto.SaveAsync();
-
-
-
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.Created;
-                _response.Message = "El curso ha sido registrado con éxito";
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
-
-        [HttpPut("updateCourse/{id:int}", Name ="UpdateCourse")]
+        [HttpPut("updateCourse/{id:int}", Name = "UpdateCourse")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> UpdateCourse(int id, [FromBody] CourseDto course)
         {
-            try
-            {
-                if (course.CategoriaId == 0)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Debe seleccionar una categoría para el curso";
-                    return BadRequest(_response);
-                }
-                //var courseFromDb =await _db.CourseTbl.AsNoTracking().FirstOrDefaultAsync(u => u.Id == course.Id);
-                var courseFromDb = await _dbCourse.GetAsync(u => u.Id == course.Id, tracked: false);
-                var productoFromDb = await _dbProducto.GetAsync(u => u.Codigo == courseFromDb.Codigo, tracked: false);
-                if (courseFromDb == null || course == null || id != course.Id || productoFromDb == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error y no se pudo actualizar el registro";
-                    return BadRequest(_response);
-                }
+            var result = await _repoCourse.UpdateAsync(id, course);
 
-                //var courseCode = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower(), tracked:false);
-                //if (courseCode.Id != courseFromDb.Id)
-                //{
-                //    _response.isSuccess = false;
-                //    _response.StatusCode = HttpStatusCode.BadRequest;
-                //    _response.Message = "Error. No se puede actualizar el curso con un código o titulo que ya existe!";
-                //    return BadRequest(_response);
-                //}
-
-                if ((courseFromDb.Codigo!.ToLower() != course.Codigo!.ToLower() && productoFromDb.Codigo!.ToLower() != course.Codigo!.ToLower() ) || (courseFromDb.Titulo!.ToLower() != course.Titulo!.ToLower() && productoFromDb.Titulo!.ToLower() != course.Titulo.ToLower()))
-                {
-                    var coursesCode = await _dbCourse.GetAllAsync(u => u.Titulo!.ToLower() == course.Titulo!.ToLower() || u.Codigo!.ToLower() == course.Codigo!.ToLower(), tracked: false);
-                    foreach (var item in coursesCode)
-                    {
-                        if (item.Id != id)
-                        {
-                            _response.isSuccess = false;
-                            _response.StatusCode = HttpStatusCode.BadRequest;
-                            _response.Message = "Error. No se puede actualizar el curso con un código o titulo que ya existe!";
-                            return BadRequest(_response);
-                        }
-                    }
-                }
-
-                Course model = new()
-                {
-                    Id = course.Id,
-                    Codigo = course.Codigo,
-                    ImagenUrl = course.ImagenUrl,
-                    Titulo = course.Titulo,
-                    Detalle = course.Detalle,
-                    FolderId = course.FolderId,
-                    Precio = course.Precio,
-                    TeacherId = course.TeacherId,
-                    BibliotecaUrl = course.BibliotecaUrl,
-                    ClaseUrl = course.ClaseUrl
-                };
-
-                await _dbCourse.UpdateAsync(model);
-                await _dbCourse.SaveAsync();
-
-                if (course.CategoriaId == 0)
-                {
-                    Producto producto = new()
-                    {
-                        Id = productoFromDb.Id,
-                        Codigo = course.Codigo,
-                        ImagenUrl = course.ImagenUrl,
-                        Titulo = course.Titulo,
-                        Detalle = course.Detalle,
-                        Precio = course.Precio,
-                        Tipo = productoFromDb.Tipo,
-                        Cantidad = productoFromDb.Cantidad,
-                        CategoriaId = productoFromDb.CategoriaId
-                    };
-
-                    await _dbProducto.UpdateAsync(producto);
-                    await _dbProducto.SaveAsync();
-
-                }
-                else
-                {
-                    Producto producto = new()
-                    {
-                        Id = productoFromDb.Id,
-                        Codigo = course.Codigo,
-                        ImagenUrl = course.ImagenUrl,
-                        Titulo = course.Titulo,
-                        Detalle = course.Detalle,
-                        Precio = course.Precio,
-                        Tipo = productoFromDb.Tipo,
-                        Cantidad = productoFromDb.Cantidad,
-                        CategoriaId = course.CategoriaId
-                    };
-
-                    await _dbProducto.UpdateAsync(producto);
-                    await _dbProducto.SaveAsync();
-
-                }
-
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El curso ha sido actualizado con éxito";
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-            return _response;
-   
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
 
         [HttpDelete("deleteCourse/{id:int}", Name = "deleteCourse")]
         [ResponseCache(CacheProfileName = "Default30")]
         public async Task<ActionResult<ApiResponse>> DeleteCourse(int id)
         {
-            try
-            {
-                var course = await _dbCourse.GetAsync(u => u.Id == id,tracked:false);
-                var producto = await _dbProducto.GetAsync(u => u.Codigo == course.Codigo, tracked: false);
-                if (course == null || producto == null)
-                {
-                    _response.isSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Message = "Ha ocurrido un error inesperado al eliminar el registro";
-                    return BadRequest(_response);
-                }
+            var result = await _repoCourse.DeleteCourse(id);
 
-                await _dbCourse.RemoveAsync(course);
-                await _dbCourse.SaveAsync();
-
-                await _dbProducto.RemoveAsync(producto);
-                await _dbProducto.SaveAsync();
-
-
-                _response.isSuccess = true;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.Message = "El curso ha sido eliminado con éxito";
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _response.isSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-            }
-            return _response;
-
+            return StatusCode((int)result.StatusCode, _mapper.Map<ApiResponse>(result));
         }
-
     }
 }

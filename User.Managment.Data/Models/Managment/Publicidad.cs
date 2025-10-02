@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="Publicidad.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace User.Managment.Data.Models.Managment
 {
@@ -18,9 +17,7 @@ namespace User.Managment.Data.Models.Managment
         public string? imageUrl { get; set; }
 
         [Required]
-        [MaxLength(40, ErrorMessage ="Debe contener al menos 40 caracteres")]
+        [MaxLength(40, ErrorMessage = "Debe contener al menos 40 caracteres")]
         public string? Titulo { get; set; }
-
-
     }
 }

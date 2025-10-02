@@ -1,4 +1,7 @@
-﻿using System;
+﻿// <copyright file="20240828003543_AddVentaTblAndShoppingTbl.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -102,7 +105,7 @@ namespace User.Managment.Data.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DirectionMain = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DirectionSec = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    DirectionSec = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -118,7 +121,7 @@ namespace User.Managment.Data.Migrations
                     Emision = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Total = table.Column<double>(type: "float", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ClienteId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ClienteId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -144,7 +147,7 @@ namespace User.Managment.Data.Migrations
                     { "a6a03fc1-d43c-4781-aeef-d77687a44904", "4", "Teacher", "TEACHER" },
                     { "d90745f7-5c5a-4f9a-baad-833d53802583", "1", "Admin", "ADMIN" },
                     { "f85fc566-f4ea-43b4-a4ca-e8405a01bc8d", "2", "User", "USER" },
-                    { "fe64a82b-8583-42b1-9c24-260f852b60e3", "5", "Secretary", "SECRETARY" }
+                    { "fe64a82b-8583-42b1-9c24-260f852b60e3", "5", "Secretary", "SECRETARY" },
                 });
 
             migrationBuilder.CreateIndex(
@@ -253,7 +256,7 @@ namespace User.Managment.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FechaVenta = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Total = table.Column<double>(type: "float", nullable: false)
+                    Total = table.Column<double>(type: "float", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -275,7 +278,7 @@ namespace User.Managment.Data.Migrations
                     { "114bdc25-daec-4d01-9a62-dde4722f2799", "3", "Student", "STUDENT" },
                     { "282e6064-5928-4a9e-a18d-58059cc13a91", "2", "User", "USER" },
                     { "4061c24d-04e4-427b-9e4a-56fe195c28ea", "5", "Secretary", "SECRETARY" },
-                    { "5ce3e3e4-d455-4d79-a051-2d131c92c182", "1", "Admin", "ADMIN" }
+                    { "5ce3e3e4-d455-4d79-a051-2d131c92c182", "1", "Admin", "ADMIN" },
                 });
 
             migrationBuilder.CreateIndex(

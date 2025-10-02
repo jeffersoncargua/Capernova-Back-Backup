@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240904030434_AlterPedidoTblAddEstado.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -55,7 +59,7 @@ namespace User.Managment.Data.Migrations
                     { "7e066ab6-e8f7-4ba4-8981-9b506c2989b3", "2", "User", "USER" },
                     { "a25dbf13-9f7a-4841-baa9-664e0120a1f0", "5", "Secretary", "SECRETARY" },
                     { "e2355967-ed2b-439f-9218-e3f97dada559", "3", "Student", "STUDENT" },
-                    { "f0a1e1a8-12ae-47d9-b818-50a7f24162a6", "4", "Teacher", "TEACHER" }
+                    { "f0a1e1a8-12ae-47d9-b818-50a7f24162a6", "4", "Teacher", "TEACHER" },
                 });
         }
     }

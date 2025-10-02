@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240904160437_SeedRolesToDb.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,7 +21,7 @@ namespace User.Managment.Data.Migrations
                     { "7b4b23fd-c3bd-410d-8097-5c953efb5906", "3", "Student", "STUDENT" },
                     { "84f27c24-df7b-4926-96b1-d43ee4ed4283", "2", "User", "USER" },
                     { "aac42112-eaef-426c-acb7-e45a5254cec4", "1", "Admin", "ADMIN" },
-                    { "e034127d-5089-466d-a4bf-572371daef8d", "5", "Secretary", "SECRETARY" }
+                    { "e034127d-5089-466d-a4bf-572371daef8d", "5", "Secretary", "SECRETARY" },
                 });
         }
 

@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20240919225124_DeleteAreaAndAlterCategoriaTblAndAlterProductoTblAddCategoriaId.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -15,7 +19,6 @@ namespace User.Managment.Data.Migrations
                 name: "IX_ProductoTbl_Especificacion",
                 table: "ProductoTbl");
 
-
             migrationBuilder.DropColumn(
                 name: "Especificacion",
                 table: "ProductoTbl");
@@ -31,7 +34,6 @@ namespace User.Managment.Data.Migrations
                 table: "CategoriaTbl",
                 type: "nvarchar(max)",
                 nullable: true);
-
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoTbl_CategoriaId",
@@ -76,7 +78,7 @@ namespace User.Managment.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 },
                 constraints: table =>
                 {
