@@ -366,6 +366,12 @@ dotnet_diagnostic.SA1118.severity = none
 dotnet_diagnostic.SA0001.severity = none
 dotnet_diagnostic.SA1516.severity = none
 
+# IDE0290: Usar constructor principal
+dotnet_diagnostic.IDE0290.severity = none
+
+# CS8604: Posible argumento de referencia nulo
+dotnet_diagnostic.CS8604.severity = none
+
 [*.{cs,vb}]
 end_of_line = crlf
 dotnet_style_allow_multiple_blank_lines_experimental = true:silent
@@ -379,3 +385,9 @@ dotnet_diagnostic.IDE0003.severity = none
 
 # IDE0060: Quitar el parámetro no utilizado
 dotnet_diagnostic.IDE0060.severity = none
+
+# IDE0028: Simplificar la inicialización de la recopilación
+dotnet_diagnostic.IDE0028.severity = none
+
+# IDE0300: Simplificar la inicialización de la recopilación
+dotnet_diagnostic.IDE0300.severity = none

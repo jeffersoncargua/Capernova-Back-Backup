@@ -41,7 +41,7 @@ namespace User.Managment.Repository.Repository
             // _configuration = configuration;
             _frontConfig = frontConfig;
             this._response = new();
-            this.secretKey = configuration.GetValue<string>("JWT:Secret");
+            this.secretKey = configuration.GetValue<string>("JWT:Secret")!;
         }
 
         public async Task<ResponseDto> ConfirmEmail(string token, string email)
@@ -105,7 +105,7 @@ namespace User.Managment.Repository.Repository
                     // var forgotPasswordLink = $"https://localhost:3000/changePassword?token={token}&email={user.Email}";
                     var forgotPasswordLink = $"{_frontConfig.Url}/changePassword?token={token}&email={user.Email}";
 
-                    var message = new Message(new string[] { user.Email }, "Capernova: Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
+                    var message = new Message([user.Email!], "Capernova: Solicitud de cambio de contraseña", $"Para cambiar tu contraseña presiona el <a href='{forgotPasswordLink!}'>enlace</a>");
                     _emailRepository.SendEmail(message);
 
                     // return StatusCode(StatusCodes.Status200OK,

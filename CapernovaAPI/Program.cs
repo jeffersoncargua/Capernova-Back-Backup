@@ -25,10 +25,20 @@ builder.Services.AddCors(options =>
 {
     var frontEndURL = configuration.GetValue<string>("frontEnd:Url");
 
-    options.AddDefaultPolicy(builder =>
+    if (!string.IsNullOrWhiteSpace(frontEndURL))
     {
-        builder.WithOrigins(frontEndURL).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-    });
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.WithOrigins(frontEndURL).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        });
+    }
+    else
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        });
+    }
 });
 
 // Add services to the container.
@@ -95,19 +105,19 @@ builder.Services.AddAuthentication(options =>
 
 // Se agrega la configuracion del Email que se agrego en la appSettings.json
 var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
-builder.Services.AddSingleton(emailConfig);
+builder.Services.AddSingleton(emailConfig!);
 
 // Se agrega la configuracion de Paypal que se agrego en la appSettings.json
 var paypalConfig = builder.Configuration.GetSection("Paypal").Get<PaypalSettings>();
-builder.Services.AddSingleton(paypalConfig);
+builder.Services.AddSingleton(paypalConfig!);
 
 // Se agrega la configuracion de GoogleDrive que se agrego en la appSettings.json
 var googleDriveConfig = builder.Configuration.GetSection("GoogleDrive").Get<GoogleDriveSettings>();
-builder.Services.AddSingleton(googleDriveConfig);
+builder.Services.AddSingleton(googleDriveConfig!);
 
 // Se agrega la configuracion de Whatsapp API  que se agrego en la appSettings.json
 var WhatsappConfig = builder.Configuration.GetSection("WhatsappConfig").Get<WhatsappSettings>();
-builder.Services.AddSingleton(WhatsappConfig);
+builder.Services.AddSingleton(WhatsappConfig!);
 
 // Se agrega el repositorio Email para utilizarlo en el proyecto
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
@@ -133,7 +143,7 @@ builder.Services.AddSwaggerGen();
 
 // se agrega la url del front-end para poder emplearlo con las api que la necesiten
 var frontUrl = builder.Configuration.GetSection("frontEnd").Get<FrontSettings>();
-builder.Services.AddSingleton(frontUrl);
+builder.Services.AddSingleton(frontUrl!);
 
 /* Servicio de autenticacion para utilizar google drive
 //builder.Services.AddAuthentication(o =>
