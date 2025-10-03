@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -33,5 +33,9 @@
     <ProjectReference Include="..\Capernova.Utility\Capernova.Utility.csproj" />
     <ProjectReference Include="..\User.Managment.Data\User.Managment.Data.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+	<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
 
 </Project>
