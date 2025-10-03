@@ -18,12 +18,13 @@ jobs:
               run: dotnet build-server shutdown && dotnet build /p:TreatWarningsAsErrors=true
 
             - name: Run StyleCop
-              run: dotnet buils /p:TreatWarningsAsErrors=true
+              run: dotnet build /p:TreatWarningsAsErrors=true
 
             - name: Enforce code style
-              run: dotnet format --verify-no-changes --verbosity diagnostic
+              run: dotnet format --verify-no-changes
 
     build_deploy:
+        needs: [lint]
         runs-on: windows-latest
 
         steps:
