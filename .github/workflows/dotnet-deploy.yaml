@@ -1,0 +1,57 @@
+name: Build, Lint and Deploy Capernova Demo CI/CD
+
+on:
+    push:
+        branches: [ main ]
+
+permissions:
+    checks: write
+    pull-requests: write
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps: 
+            - uses: actions/checkout@v4
+
+            - name: Run SonarAnalyzer
+              run: dotnet build-server shutdown && dotnet build /p:TreatWarningsAsErrors=true
+
+            - name: Run StyleCop
+              run: dotnet buils /p:TreatWarningsAsErrors=true
+
+            - name: Enforce code style
+              run: dotnet format --verify-no-changes --verbosity diagnostic
+
+    build_deploy:
+        runs-on: windows-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup .Net SDK
+              uses: actions/setup-dotnet@v4
+              with:
+                dotnet-version: '6.0.x'
+                cache: true
+                cache-dependency-path: "**/packages.lock.json"
+
+            - name: Restore Dependencies
+              run: dotnet restore --locked-mode
+
+            - name: Build
+              run: dotnet build -c Release --no-restore
+
+            - name: Publish
+              run: dotnet publish -c Release -o /.publish --runtime win-x86
+
+            - name: Deploy to MonsterASP.NET via WebDeploy
+              uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+              with:
+                website-name: ${{ secrets.WEBSITE_NAME }}
+                server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+                server-username: ${{ secrets.SERVER_USERNAME }}
+                server-password: ${{ secrets.SERVER_PASSWORD }}
+
+        
+
