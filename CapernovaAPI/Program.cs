@@ -164,17 +164,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     // Descomentar cuando se quiera realizar pruebas solo en modo local
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwagger();
+    // app.UseSwaggerUI();
 }
 
 // Descomentar esta seccion para poder probarlo en la red
-/*app.UseSwagger();
-//app.UseSwaggerUI(options =>
-//{
-//    options.SwaggerEndpoint("../swagger/v1/swagger.json", "CapernovaAPI");
-//    options.RoutePrefix = String.Empty;
-//});*/
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("../swagger/v1/swagger.json", "CapernovaAPI");
+    options.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 
