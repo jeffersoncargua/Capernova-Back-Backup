@@ -515,7 +515,7 @@ namespace User.Managment.Repository.Repository
         {
             try
             {
-                var matriculaExist = await _dbMatricula.GetAsync(u => u.Id == id && u.EstudianteId == studentId);
+                var matriculaExist = await _dbMatricula.GetAsync(u => u.Id == id && u.EstudianteId == studentId, tracked: false);
                 if (matriculaExist == null)
                 {
                     _response.IsSuccess = false;
