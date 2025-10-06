@@ -8,6 +8,8 @@ using User.Managment.Data.Models.Course;
 using User.Managment.Data.Models.Course.DTO;
 using User.Managment.Data.Models.Managment;
 using User.Managment.Data.Models.Managment.DTO;
+using User.Managment.Data.Models.PaypalOrder;
+using User.Managment.Data.Models.PaypalOrder.Dto;
 using User.Managment.Data.Models.ProductosServicios;
 using User.Managment.Data.Models.ProductosServicios.Dto;
 using User.Managment.Data.Models.Student;
@@ -15,6 +17,7 @@ using User.Managment.Data.Models.Student.DTO;
 using User.Managment.Data.Models.Ventas;
 using User.Managment.Data.Models.Ventas.Dto;
 using User.Managment.Repository.Models;
+using ShoppingCartDto = User.Managment.Data.Models.Ventas.Dto.ShoppingCartDto;
 
 namespace CapernovaAPI.Mapping
 {
@@ -39,6 +42,7 @@ namespace CapernovaAPI.Mapping
             CreateMap<PedidoDto, Pedido>().ReverseMap();
             CreateMap<ShoppingCartDto, ShoppingCart>().ReverseMap();
             CreateMap<ResponseDto, ApiResponse>().ReverseMap();
+            CreateMap<MatriculaDto, Matricula>().ReverseMap();
         }
     }
 }

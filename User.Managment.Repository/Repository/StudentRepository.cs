@@ -398,7 +398,7 @@ namespace User.Managment.Repository.Repository
                     _response.IsSuccess = true;
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.Message = "Se ha enviado la lista de cursos del estudiante";
-                    _response.Result = cursos;
+                    _response.Result = _mapper.Map<List<MatriculaDto>>(cursos);
                 }
 
                 return _response;

@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using User.Managment.Data.Models.Managment;
 
 namespace User.Managment.Data.Models.Course.DTO
 {
@@ -34,5 +35,7 @@ namespace User.Managment.Data.Models.Course.DTO
         public string? ClaseUrl { get; set; }
 
         public int? CategoriaId { get; set; }
+
+        public Teacher? Teacher { get; set; }
     }
 }
