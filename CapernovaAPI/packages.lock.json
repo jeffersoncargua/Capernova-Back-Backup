@@ -23,12 +23,12 @@
       },
       "Google.Apis.Drive.v3": {
         "type": "Direct",
-        "requested": "[1.68.0.3466, )",
-        "resolved": "1.68.0.3466",
-        "contentHash": "0Cnuz9N0UYJWAwFuNfonpDT5uVC3S1p8G6wq8IUqzbDwymOwMbeth0UfEYD8wPIClnKsUBdKPn2t4ejWsEGfOw==",
+        "requested": "[1.71.0.3905, )",
+        "resolved": "1.71.0.3905",
+        "contentHash": "3UU7IWYm7LpqgrRONt1PQm6Fh75RuDkC4d1nem2VjAlVHFm6Vb4eouDyvQZYA/cun7sBasF8SmkABkpp07Ny9g==",
         "dependencies": {
-          "Google.Apis": "1.68.0",
-          "Google.Apis.Auth": "1.68.0"
+          "Google.Apis": "1.71.0",
+          "Google.Apis.Auth": "1.71.0"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -156,26 +156,26 @@
       },
       "Google.Apis": {
         "type": "Transitive",
-        "resolved": "1.68.0",
-        "contentHash": "s2MymhdpH+ybZNBeZ2J5uFgFHApBp+QXf9FjZSdM1lk/vx5VqIknJwnaWiuAzXxPrLEkesX0Q+UsiWn39yZ9zw==",
+        "resolved": "1.71.0",
+        "contentHash": "xKVk+SLZXeBPKuEKzNTg2K7ptr5ZL40+VSR8e5+yJbzTE9uRCCDPlAzT/ij3urh4usBsn5IiW5rXQI+xAc3bRQ==",
         "dependencies": {
-          "Google.Apis.Core": "1.68.0"
+          "Google.Apis.Core": "1.71.0"
         }
       },
       "Google.Apis.Auth": {
         "type": "Transitive",
-        "resolved": "1.68.0",
-        "contentHash": "hFx8Qz5bZ4w0hpnn4tSmZaaFpjAMsgVElZ+ZgVLUZ2r9i+AKcoVgwiNfv1pruNS5cCvpXqhKECbruBCfRezPHA==",
+        "resolved": "1.71.0",
+        "contentHash": "AshxDrFfj0QQPkmGQWvWhT+iZ8Vif23hLa9mFZ6cnbwvfXmXwXOWK9bP6uWnLj+sO6otAYKm+7SMZYgwi1AdJA==",
         "dependencies": {
-          "Google.Apis": "1.68.0",
-          "Google.Apis.Core": "1.68.0",
+          "Google.Apis": "1.71.0",
+          "Google.Apis.Core": "1.71.0",
           "System.Management": "7.0.2"
         }
       },
       "Google.Apis.Core": {
         "type": "Transitive",
-        "resolved": "1.68.0",
-        "contentHash": "pAqwa6pfu53UXCR2b7A/PAPXeuVg6L1OFw38WckN27NU2+mf+KTjoEg2YGv/f0UyKxzz7DxF1urOTKg/6dTP9g==",
+        "resolved": "1.71.0",
+        "contentHash": "tCsg4USOGBVCIrSOyLht1akZe/+ioH7+LVWix6XuxP5fFiw5kEFSBXL+Of93aK/ztJa1dQI+p03dJ+AKgViRuw==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.3"
         }
@@ -835,7 +835,7 @@
           "AutoMapper": "[12.0.1, )",
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "[12.0.1, )",
           "Capernova.Utility": "[1.0.0, )",
-          "Google.Apis.Drive.v3": "[1.68.0.3466, )",
+          "Google.Apis.Drive.v3": "[1.71.0.3905, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.20, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.20, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[8.0.20, )",
